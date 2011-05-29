@@ -104,10 +104,10 @@ int main(int argc, char** argv)
             exit(-1);
         }
 	if(buf[3]==1) {
-            printf("%d %d %d %d x:%d y:%d z:%d\n", buf[0], buf[1], buf[2], buf[3], buf[4], buf[5], buf[6]);
-            msg.axes.push_back(buf[4]/127.0);
-            msg.axes.push_back(buf[5]/127.0);
-            msg.axes.push_back(buf[6]/127.0);
+            // printf("%d %d %d %d x:%d y:%d z:%d\n", buf[0], buf[1], buf[2], buf[3], buf[4], buf[5], buf[6]);
+            msg.axes.push_back(buf[5]*-1.0/127.0);
+            msg.axes.push_back(buf[4]*-1.0/127.0);
+            msg.axes.push_back(buf[6]*-1.0/127.0);
 	    pub.publish(msg);
 	    msg.axes.clear();
 	}
