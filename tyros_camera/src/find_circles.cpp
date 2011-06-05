@@ -38,20 +38,6 @@ double find_distance_y(double pixel_y){
        return distance_y;
 }
 
-/*
- * Arvutab pildil oleva x kordinaadi (horisontaaltelg) punkti kauguseks robotist.
- * Mõõdetud maapinnalt, täpselt kaamera all asuvast punktist. Täpselt robotist
- * ette vaadates on null telg. Paremale käele jääb jäävad plusskordinaadid
- * ja vasakule miinuskordinaadid.
- */
-/*
-double find_distance_x(double distance_y, double pixel_x){
-  double angle = (pixel_x/320-1)*image_angle_x;
-  double distance_x = tan(angle)*distance_y;
-       return distance_x;
-}
-*/
-
 
 double find_distance_x(double distance_y, double pixel_x){
   double angle = (pixel_x/IMAGE_WIDTH-1)*(CAMERA_X_ANGLE/2);
