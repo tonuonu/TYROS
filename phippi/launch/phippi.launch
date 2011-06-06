@@ -11,22 +11,18 @@
   <param name="border_lowerright" textfile="$(find phippi)/urdf/border_lowerright.urdf"/>
   <param name="border_lowerleft" textfile="$(find phippi)/urdf/border_lowerleft.urdf"/>
 
-  <node pkg="tf" type="static_transform_publisher" name="tmp_broadcaster" args="1 -0.5 0 0 3.1415 0.6 world roomuk-21 500" />
-  <node pkg="tf" type="static_transform_publisher" name="ball_broadcaster" args="-1 -0.5 0 0 0 0 world ball 500" />
-  <node pkg="tf" type="static_transform_publisher" name="gate1_broadcaster" args="1.5 0 0 0 0 0 world gate1 500" />
-  <node pkg="tf" type="static_transform_publisher" name="gate2_broadcaster" args="-1.5 0 0 0 0 0 world gate2 500" />
+  <node pkg="tf" type="static_transform_publisher" name="tmp_broadcaster" args="1 -0.5 0 0 3.1415 0.6 world roomuk-21 500" respawn="true"/>
+  <node pkg="tf" type="static_transform_publisher" name="ball_broadcaster" args="-1 -0.5 0 0 0 0 world ball 500" respawn="true"/>
+  <node pkg="tf" type="static_transform_publisher" name="gate1_broadcaster" args="1.5 0 0 0 0 0 world gate1 500" respawn="true"/>
+  <node pkg="tf" type="static_transform_publisher" name="gate2_broadcaster" args="-1.5 0 0 0 0 0 world gate2 500" respawn="true"/>
 
-  <node pkg="robot_state_publisher" type="state_publisher" name="rob_st_pub" />
-  <node name="joint_state_publisher" pkg="joint_state_publisher" type="joint_state_publisher" />
+  <node pkg="robot_state_publisher" type="state_publisher" name="rob_st_pub" respawn="true"/>
+  <node name="joint_state_publisher" pkg="joint_state_publisher" type="joint_state_publisher" respawn="true" />
 
   <node pkg="phippi" type="phippi_motors_server" name="motors_server" output="screen"/>
 
-<!--
-  <node pkg="tf" type="static_transform_publisher" name="robut2_broadcaster" args="0 -0.5 0 0 0 1.5707 world Intergy_komplekt-21 500" />
-  <node name="rviz" pkg="rviz" type="rviz" args="-d $(find phippi)/phippi.vcg" />
--->
-    <node pkg="tyros_camera" type="tyros_camera" name="mycam" respawn="true">
-    </node>
+  <node pkg="tyros_camera" type="tyros_camera" name="mycam" respawn="true">
+  </node>
 
 </launch>
 
