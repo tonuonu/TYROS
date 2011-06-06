@@ -1,0 +1,71 @@
+<robot name="ball"
+       xmlns:sensor="http://playerstage.sourceforge.net/gazebo/xmlschema/#sensor"
+       xmlns:controller="http://playerstage.sourceforge.net/gazebo/xmlschema/#controller"
+       xmlns:interface="http://playerstage.sourceforge.net/gazebo/xmlschema/#interface">
+  <link name="world"/>
+  <joint name="ball_joint" type="continuous" >
+    <!-- axis is in the parent link frame coordintates -->
+    <axis xyz="0 0 0" />
+    <parent link="world" />
+    <child link="ball" />
+    <!-- initial pose of ball in the parent frame coordiantes -->
+    <origin xyz="0 0 0" rpy="0 0 0" />
+  </joint>
+  <link name="ball">
+    <inertial>
+      <mass value="1.0" />
+      <!-- center of mass (com) is defined w.r.t. link local coordinate system -->
+      <origin xyz="0 0 0" /> 
+      <inertia  ixx="1.0" ixy="0.0"  ixz="0.0"  iyy="100.0"  iyz="0.0"  izz="1.0" />
+    </inertial>
+    <visual>
+      <!-- visual origin is defined w.r.t. link local coordinate system -->
+      <origin xyz="0 0 0" rpy="0 0 0" />
+      <geometry>
+        <sphere radius="0.0215" />
+      </geometry>
+        <material name="White">
+          <color rgba="250 250 250 0.5"/>
+        </material>
+
+    </visual>
+    <collision>
+      <!-- collision origin is defined w.r.t. link local coordinate system -->
+      <origin xyz="0 0 0" rpy="0 0 0" />
+      <geometry>
+        <sphere radius="0.25" />
+      </geometry>
+    </collision>
+  </link>
+  <gazebo reference="ball">
+    <material>Gazebo/Blue</material>
+    <turnGravityOff>false</turnGravityOff>
+
+    <sensor:camera name="cam_sensor">
+      <imageSize>640 480</imageSize>
+      <imageFormat>L8</imageFormat>
+      <hfov>90</hfov>
+      <nearClip>0.1</nearClip>
+      <farClip>100</farClip>
+      <updateRate>20.0</updateRate>
+      <controller:gazebo_ros_camera name="cam_controller" plugin="libgazebo_ros_camera.so">
+        <alwaysOn>true</alwaysOn>
+        <updateRate>20.0</updateRate>
+        <imageTopicName>cam/image_raw</imageTopicName>
+        <cameraInfoTopicName>cam/camera_info</cameraInfoTopicName>
+        <frameName>ball</frameName>
+        <CxPrime>320.5</CxPrime>
+        <Cx>320.5</Cx>
+        <Cy>240.5</Cy>
+        <focal_length>320</focal_length> <!-- image_width / (2*tan(hfov_radian /2)) -->
+        <distortion_k1>0</distortion_k1>
+        <distortion_k2>0</distortion_k2>
+        <distortion_k3>0</distortion_k3>
+        <distortion_t1>0</distortion_t1>
+        <distortion_t2>0</distortion_t2>
+        <interface:camera name="cam_iface" />
+      </controller:gazebo_ros_camera>
+    </sensor:camera>
+  </gazebo>
+
+</robot>
