@@ -20,12 +20,13 @@
   <node name="joint_state_publisher" pkg="joint_state_publisher" type="joint_state_publisher" />
 
   <node pkg="phippi" type="phippi_motors_server" name="motors_server" output="screen"/>
-->
 
-
-<!--  <node pkg="tf" type="static_transform_publisher" name="robut2_broadcaster" args="0 -0.5 0 0 0 1.5707 world Intergy_komplekt-21 500" />
+<!--
+  <node pkg="tf" type="static_transform_publisher" name="robut2_broadcaster" args="0 -0.5 0 0 0 1.5707 world Intergy_komplekt-21 500" />
+  <node name="rviz" pkg="rviz" type="rviz" args="-d $(find phippi)/phippi.vcg" />
 -->
-                    <node name="rviz" pkg="rviz" type="rviz" args="-d $(find phippi)/phippi.vcg" />
+    <node pkg="tyros_camera" type="tyros_camera" name="mycam" respawn="true">
+
 
 </launch>
 
