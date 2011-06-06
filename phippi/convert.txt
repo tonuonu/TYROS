@@ -1,0 +1,4 @@
+tonu@hp:~/TYROS/phippi/urdf$ rosrun simmechanics_to_urdf convert.py ../Simmechanics/Roboti_algus.xml foobar.yaml xml  > robot.urdf
+tonu@hp:~/TYROS/phippi/urdf$ sed -ie 's,<mesh filename=",<mesh filename="package://phippi/Simmechanics/,g' robot.urdf
+tonu@hp:~/TYROS/phippi/urdf$ 
+
