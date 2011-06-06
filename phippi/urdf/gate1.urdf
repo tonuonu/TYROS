@@ -1,0 +1,44 @@
+<robot name="gate1">
+  <link name="world"/>
+  <joint name="gate_joint" type="continuous" >
+    <!-- axis is in the parent link frame coordintates -->
+    <axis xyz="1 0 0" />
+    <parent link="world" />
+    <child link="world" />
+    <!-- initial pose of turtle1 joint/link in the parent frame coordiantes -->
+    <origin xyz="0.1 0.0 0.1" rpy="0 0 0" />
+  </joint>
+  <link name="gate1">
+
+<!--
+
+    <inertial>
+      <mass value="1.0" />
+      <origin xyz="0.1 0.0 0.1" /> 
+      <inertia  ixx="1.0" ixy="0.0"  ixz="0.0"  iyy="100.0"  iyz="0.0"  izz="1.0" />
+    </inertial>
+-->
+    <visual>
+      <!-- visual origin is defined w.r.t. link local coordinate system -->
+      <origin xyz="0.1 0.0 0.1" rpy="0 0 0" />
+      <geometry>
+        <box size="0.2 0.7 0.2" />
+      </geometry>
+    </visual>
+
+<!--
+    <collision>
+      <!-- collision origin is defined w.r.t. link local coordinate system -->
+      <origin xyz="0 0 0" rpy="0 0 0 " />
+      <geometry>
+        <box size="0.02 0.07 0.02" />
+      </geometry>
+    </collision>
+
+-->
+  </link>
+  <gazebo reference="gate1">
+    <material>Gazebo/Blue</material>
+    <turnGravityOff>false</turnGravityOff>
+  </gazebo>
+</robot>

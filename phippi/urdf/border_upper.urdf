@@ -1,0 +1,13 @@
+<robot name="border_upper">
+  <link name="world">
+    <visual>
+      <origin xyz="0 1 0.05" rpy="0 0 0" />
+      <geometry>
+        <box size="3.0 0.02 0.1" />
+      </geometry>
+      <material name="Green">
+          <color rgba="0 250 0 0.5"/>
+      </material>
+    </visual>
+  </link>
+</robot>
