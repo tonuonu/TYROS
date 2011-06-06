@@ -1,0 +1,5 @@
+<launch>
+    <node pkg="tyros_camera" type="tyros_camera" name="mycam" respawn="true">
+    </node>
+
+</launch>

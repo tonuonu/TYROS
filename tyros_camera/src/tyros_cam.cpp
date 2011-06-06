@@ -56,7 +56,7 @@ int main(int argc, char **argv) {
 	nh.param<int>("input", input, 0);
 	nh.param<std::string>("device", dev, "/dev/video0");
 	nh.param<std::string>("frame_id", frame_id, "camera");
-	nh.param<std::string>("camera_info_url", cinfo_url, "file:///home/tonu/TYROS/tyros_camera/calib.yaml");
+	nh.param<std::string>("camera_info_url", cinfo_url, "file:///home/panda/TYROS/tyros_camera/calib.yaml");
 	cinfo.loadCameraInfo(cinfo_url);
 
 	ROS_INFO("Opening device : %s", dev.c_str());
@@ -78,8 +78,10 @@ int main(int argc, char **argv) {
 
 	IplImage* imgy;
         imgy= cvCreateImage(cvSize(IMAGE_WIDTH,IMAGE_HEIGHT), 8, 1);
+#ifdef DEBUG
 	cvNamedWindow( "result", 1 );
         cvStartWindowThread();
+#endif
 	while (ros::ok()) {
 		unsigned char* ptr = cam.Update();
 		int i,j;
@@ -109,13 +111,17 @@ int main(int argc, char **argv) {
 		find_circles(imgy);
 //		draw_circles(imgy)
 
+#ifdef DEBUG
                 double hScale=0.7;
                 double vScale=0.7;
                 int    lineWidth=1;
                 CvFont font;
                 cvInitFont(&font,CV_FONT_HERSHEY_SIMPLEX, hScale,vScale,0,lineWidth,0);
+#endif
                 for (i=0; circles[i].x_in_picture != -1; i++) {
+#ifdef DEBUG
                     char buf[256];
+#endif
                     tyros_camera::Object o;
 
                     o.vector.x=circles[i].x_in_picture;
@@ -129,7 +135,6 @@ int main(int argc, char **argv) {
 #ifdef DEBUG
                     printf("Circle[%d] x:%d y:%d r:%d\n", i, circles[i].x_in_picture, circles[i].y_in_picture, circles[i].r_in_picture);
                     printf("Circle[%d] real: x:%lf y:%lf r:%lf\n", i, circles[i].x_from_robot, circles[i].y_from_robot, circles[i].r_from_robot);
-#endif
 //                    cvCircle(imgy[devnum], cvPoint(cvRound(circles[i].x_in_picture), cvRound(circles[i].y_in_picture)), 3, CV_RGB(0,255,0), -1, 8, 0);
                     cvCircle(imgy, cvPoint(cvRound(circles[i].x_in_picture), cvRound(circles[i].y_in_picture)), cvRound(circles[i].r_in_picture), CV_RGB(0,255,0), 3, 8, 0);
 
@@ -138,12 +143,15 @@ int main(int argc, char **argv) {
                     cvPutText (imgy,buf,cvPoint(circles[i].x_in_picture-110,circles[i].y_in_picture+circles[i].r_in_picture*2), &font, cvScalarAll(255));
                     sprintf(buf, "%d x: %.1lf y: %.1lf r: %.1lf", i, circles[i].x_from_robot, circles[i].y_from_robot, circles[i].r_from_robot);
                     cvPutText (imgy,buf,cvPoint(circles[i].x_in_picture-110,circles[i].y_in_picture+circles[i].r_in_picture*2+20), &font, cvScalarAll(255));
+#endif
                 }
 
 
                 pub.publish(msg);
            //     msg.object.clear();
+#ifdef DEBUG
                 cvShowImage( "result", imgy );
+#endif
 //		cam_info = cinfo.getCameraInfo();
   	        cam_info.header.frame_id = image.header.frame_id;
 		cam_info.header.stamp = image.header.stamp;
@@ -152,6 +160,8 @@ int main(int argc, char **argv) {
 
 		ros::spinOnce();
 	}
-                cvReleaseImage(&imgy);
+#ifdef DEBUG
+        cvReleaseImage(&imgy);
+#endif
 	return 0;
 }
