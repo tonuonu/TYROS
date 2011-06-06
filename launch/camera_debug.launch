@@ -1,8 +1,0 @@
-<launch>
-    <node pkg="tyros_camera" type="tyros_camera" name="mycam" respawn="true"/>
-    <node pkg="image_view" type="image_view" name="image_view">
-        <remap from="image" to="/mycam/image_raw" />
-        <param name="window_name" type="str" value="Camera 0 (forward)" />
-        <param name="autosize" type="bool" value="True" />
-    </node>
-</launch>
