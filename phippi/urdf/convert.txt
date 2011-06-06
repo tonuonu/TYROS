@@ -1,0 +1,5 @@
+rosrun simmechanics_to_urdf convert.py ../Simmechanics/Roboti_algus.xml foobar.yaml xml  > robot.urdf
+sed -ie 's,<mesh filename=",<mesh filename="package://phippi/Simmechanics/,g' robot.urdf
+sed -ie 's/revolute/fixed/g'  robot.urdf
+sed -ie 's/prismatic/fixed/g'  robot.urdf
+
