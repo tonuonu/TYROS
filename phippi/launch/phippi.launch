@@ -1,0 +1,31 @@
+<launch>
+
+  <param name="ball_description" textfile="$(find phippi)/simple_sphere.urdf"/>
+  <param name="robot_description" command="cat $(find phippi)/xml/robut2.urdf"/>
+  <param name="gate1_description" textfile="$(find phippi)/gate1.urdf"/>
+  <param name="gate2_description" textfile="$(find phippi)/gate2.urdf"/>
+  <param name="border_upper" textfile="$(find phippi)/border_upper.urdf"/>
+  <param name="border_upperleft" textfile="$(find phippi)/border_upperleft.urdf"/>
+  <param name="border_upperright" textfile="$(find phippi)/border_upperright.urdf"/>
+  <param name="border_lower" textfile="$(find phippi)/border_lower.urdf"/>
+  <param name="border_lowerright" textfile="$(find phippi)/border_lowerright.urdf"/>
+  <param name="border_lowerleft" textfile="$(find phippi)/border_lowerleft.urdf"/>
+
+  <node pkg="tf" type="static_transform_publisher" name="tmp_broadcaster" args="1 -0.5 0 0 3.1415 0.6 world Intergy_komplekt-21 500" />
+  <node pkg="tf" type="static_transform_publisher" name="ball_broadcaster" args="-1 -0.5 0 0 0 0 world ball 500" />
+  <node pkg="tf" type="static_transform_publisher" name="gate1_broadcaster" args="1.5 0 0 0 0 0 world gate1 500" />
+  <node pkg="tf" type="static_transform_publisher" name="gate2_broadcaster" args="-1.5 0 0 0 0 0 world gate2 500" />
+
+  <node pkg="robot_state_publisher" type="state_publisher" name="rob_st_pub" />
+  <node name="joint_state_publisher" pkg="joint_state_publisher" type="joint_state_publisher" />
+
+  <node pkg="phippi" type="phippi_motors_server" name="motors_server" output="screen"/>
+->
+
+
+<!--  <node pkg="tf" type="static_transform_publisher" name="robut2_broadcaster" args="0 -0.5 0 0 0 1.5707 world Intergy_komplekt-21 500" />
+-->
+                    <node name="rviz" pkg="rviz" type="rviz" args="-d $(find phippi)/phippi.vcg" />
+
+</launch>
+
