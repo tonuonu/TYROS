@@ -1,58 +1,68 @@
-#include "types.h"
+/*
+ *  Copyright (c) 2011, Tõnu Samuel
+ *  All rights reserved.
+ *
+ *  This file is part of TYROS.
+ *
+ *  TYROS is free software: you can redistribute it and/or modify
+ *  it under the terms of the GNU General Public License as published by
+ *  the Free Software Foundation, either version 3 of the License, or
+ *  (at your option) any later version.
+ *
+ *  TYROS is distributed in the hope that it will be useful,
+ *  but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *  GNU General Public License for more details.
+ *
+ *  You should have received a copy of the GNU General Public License
+ *  along with TYROS.  If not, see <http://www.gnu.org/licenses/>.
+ *
+ */
+
 #include "ior32c111.h"
 #include "main.h"
 #include "tnroman.h"
 
-//-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=
-//  Pin Definition
-//-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=
-
 #define LCD_RESET p4_2
 
-//=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=
-//  Global Variables
-//=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=
 #define	OLED_Shift	0x1C
 #define OLED_Max_Column	0x3F				   // 256/4-1
 #define OLED_Max_Row	0x3F				   // 64-1
 #define	OLED_Brightness	0x0F
 
-//-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=
-//  Delay Time
-//-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=
 void
 Delay(unsigned char n)
 {
     unsigned char i, j, k;
     for (k = 0; k < n; k++)
-	for (i = 0; i < 131; i++)
-	    for (j = 0; j < 15; j++)
-		uDelay(203);
+	for (i = 0; i < 100; i++)
+	    for (j = 0; j < 100; j++)
+		uDelay(100);
 }
 
 //-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=
 //  Instruction Setting
 //-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=
-inline void
+void
 OLED_Set_Column_Address(unsigned char a, unsigned char b) {
     SPI_send_cmd(0x15);				   // Set Column Address
     SPI_send_data(a);					   //   Default => 0x00
     SPI_send_data(b);					   //   Default => 0x77
 }
 
-inline void
+void
 OLED_Set_Row_Address(unsigned char a, unsigned char b) {
     SPI_send_cmd(0x75);				   // Set Row Address
     SPI_send_data(a);					   //   Default => 0x00
     SPI_send_data(b);					   //   Default => 0x7F
 }
 
-inline void
+void
 OLED_Set_Write_RAM() {
     SPI_send_cmd(0x5C);				   // Enable MCU to Write into RAM
 }
 
-inline void
+void
 OLED_Set_Read_RAM() {
     SPI_send_cmd(0x5D);				   // Enable MCU to Read from RAM
 }
@@ -202,103 +212,6 @@ OLED_Set_Command_Lock(unsigned char d) {
     //     0x16 => All Commands are locked except 0xFD.
 }
 
-//=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=
-//  Graphic Acceleration (Partial or Full Screen)
-//
-//    a: Line Width
-//    b: Column Address of Start
-//    c: Column Address of End
-//    d: Row Address of Start
-//    e: Row Address of End
-//=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=
-void
-OLED_Draw_Rectangle(unsigned char Data, unsigned char a, unsigned char b,
-    unsigned char c, unsigned char d, unsigned char e) {
-    unsigned char i, j, k, l;
-    k = a % 4;
-    if (k == 0) {
-	l = (a / 4) - 1;
-    } else {
-	l = a / 4;
-    }
-    OLED_Set_Column_Address(OLED_Shift + b, OLED_Shift + c);
-    OLED_Set_Row_Address(d, (d + a - 1));
-    OLED_Set_Write_RAM();
-    for (i = 0; i < (c - b + 1); i++)
-	for (j = 0; j < a; j++) {
-	    SPI_send_data(Data);
-	    SPI_send_data(Data);
-	}
-    OLED_Set_Column_Address(OLED_Shift + (c - l), OLED_Shift + c);
-    OLED_Set_Row_Address(d + a, e - a);
-    OLED_Set_Write_RAM();
-    for (i = 0; i < (e - d + 1); i++) {
-	for (j = 0; j < (l + 1); j++) {
-	    if (j == 0) {
-		switch (k) {
-		case 0:
-		    SPI_send_data(Data);
-		    SPI_send_data(Data);
-		    break;
-		case 1:
-		    SPI_send_data(0x00);
-		    SPI_send_data(Data & 0x0F);
-		    break;
-		case 2:
-		    SPI_send_data(0x00);
-		    SPI_send_data(Data);
-		    break;
-		case 3:
-		    SPI_send_data(Data & 0x0F);
-		    SPI_send_data(Data);
-		    break;
-		}
-	    } else {
-		SPI_send_data(Data);
-		SPI_send_data(Data);
-	    }
-	}
-    }
-    OLED_Set_Column_Address(OLED_Shift + b, OLED_Shift + c);
-    OLED_Set_Row_Address((e - a + 1), e);
-    OLED_Set_Write_RAM();
-    for (i = 0; i < (c - b + 1); i++)
-	for (j = 0; j < a; j++) {
-	    SPI_send_data(Data);
-	    SPI_send_data(Data);
-	}
-    OLED_Set_Column_Address(OLED_Shift + b, OLED_Shift + (b + l));
-    OLED_Set_Row_Address(d + a, e - a);
-    OLED_Set_Write_RAM();
-    for (i = 0; i < (e - d + 1); i++) {
-	for (j = 0; j < (l + 1); j++) {
-	    if (j == l) {
-		switch (k) {
-		case 0:
-		    SPI_send_data(Data);
-		    SPI_send_data(Data);
-		    break;
-		case 1:
-		    SPI_send_data(Data & 0xF0);
-		    SPI_send_data(0x00);
-		    break;
-		case 2:
-		    SPI_send_data(Data);
-		    SPI_send_data(0x00);
-		    break;
-		case 3:
-		    SPI_send_data(Data);
-		    SPI_send_data(Data & 0xF0);
-		    break;
-		}
-	    } else {
-		SPI_send_data(Data);
-		SPI_send_data(Data);
-	    }
-	}
-    }
-}
-
 #include "phippi.h"
 
 void
@@ -367,28 +280,7 @@ OLED_Fill_Block(unsigned char Data, unsigned char a, unsigned char b,
 	}
     }
 }
-
-//-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=
-//  Show Checkboard (Full Screen)
-//-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=
-void
-OLED_Checkerboard() {
-    unsigned char i, j;
-    OLED_Set_Column_Address(0x00, 0x77);
-    OLED_Set_Row_Address(0x00, 0x7F);
-    OLED_Set_Write_RAM();
-    for (i = 0; i < 64; i++) {
-	for (j = 0; j < 120; j++) {
-	    SPI_send_data(0xF0);
-	    SPI_send_data(0xF0);
-	}
-	for (j = 0; j < 120; j++) {
-	    SPI_send_data(0x0F);
-	    SPI_send_data(0x0F);
-	}
-    }
-}
-
+#if 0
 //-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=
 //  Show Gray Scale Bar (Full Screen)
 //-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=
@@ -443,6 +335,7 @@ OLED_Grayscale() {
 	// Level 1 => Column 241~256
 	OLED_Fill_Block(0x00, 0x3C, OLED_Max_Column, 0x00, OLED_Max_Row);
 }
+#endif
 
 #define OLED_BRIGHTNESS    15
 #define OLED_BR_1B      OLED_BRIGHTNESS<<4
@@ -566,94 +459,6 @@ OLED_Show_Pattern(unsigned char *Data_Pointer, unsigned char a,
     }
 }
 
-//-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=
-//  Vertical Scrolling (Full Screen)
-//
-//    a: Scrolling Direction
-//       "0x00" (Upward)
-//       "0x01" (Downward)
-//    b: Set Numbers of Row Scroll per Step
-//    c: Set Time Interval between Each Scroll Step
-//-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=
-void
-OLED_Vertical_Scroll(unsigned char a, unsigned char b, unsigned char c) {
-    unsigned char i, j;
-    OLED_Set_Partial_Display(0x00, 0x00, OLED_Max_Row);
-    switch (a) {
-    case 0:
-	for (i = 0; i < (OLED_Max_Row + 1); i += b) {
-	    OLED_Set_Display_Offset(i + 1);
-	    for (j = 0; j < c; j++) {
-		uDelay(200);
-	    }
-	}
-	break;
-    case 1:
-	for (i = 0; i < (OLED_Max_Row + 1); i += b) {
-	    OLED_Set_Display_Offset(OLED_Max_Row - i);
-	    for (j = 0; j < c; j++)
-		uDelay(200);
-	}
-	break;
-    }
-    OLED_Set_Partial_Display(0x01, 0x00, 0x00);
-}
-
-//-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=
-//  Vertical Fade Scrolling (Full Screen)
-//
-//    a: Scrolling Direction
-//       "0x00" (Upward - In)
-//       "0x01" (Downward - In)
-//       "0x02" (Upward - Out)
-//       "0x03" (Downward - Out)
-//    b: Set Numbers of Row Scroll per Step
-//    c: Set Time Interval between Each Scroll Step
-//-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=
-void
-OLED_Fade_Scroll(unsigned char a, unsigned char b, unsigned char c) {
-    unsigned char i, j;
-    OLED_Set_Partial_Display(0x00, 0x00, OLED_Max_Row);
-    switch (a) {
-    case 0:
-	for (i = (OLED_Max_Row + 1); i < 128; i += b) {
-	    OLED_Set_Start_Line(i);
-	    for (j = 0; j < c; j++) {
-		uDelay(200);
-	    }
-	}
-	OLED_Set_Start_Line(0x00);
-	for (j = 0; j < c; j++) {
-	    uDelay(200);
-	}
-	break;
-    case 1:
-	for (i = 0; i < (OLED_Max_Row + 1); i += b) {
-	    OLED_Set_Start_Line(OLED_Max_Row - i);
-	    for (j = 0; j < c; j++) {
-		uDelay(200);
-	    }
-	}
-	break;
-    case 2:
-	for (i = 0; i < (OLED_Max_Row + 1); i += b) {
-	    OLED_Set_Start_Line(i + 1);
-	    for (j = 0; j < c; j++) {
-		uDelay(200);
-	    }
-	}
-	break;
-    case 3:
-	for (i = 127; i > OLED_Max_Row; i -= b) {
-	    OLED_Set_Start_Line(i);
-	    for (j = 0; j < c; j++) {
-		uDelay(200);
-	    }
-	}
-	break;
-    }
-    OLED_Set_Partial_Display(0x01, 0x00, 0x00);
-}
 
 //-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=
 //  Fade In (Full Screen)
@@ -706,29 +511,8 @@ OLED_Sleep(unsigned char a) {
 }
 
 //-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=
-//  Connection Test
-//-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=
-void
-OLED_Test() {
-    unsigned char i;
-    LCD_RESET = 0;
-    for (i = 0; i < 200; i++) {
-	uDelay(200);
-    }
-    LCD_RESET = 1;
-    OLED_Set_Display_Mode(0x01);			   // Entire Display On Mode (0x00/0x01/0x02/0x03)
-    while (1) {
-	OLED_Set_Display_On_Off(0x01);			   // Display On (0x00/0x01)
-	Delay(2);
-	OLED_Set_Display_On_Off(0x00);			   // Display Off (0x00/0x01)
-	Delay(2);
-    }
-}
-
-//-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=
 //  Gray Scale Table Setting (Full Screen)
 //-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=
-void
 OLED_Set_Gray_Scale_Table() {
     SPI_send_cmd(0xB8);				   // Set Gray Scale Table
     SPI_send_data(0x0C);				   //   Gray Scale Level 1

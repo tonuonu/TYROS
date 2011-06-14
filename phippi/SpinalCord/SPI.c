@@ -1,4 +1,24 @@
-#include "types.h"
+/*
+ *  Copyright (c) 2011, Tõnu Samuel
+ *  All rights reserved.
+ *
+ *  This file is part of TYROS.
+ *
+ *  TYROS is free software: you can redistribute it and/or modify
+ *  it under the terms of the GNU General Public License as published by
+ *  the Free Software Foundation, either version 3 of the License, or
+ *  (at your option) any later version.
+ *
+ *  TYROS is distributed in the hope that it will be useful,
+ *  but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *  GNU General Public License for more details.
+ *
+ *  You should have received a copy of the GNU General Public License
+ *  along with TYROS.  If not, see <http://www.gnu.org/licenses/>.
+ *
+ */
+
 #include "ior32c111.h"
 #include <intrinsics.h>
 #include "hwsetup.h"
@@ -78,8 +98,7 @@ SPI4_Init(void)
 
     u4smr4 = 0x00;                                         // Set 0. u4c0 must be set before this function
 
-//    u4brg = 55 /* 435kHz */ ;                                             // (unsigned char)(((f1_CLK_SPEED)/(2*BIT_RATE))-1);
-    u4brg = 0xFF /* 435kHz */ ;                                             // (unsigned char)(((f1_CLK_SPEED)/(2*BIT_RATE))-1);
+    u4brg = 55 /* 435kHz */ ;                                             // (unsigned char)(((f1_CLK_SPEED)/(2*BIT_RATE))-1);
     s4tic = 0x0;
 }
 
