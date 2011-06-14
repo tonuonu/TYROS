@@ -11,7 +11,9 @@
   <param name="border_lowerright" textfile="$(find phippi)/urdf/border_lowerright.urdf"/>
   <param name="border_lowerleft" textfile="$(find phippi)/urdf/border_lowerleft.urdf"/>
 
-  <node pkg="tf" type="static_transform_publisher" name="tmp_broadcaster" args="1 -0.5 0 0 0 0 world 'camera mount-21' 500" respawn="true"/>
+  <node pkg="tf" type="static_transform_publisher" name="world_map_broadcaster" args="0 0 0 0 0 0 world map 500" respawn="true"/>
+  <node pkg="tf" type="static_transform_publisher" name="baselink_broadcaster" args="0 0 0 0 0 0 'camera mount-21' odom 500" respawn="true"/>
+  <node pkg="tf" type="static_transform_publisher" name="robot_broadcaster" args="1 -0.5 0 0 0 0 world 'camera mount-21' 500" respawn="true"/> 
   <node pkg="tf" type="static_transform_publisher" name="ball_broadcaster" args="-1 -0.5 0 0 0 0 world ball 500" respawn="true"/>
   <node pkg="tf" type="static_transform_publisher" name="gate1_broadcaster" args="1.5 0 0 0 0 0 world gate1 500" respawn="true"/>
   <node pkg="tf" type="static_transform_publisher" name="gate2_broadcaster" args="-1.5 0 0 0 0 0 world gate2 500" respawn="true"/>

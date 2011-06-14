@@ -82,9 +82,9 @@ int main(int argc, char **argv)
   double y = 0.0;
   double th = 0.0;
 
-  double vx = 0.1;
-  double vy = -0.1;
-  double vth = 0.1;
+  double vx = 0.0;
+  double vy = 0.0;
+  double vth = 0.0;
 
   ros::Time current_time, last_time;
   current_time = ros::Time::now();
@@ -92,7 +92,8 @@ int main(int argc, char **argv)
 
   ros::Rate r(1.0);
 
-while(n.ok()){
+  while(n.ok()){
+ 
     current_time = ros::Time::now();
 
     //compute odometry in a typical way given the velocities of the robot
@@ -141,7 +142,7 @@ while(n.ok()){
 
     //publish the message
     odom_pub.publish(odom);
-    ros::spin();
+ //   ros::spin();
 
     last_time = current_time;
     r.sleep();
