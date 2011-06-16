@@ -12,6 +12,10 @@
   <depend package="roscpp"/>
   <depend package="tf"/>
   <depend package="nav_msgs"/>
+  <depend package="move_base"/>
+  <depend package="map_server"/>
+  <depend package="joint_state_publisher"/>
+  <depend package="robot_state_publisher"/>
 
 </package>
 
