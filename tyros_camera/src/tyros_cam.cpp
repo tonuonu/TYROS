@@ -54,9 +54,14 @@ int main(int argc, char **argv) {
 	nh.param<int>("width", width, 240);
 	nh.param<int>("height", height, 320);
 	nh.param<int>("input", input, 0);
-	nh.param<std::string>("device", dev, "/dev/video0");
+	if(argc<2) {
+		nh.param<std::string>("device", dev, "/dev/video0");
+	} else {
+		nh.param<std::string>("device", dev, argv[1]);
+		printf("opening %s\n",argv[1]);
+	}
 	nh.param<std::string>("frame_id", frame_id, "camera");
-	nh.param<std::string>("camera_info_url", cinfo_url, "file:///home/panda/TYROS/tyros_camera/calib.yaml");
+	nh.param<std::string>("camera_info_url", cinfo_url, "file:///home/it/TYROS/tyros_camera/calib.yaml");
 	cinfo.loadCameraInfo(cinfo_url);
 
 	ROS_INFO("Opening device : %s", dev.c_str());
@@ -69,12 +74,12 @@ int main(int argc, char **argv) {
 	image.width = 240;
 	image.encoding = sensor_msgs::image_encodings::MONO8;
 
-        ros::init(argc, argv, "TIChronos_teleop");
+        ros::init(argc, argv, "tyros_cam");
         ros::NodeHandle n;
-        ros::Rate loop_rate(60);
+        ros::Rate loop_rate(30);
         ros::Publisher pub;
 
-        pub = n.advertise<tyros_camera::Objects>("vision_publisher", 5); /* Message queue length is 3 */
+        pub = n.advertise<tyros_camera::Objects>("vision_publisher", 5); /* Message queue length is 5 */
 
 	IplImage* imgy;
         imgy= cvCreateImage(cvSize(IMAGE_WIDTH,IMAGE_HEIGHT), 8, 1);

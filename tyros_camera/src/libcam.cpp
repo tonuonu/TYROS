@@ -24,8 +24,6 @@
 
 #include <linux/videodev2.h>
 
-//#include <libv4l2.h>
-
 #define CLEAR(x) memset (&(x), 0, sizeof (x))
 
 #include "libcam.h"
@@ -89,7 +87,7 @@ void Camera::Open() {
 	fd = open(name, O_RDWR | O_NONBLOCK, 0);
 
 	if (-1 == fd) {
-		fprintf(stderr, "Canno open '%s': %d, %s\n", name, errno, strerror(
+		fprintf(stderr, "Cannot open '%s': %d, %s\n", name, errno, strerror(
 				errno));
 		exit(1);
 	}
@@ -164,7 +162,7 @@ void Camera::Init() {
 
 	if (-1 == xioctl(fd, VIDIOC_S_FMT, &fmt))
 		errno_exit("VIDIOC_S_FMT");
-/*
+
 	struct v4l2_streamparm p;
 	p.type = V4L2_BUF_TYPE_VIDEO_CAPTURE;
 	p.parm.capture.timeperframe.numerator = 1;
@@ -172,7 +170,7 @@ void Camera::Init() {
 
 	if (-1 == xioctl(fd, VIDIOC_S_PARM, &p))
 		errno_exit("VIDIOC_S_PARM");
-*/
+
 	//default values, mins and maxes
 
 
@@ -300,7 +298,7 @@ void Camera::Init() {
 #endif
 	//TODO: TO ADD SETTINGS
 	//here should go custom calls to xioctl
-#if 0
+#if 1
 
     struct v4l2_control control;
     control.id = V4L2_CID_POWER_LINE_FREQUENCY;
