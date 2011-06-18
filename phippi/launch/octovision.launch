@@ -1,0 +1,74 @@
+<launch>
+
+  <param name="ball_description" textfile="$(find phippi)/urdf/simple_sphere.urdf"/>
+  <param name="robot_description" command="cat $(find phippi)/urdf/robot-fixed.urdf"/>
+  <param name="gate1_description" textfile="$(find phippi)/urdf/gate1.urdf"/>
+  <param name="gate2_description" textfile="$(find phippi)/urdf/gate2.urdf"/>
+  <param name="border_upper" textfile="$(find phippi)/urdf/border_upper.urdf"/>
+  <param name="border_upperleft" textfile="$(find phippi)/urdf/border_upperleft.urdf"/>
+  <param name="border_upperright" textfile="$(find phippi)/urdf/border_upperright.urdf"/>
+  <param name="border_lower" textfile="$(find phippi)/urdf/border_lower.urdf"/>
+  <param name="border_lowerright" textfile="$(find phippi)/urdf/border_lowerright.urdf"/>
+  <param name="border_lowerleft" textfile="$(find phippi)/urdf/border_lowerleft.urdf"/>
+
+  <node pkg="tf" type="static_transform_publisher" name="world_map_broadcaster" args="0 0 0 0 0 0 world map 500" respawn="true"/>
+  <node pkg="tf" type="static_transform_publisher" name="robot_broadcaster" args="0 0 0 0 0 0 odom 'camera mount-21' 500" respawn="true"/> 
+  <node pkg="tf" type="static_transform_publisher" name="ball_broadcaster" args="-1 -0.5 0 0 0 0 world ball 500" respawn="true"/>
+  <node pkg="tf" type="static_transform_publisher" name="gate1_broadcaster" args="2.5 0 0 0 0 0 world gate1 500" respawn="true"/>
+  <node pkg="tf" type="static_transform_publisher" name="gate2_broadcaster" args="-2.5 0 0 0 0 0 world gate2 500" respawn="true"/>
+  <node pkg="tf" type="static_transform_publisher" name="foobar" args="0 0 0 0 0 0 map odom 500" respawn="true"/>
+
+  <node pkg="robot_state_publisher" type="state_publisher" name="robot_state_publisher" respawn="true"/>
+  <node name="joint_state_publisher" pkg="joint_state_publisher" type="joint_state_publisher" respawn="true" />
+
+  <node pkg="phippi" type="phippi_motors_server" name="motors_server" output="screen"/>
+
+  <node pkg="tyros_camera" type="tyros_camera" name="mycam1" respawn="true" args="/dev/v4l/by-path/pci-0000:00:13.2-usb-0:2.1.1:1.0-video-index0"  >
+      <rosparam name="frame_id" type="string" value="camera1" />
+  </node>
+
+<!--
+  <node pkg="tyros_camera" type="tyros_camera" name="mycam2" respawn="true" args="/dev/v4l/by-path/pci-0000:00:13.2-usb-0:2.2.1:1.0-video-index0"  >
+      <rosparam name="frame_id" type="string" value="camera2" />
+  </node>
+-->
+  <node pkg="tyros_camera" type="tyros_camera" name="mycam3" respawn="true" args="/dev/v4l/by-path/pci-0000:00:13.2-usb-0:2.3.1:1.0-video-index0"  >
+      <rosparam name="frame_id" type="string" value="camera3" />
+  </node>
+  <node pkg="tyros_camera" type="tyros_camera" name="mycam4" respawn="true" args="/dev/v4l/by-path/pci-0000:00:13.2-usb-0:2.4.1:1.0-video-index0"  >
+      <rosparam name="frame_id" type="string" value="camera4" />
+  </node>
+  <node pkg="tyros_camera" type="tyros_camera" name="mycam5" respawn="true" args="/dev/v4l/by-path/pci-0000:00:12.2-usb-0:3.1.1:1.0-video-index0"  >
+      <rosparam name="frame_id" type="string" value="camera5" />
+  </node>
+  <node pkg="tyros_camera" type="tyros_camera" name="mycam6" respawn="true" args="/dev/v4l/by-path/pci-0000:00:12.2-usb-0:3.2.1:1.0-video-index0"  >
+      <rosparam name="frame_id" type="string" value="camera6" />
+  </node>
+  <node pkg="tyros_camera" type="tyros_camera" name="mycam7" respawn="true" args="/dev/v4l/by-path/pci-0000:00:12.2-usb-0:3.3.1:1.0-video-index0"  >
+      <rosparam name="frame_id" type="string" value="camera7" />
+  </node>
+  <node pkg="tyros_camera" type="tyros_camera" name="mycam8" respawn="true" args="/dev/v4l/by-path/pci-0000:00:12.2-usb-0:3.4.1:1.0-video-index0"  >
+      <rosparam name="frame_id" type="string" value="camera8" />
+  </node>
+
+
+
+
+
+
+
+
+
+
+  <node pkg="move_base" type="move_base" respawn="false" name="move_base" output="screen">
+    <rosparam file="$(find phippi)/costmap_common_params.yaml" command="load" ns="global_costmap" />
+    <rosparam file="$(find phippi)/costmap_common_params.yaml" command="load" ns="local_costmap" />
+    <rosparam file="$(find phippi)/local_costmap_params.yaml" command="load" />
+    <rosparam file="$(find phippi)/global_costmap_params.yaml" command="load" />
+    <rosparam file="$(find phippi)/base_local_planner_params.yaml" command="load" />
+  </node>
+
+  <node name="map_server" pkg="map_server" type="map_server" args="$(find phippi)/map_server.yaml "/>
+
+</launch>
+
