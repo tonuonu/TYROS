@@ -52,18 +52,23 @@ SPI_send_cmd(unsigned char c) {
 
 void
 SPI4_send(unsigned short c) {
-    while (ti_u4c1 == 0)
+  while (ti_u4c1 == 0)
         NOP();
-    u4tb = c;
-}
+  uDelay(SPI_DELAY);
+  ti_u4c1=0;
+  u4tb = c;
 
+}
 
 short unsigned
 SPI4_receive(void) {
-    u4tb=0xff;
-    while (ri_u4c1 == 0)
+  short unsigned r;
+  SPI4_send(0xFF);
+  while (ri_u4c1 == 0)
         NOP();
-    return u4rb;
+  r=u4rb;
+  ri_u4c1=0;
+  return r;
 }
 
 void
@@ -77,35 +82,49 @@ main(void) {
     OLED_Show_Logo();
     OLED_Set_Display_Mode(0x02);                           // Entire Display Off
     LED2=0;
-    Delay(200);
+    Delay(2);
     OLED_Fade_Out();
     OLED_Fill_RAM(0x00);
     OLED_Fade_In();
     while (1) {      
-        if (status.sek_flag==1) {
+//      if (status.sek_flag==1) {
             char buf[256];
             status.sek_flag=0;
             uart8_send(0x55);
-
             LED1 ^= 1;
-#if 1
             p9_4=0;
+            uDelay(255); 
+            uDelay(255); 
+//            uDelay(127); 
+            
             SPI4_send(0xAA);
+            uDelay(255); 
+            uDelay(255); 
+//            uDelay(127); 
+      
             SPI4_send(0xFF);
-            unsigned short c; /* 16 bit value */
-            c=SPI4_receive();
-            sprintf( /*(char *)*/ buf, "%s%s%s%s%s SPI4 %04x ",
+            uDelay(255); 
+            uDelay(255); 
+//            uDelay(127);
+            int i;
+            for(i=0;i<4;i++) {
+                unsigned short c; /* 16 bit value */
+                c=SPI4_receive();
+                sprintf( /*(char *)*/ buf, "%s%s%s%s%s SPI4 %04x ",
                     (c & (1 << 11)) ? "Arbitr " : "",
                     (c & (1 << 12)) ? "Overr " : "",
                     (c & (1 << 13)) ? "Fram " : "",
                     (c & (1 << 14)) ? "Pari " : "",
-                    (c & (1 << 15)) ? "Sum " : "", c);
-            OLED_Show_String(1, buf, 10 /* left */ , 0*8 /* top */ );
-            c=SPI4_receive();
-            sprintf((char *) buf, "SPI4 %04x ",c);
-            OLED_Show_String(1, buf, 10 /* left */ , 1*8 /* top */ );           
+                    (c & (1 << 15)) ? "Sum " : "", c & 0xFF);
+                OLED_Show_String(1, buf, 0 /* left */ , i*8 /* top */ );
+                uDelay(255); 
+            }
             p9_4=1;
-#endif
-        }
+            uDelay(255);
+            uDelay(255);
+            uDelay(255);
+            uDelay(255);
+
+            //        }
     }
 }

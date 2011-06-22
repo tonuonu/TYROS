@@ -194,7 +194,7 @@ ConfigurePortPins(void)
     p3_0s = p3_1s = p3_3s = p3_5s = p3_7s = 0;
     p3_2s = p3_4s = p3_6s = 0x02;
     pur1 = 0x04;        
-    pd5 = 0x00 | (1 << 4); // p54 is TX7                                           
+    pd5 =  (1 << 7); 
     p5_0s = p5_1s = p5_2s = p5_3s = p5_5s = p5_7s = 0;
     p5_6s = p5_4s = 0x03;
    

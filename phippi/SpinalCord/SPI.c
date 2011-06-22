@@ -37,8 +37,8 @@ SPI4_Init(void)
      */
     prc2=1;
     pd9_4 = PDIR_OUTPUT;
-
     p9_4=1;
+
     /* 
      * CLK4 
      */
@@ -55,6 +55,7 @@ SPI4_Init(void)
 
     prc2=1;
     p9_6s = PF_SPI;
+    
     pu27=1;
 
     smd0_u4mr  = 1;                                        // \ 
@@ -73,7 +74,7 @@ SPI4_Init(void)
     txept_u4c0 = 0;                                        // Transmit register empty flag 
     crd_u4c0 = 1;                                          // CTS disabled when 1
     nch_u4c0 = 0;                                          // 0=Output mode "push-pull" for TXD and CLOCK pin 
-    ckpol_u4c0 = 0;                                        // CLK Polarity 
+    ckpol_u4c0 = 1;                                        // CLK Polarity 
     uform_u4c0 = 1;                                        // 1=MSB first
 
     te_u4c1 = 1;                                           // 1=Transmission Enable
@@ -98,7 +99,8 @@ SPI4_Init(void)
 
     u4smr4 = 0x00;                                         // Set 0. u4c0 must be set before this function
 
-    u4brg = 55 /* 435kHz */ ;                                             // (unsigned char)(((f1_CLK_SPEED)/(2*BIT_RATE))-1);
+//    u4brg = 55 /* 435kHz */ ;                                             // (unsigned char)(((f1_CLK_SPEED)/(2*BIT_RATE))-1);
+    u4brg = 0x40;                                             // (unsigned char)(((f1_CLK_SPEED)/(2*BIT_RATE))-1);
     s4tic = 0x0;
 }
 
