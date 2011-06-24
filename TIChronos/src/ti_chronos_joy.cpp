@@ -23,7 +23,7 @@
 #include <termios.h>
 #include <stdio.h>
 #include <ros/ros.h>
-#include <joy/Joy.h>
+#include <sensor_msgs/Joy.h>
 #include <sys/types.h>
 #include <sys/stat.h>
 #include <fcntl.h>
@@ -87,9 +87,9 @@ int main(int argc, char** argv)
     ros::NodeHandle n;
     ros::Rate loop_rate(10);
     ros::Publisher pub;
-    joy::Joy msg;
+    sensor_msgs::Joy msg;
 
-    pub = n.advertise<joy::Joy>("joy", 1); /* Message queue length is just 1 */
+    pub = n.advertise<sensor_msgs::Joy>("joy", 1); /* Message queue length is just 1 */
 
     printf("Now it is time to set TI Chronos into ACC mode and press DOWN\n");
 
