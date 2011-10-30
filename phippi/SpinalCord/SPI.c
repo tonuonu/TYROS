@@ -100,7 +100,7 @@ SPI4_Init(void)
     u4smr4 = 0x00;                                         // Set 0. u4c0 must be set before this function
 
 //    u4brg = 55 /* 435kHz */ ;                                             // (unsigned char)(((f1_CLK_SPEED)/(2*BIT_RATE))-1);
-    u4brg = 0x40;                                             // (unsigned char)(((f1_CLK_SPEED)/(2*BIT_RATE))-1);
+    u4brg = 0x55;                                             // (unsigned char)(((f1_CLK_SPEED)/(2*BIT_RATE))-1);
     s4tic = 0x0;
 }
 

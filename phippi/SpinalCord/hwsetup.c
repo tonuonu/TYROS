@@ -35,9 +35,9 @@ static void ConfigureOperatingFrequency(char mode);
 static void ConfigurePortPins(void);
 volatile struct statuses status;
 unsigned int base_freq;
-void
-OLED_On(void)
-{
+
+void 
+OLED_On(void) {
     // Make ports safe
     p4_0 = 0;                                              // DC (data/command)
     p4_2 = 0;                                              // reset pin
@@ -54,9 +54,9 @@ OLED_On(void)
     pd4_0 = 1;                                             // Reset pin
     pd4_2 = 1;                                             // Reset pin
     pd4_4 = 1;                                             // VCC
-    pd4_5 = 1;                                             // VDD
+    pd4_5 = 0;                                             // VDD
 
-    // Make sure VDD is ON
+    // Make sure VCC is Off
     p4_4 = 0;
     uDelay(10);
 
@@ -82,13 +82,6 @@ HardwareSetup(void)
     DISABLE_IRQ;
     ConfigureOperatingFrequency(1);
 
-    // Init_TMRA0 1 mS timer
-    ta3mr = 0x80;                                          // timer mode,fc/8 = 1,0 MHz
-    ta3 = 24;                                              // 1MHz/25 - 1; 48 oli Fi = 40kHz
-    ta3ud = 0;                                             // down count
-    ta3ic = 2;                                             // level 2 interrupt
-    ta3s = 1;
-    ticks = 0;
 
     // Init_TMRB5 1 mS timer
     tb5mr = 0x80;                                          // timer mode,fc/8 = 1,0 MHz
@@ -99,12 +92,15 @@ HardwareSetup(void)
     
     ConfigurePortPins();
 
-    SPI3_Init(); // OLED?
+    SPI3_Init(); // OLED!
     SPI4_Init(); // Melexis sensor
+    uart5_init();
     uart7_init();
     uart8_init();
+#if 1
     OLED_On();
     OLED_Init();
+#endif    
     ENABLE_IRQ;
 }
 
@@ -192,7 +188,7 @@ ConfigurePortPins(void)
     p3 = 0;                                                 
     pd3 = 0xAB;                                            
     p3_0s = p3_1s = p3_3s = p3_5s = p3_7s = 0;
-    p3_2s = p3_4s = p3_6s = 0x02;
+    p3_2s = p3_4s = 0x01;// PWM ports
     pur1 = 0x04;        
     pd5 =  (1 << 7); 
     p5_0s = p5_1s = p5_2s = p5_3s = p5_5s = p5_7s = 0;

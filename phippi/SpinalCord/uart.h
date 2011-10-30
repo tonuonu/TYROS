@@ -44,3 +44,4 @@ extern unsigned short rx8_ptrr;
 #define datat_buf   rx8_ptr
 
 
+extern unsigned char get_uart5(void);
