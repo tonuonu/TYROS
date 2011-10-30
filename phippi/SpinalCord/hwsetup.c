@@ -175,10 +175,16 @@ ConfigurePortPins(void)
      */
     pur0 = 0;                            
 
-    pd0 = pd1 = 0;                                
+    pd0 = 0;
+    pd1 = 4; // charge is output                                
     p0 = p1 = 0;
     p0_0s = p0_1s = p0_2s = p0_3s = p0_4s = p0_5s = p0_6s = p0_7s = 0;
-    p1_0s = p1_1s = p1_2s = p1_3s = p1_4s = p1_5s = p1_6s = p1_7s = 0;
+    p1_0s = p1_1s = p1_3s = p1_4s = p1_5s = p1_6s = p1_7s = 0;
+
+    p1_2s = 0; // charge
+   
+pu02=1;
+pu03=1;
 
     p2 = 0x07;    
     pd2 = 0x0F;                             

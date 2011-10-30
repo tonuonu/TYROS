@@ -306,11 +306,11 @@
       <inputs>
         <tool>
           <name>BICOMP</name>
-          <file> 18 21 25 23 13 24 20 17 7 6 16 8</file>
+          <file> 18 21 25 23 13 24 20 17 7 19 26 6 16 8</file>
         </tool>
         <tool>
           <name>ICCR32C</name>
-          <file> 18 21 25 23 13 32 24 20 17 7 6 16 8</file>
+          <file> 18 21 25 23 13 32 24 20 17 7 19 26 6 16 8</file>
         </tool>
       </inputs>
     </file>

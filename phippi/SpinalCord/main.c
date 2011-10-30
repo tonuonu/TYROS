@@ -86,10 +86,7 @@ extern char command[TX_BUFF_SIZE];
 double twist[6]={0,0,0,0,0,0};
 int pwm[2]={0,0};
 
-
 void tmr1_init(void) {
-
-
 	/* Configure the port pin to provide pulse output	*/
 	p3_2s = 1;
 	pd3_2 = 1;
@@ -134,6 +131,15 @@ void tmr2_init(void) {
 	ta2s = 1;
 }
 
+void tmr3_init(void) {
+    // Init_TMRA0 1 mS timer
+    ta3mr = 0x80;                                          // timer mode,fc/8 = 1,0 MHz
+    ta3 = 24;                                              // 1MHz/25 - 1; 48 oli Fi = 40kHz
+    ta3ud = 0;                                             // down count
+    ta3ic = 2;                                             // level 2 interrupt
+    ta3s = 1;
+    ticks = 0;
+}
 void
 main(void) {
     int j;
@@ -159,6 +165,7 @@ main(void) {
 #endif
     tmr1_init();
     tmr2_init();
+    tmr3_init();
     while (1) {      
         char buf[256];
         if (status.sek_flag==1) {
@@ -191,6 +198,32 @@ main(void) {
                 ta1=pwm[0];
                 ta2=pwm[1];
                 write(buf);              
+            } else if(strncmp(command,"panda ",6)==0) {
+                int tmp;
+                for(tmp=0,tok = strtok(command," "); tok && tmp<=2 ; tok=strtok(0," "),tmp++) {
+                    if(tmp == 1) {
+                        p3_5=(int)strtod(tok,NULL); 
+                    }
+                }
+                sprintf(buf,"panda %s",p3_5 ? "on":"off");
+                write(buf);              
+            } else if(strncmp(command,"charge ",7)==0) {
+                int tmp;
+                for(tmp=0,tok = strtok(command," "); tok && tmp<=2 ; tok=strtok(0," "),tmp++) {
+                    if(tmp == 1) {
+                        p1_2=(int)strtod(tok,NULL); 
+                    }
+                }
+                sprintf(buf,"charge %s",p1_2 ? "on":"off");
+                write(buf);              
+            } else if(strncmp(command,"joy",3)==0) {
+                sprintf(buf,"joy %s%s%s%s%s",
+                        p1_3 ? ""    :"up ",
+                        p1_4 ? ""  :"down ",
+                        p1_5 ? ""  :"left ",
+                        p1_6 ? "" :"right ",
+                        p1_7 ? "":"center" );
+                write(buf);                            
             } else       
               write("Unknown command:'");
             putchar('>');    
