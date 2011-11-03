@@ -19,8 +19,6 @@
  *
  */
 
-
-
 #include "ior32c111.h"
 #include "hwsetup.h"
 #include <stdio.h>
@@ -30,6 +28,8 @@
 #include <stdarg.h>
 #include "main.h"
 #include "uart.h"
+
+#define TIMERB2COUNT	1200
 
 static void ConfigureOperatingFrequency(char mode);
 static void ConfigurePortPins(void);
@@ -73,6 +73,202 @@ OLED_On(void) {
     uDelay(100);
 }
 
+
+void
+PWM_Init(void)
+{
+
+    /* 
+     * Removes Protection for INVC0 & INVC1 Registers 
+     */
+    prc1 = 1;
+
+    /* 
+     * Three-Phase PWM Control Register0 - 00001100b b1:b0 INV01:INV00
+     * ICTB2 Count Condition: Underflow of timer B2 b2 INV02 Use
+     * Three-Phase Motor Control Timers b3 INV03 Enable Three-Phase Motor 
+     * Control Timer Output b4 INV04 Ignore Simultaneous turn-on Signal
+     * output b5 INV05 Simultaneous Conduction Not Detected b6 INV06
+     * Triangular Wave Modulation b7 INV07 Software Trigger Select Bit 
+     */
+    invc0 = 0x1C;
+
+    /* 
+     * Three-Phase PWM Control Register1 - 00110000b b0 INV10 Timers A1,
+     * A2 & A4 Trigger : Underflow of Timer B2 b1 INV11 Timers A1-1, A2-1 
+     * & A4-1 Control : Thee-phase mode 0 b2 INV12 Dead Time Timer Count
+     * Source : f1 b3 INV13 Timer A reload control signal is 0 b4 INV14
+     * Active High output b5 INV15 Dead Time Disable b6 INV16 Dead Time
+     * Timer Trigger : Rising edge of the three-phase output shift
+     * register b7 - Reserved 
+     */
+    invc1 = 0x40;
+
+    /* 
+     * Three-Phase Output Use pins U, U, V, V, W, and W of port P3 
+     */
+    tbsout = 1;
+
+    /* 
+     * Protects INVC0 & INVC1 Registers 
+     */
+    prc1 = 0;
+
+    /* 
+     * Timer B2 Reload every time an underflow occure 
+     */
+    tb2sc = 0x00;
+
+    /* 
+     * Three-Phase Output Buffer Register0 - 00111111b b0 DU0 U-Phase
+     * Output Buffer0 ON b1 DUB0 U'-Phase Output Buffer0 ON b2 DV0
+     * V-Phase Output Buffer0 ON b3 DVB0 V'-Phase Output Buffer0 ON
+     * b4 DW0 W-Phase Output Buffer0 ON b5 DWB0 W'-Phase Output
+     * Buffer0 OFF b7:b6 - Reserved 
+     */
+    idb0 = 0x1A;
+
+    /* 
+     * Three-Phase Output Buffer Register1 - 00000000b b0 DU1 U-Phase
+     * Output Buffer1 OFF b1 DUB1 U'-Phase Output Buffer1 OFF b2 DV1 
+     * V-Phase Output Buffer1 OFF b3 DVB1 V'-Phase Output Buffer1 OFF 
+     * b4 , DW1 W-Phase Output Buffer1 OFF b5 DWB1 W'-Phase Output
+     * Buffer1 OFF b7:b6 - Reserved 
+     */
+    idb1 = 0x25;
+
+    /* 
+     * Timer A4 Mode Register - 00010001b b1:b0 TMOD0:TMOD1 One shot
+     * mode b2 MR0 Reserved b3 MR1 External Trigger Select Bit b4
+     * MR2 Trigger selected by TRGSR register b5 MR3 Reserved b6:b7
+     * TCK0:TCK1 Count Source f1 
+     */
+    ta4mr = 0x12;
+
+    /* 
+     * Timer A1 Mode Register - 00010001b b1:b0 TMOD0:TMOD1 One shot
+     * mode b2 MR0 Reserved b3 MR1 External Trigger Select Bit b4
+     * MR2 Trigger selected by TRGSR register b5 MR3 Reserved b6:b7
+     * TCK0:TCK1 Count Source f1 
+     */
+    ta1mr = 0x12;
+
+    /* 
+     * Timer A2 Mode Register - 00010001b b1:b0 TMOD0:TMOD1 One shot
+     * mode b2 MR0 Reserved b3 MR1 External Trigger Select Bit b4
+     * MR2 Trigger selected by TRGSR register b5 MR3 Reserved b6:b7
+     * TCK0:TCK1 Count Source f1 
+     */
+    ta2mr = 0x12;
+
+    /* 
+     * Timer B2 Mode Register - 00000000b b1:b0 TMOD0:TMOD1 Timer
+     * Mode b2:b3 mr0:mr1 Reserved b4 mr2 Reserved b5 mr3 Reserved
+     * b6:b7 TCK0:TCK1 Count Source f1 
+     */
+    tb2mr = 0x00;
+
+    /* 
+     * Trigger Select Register - 01000101b b1:b0 TA1TGL:TA1TGH Timer
+     * A1 Trigger the underflow of TB2 b2:b3 TA2TGL:TA2TGH Timer A2
+     * Trigger the underflow of TB2 b4:b5 TA3TGL:TA3TGH Timer A3
+     * Trigger : input to TA3IN pin b6:b7 TA4TGL:TA4TGH Timer A4
+     * Trigger the underflow of TB2 
+     */
+    trgsr = 0x45;
+
+    /* 
+     * Configures 3-Phase motor control timers 
+     */
+    /* 
+     * Loading the register 
+     */
+    tb2 = TIMERB2COUNT;
+
+    /* 
+     * Timer A4 register 
+     */
+    ta4 = 1;
+    ta1 = 1;
+    ta2 = 1;
+
+    /* 
+     * Timer A1 register 
+     */
+    // ta1 = ((TIMERB2COUNT * 2) / 3);
+
+    /* 
+     * Timer A2 register 
+     */
+    // ta2 = ((TIMERB2COUNT * 1) / 3);
+
+    /* 
+     * Removes Protection for P3_6S,P3_2S & P3_4S Registers 
+     */
+    // prc30 = 1;
+    /* 
+     * Initialize port 3 for output 
+     */
+    pd3 = 0xFF;
+
+    /* 
+     * Port P3_2 Function Select Register - 00000010b b2:b0
+     * PSEL2:PSEL0 Three-phase motor control output b7:b3 - No
+     * register bits; 
+     */
+    p3_2s = 0x01;
+
+    /* 
+     * Port P3_,3 Function Select Register - 00000010b b2:b0
+     * PSEL2:PSEL0 Three-phase motor control output b7:b3 - No
+     * register bits; 
+     */
+    // p3_3s = 0x02;
+    /* 
+     * Port P3_4 Function Select Register - 00000010b b2:b0
+     * PSEL2:PSEL0 Three-phase motor control output b7:b3 - No
+     * register bits; 
+     */
+    p3_4s = 0x01;
+
+    /* 
+     * Port P3_5 Function Select Register - 00000010b b2:b0
+     * PSEL2:PSEL0 Three-phase motor control output b7:b3 - No
+     * register bits; 
+     */
+    // p3_5s = 0x02;
+    /* 
+     * Port P3_6 Function Select Register - 00000010b b2:b0
+     * PSEL2:PSEL0 Three-phase motor control output b7:b3 - No
+     * register bits 
+     */
+    p3_6s = 0x01;
+
+    /* 
+     * Port P3_7 Function Select Register - 00000010b b2:b0
+     * PSEL2:PSEL0 Three-phase motor control output b7:b3 - No
+     * register bits; 
+     */
+    // p3_7s = 0x02;
+    p3_7s = 0;
+    pd3_7 = 1;
+    p3_7 = 0;
+
+    /* 
+     * Protects P3_6S,P3_2S & P3_4S Registers 
+     */
+    // prc30 = 0;
+    /* 
+     * Setting timer A4, timer A1, timer A2 and timer B2 start flag 
+     */
+    tabsr = 0x96;
+
+    // FIXME, timer3 start into right place
+    TABSR_bit.TA3S = 1;
+}
+
+
+
 void
 HardwareSetup(void)
 {
@@ -102,6 +298,8 @@ HardwareSetup(void)
     OLED_Init();
 #endif    
     ENABLE_IRQ;
+    PWM_Init();
+
 }
 
 static void
