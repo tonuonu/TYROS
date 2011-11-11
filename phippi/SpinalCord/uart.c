@@ -31,6 +31,7 @@
 #define base_freq (24000000)
 /* Used to store the received data */
 volatile unsigned char U5_in;
+volatile unsigned char U4_in;
 
 char tx5_buff[TX_BUFF_SIZE];
 char command[TX_BUFF_SIZE]="";
@@ -167,3 +168,41 @@ void  uart7_send(unsigned char d) {
     u7tb = (short)d;
 }
 
+
+#if 1
+#pragma vector = UART4_RX
+__interrupt void _uart4_receive(void)
+{
+  
+  LED1=0; 
+  LED2=1; 
+
+  if (rx5_ptr >= RX_BUFF_SIZE) 
+        rx5_ptr = RX_BUFF_SIZE-1;
+
+    while(ri_u4c1 == 0) {
+        /* Make sure that the receive is complete */
+    }
+
+    /* Read the received data */
+    U4_in = (unsigned char)u4rb;
+    switch(U4_in) {
+    case 13:
+        rx5_buff[rx5_ptr]=0;
+        strcpy(command,rx5_buff);
+        rx5_ptr=0;
+        putchar(0x0a);
+        putchar(0x0d);
+        break;
+    case 127:
+        rx5_ptr--;
+        rx5_buff[rx5_ptr]= 0;
+        break;
+    default:
+       rx5_buff[rx5_ptr]= U5_in;
+       rx5_ptr++;
+       putchar(U4_in);
+       break;
+    }
+}
+#endif

@@ -31,6 +31,7 @@ extern int alarm;
 
 volatile unsigned short ticks;
 
+#define TIMERB2COUNT	10
 #define SPI_DELAY (50)
 void
 SPI_send_data(unsigned char c) {
@@ -163,9 +164,9 @@ main(void) {
     putchar('>');    
     putchar(' ');
 #endif
-    tmr1_init();
-    tmr2_init();
-    tmr3_init();
+//    tmr1_init();
+//    tmr2_init();
+//    tmr3_init();
     while (1) {      
         char buf[256];
         if (status.sek_flag==1) {
@@ -195,8 +196,27 @@ main(void) {
                 if(pwm[0]<-100) pwm[0]=-100;
                 if(pwm[1]<-100) pwm[1]=-100;
                 sprintf(buf,"manual pwm left=%d%%, right=%d%%",pwm[0],pwm[1]);
-                ta1=pwm[0];
-                ta2=pwm[1];
+                ta1=(int)abs(pwm[0]*TIMERB2COUNT);
+                ta2=(int)abs(pwm[1]*TIMERB2COUNT);
+                if(pwm[0] > 0) {
+                    p2_0=1;
+                    p2_1=0;
+                } else {
+                    p2_0=0;
+                    p2_1=1;
+                }
+                if(pwm[1] > 0) {
+                    p2_2=1;
+                    p2_3=0;
+                } else {
+                    p2_2=0;
+                    p2_3=1;
+                }
+                p2_4=1;
+                p2_5=1;
+                p2_6=1;
+                p2_7=1;
+               
                 write(buf);              
             } else if(strncmp(command,"panda ",6)==0) {
                 int tmp;
@@ -254,8 +274,13 @@ main(void) {
         int x;
         for(x=0;x<4;x++) {
             unsigned short c; /* 16 bit value */
+            pd9_6=0;
+    dinc_u4smr3 = 1;                                       // Master mode when 0
             c=SPI4_receive();
-#if 0
+            pd9_6=1;
+    dinc_u4smr3 = 0;                                       // slave mode when 1
+
+#if 1
             sprintf( /*(char *)*/ buf, "%s%s%s%s%s SPI4 %04x ",
                 (c & (1 << 11)) ? "Arbitr " : "",
                 (c & (1 << 12)) ? "Overr " : "",

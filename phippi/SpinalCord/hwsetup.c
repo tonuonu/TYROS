@@ -188,9 +188,9 @@ PWM_Init(void)
     /* 
      * Timer A4 register 
      */
-    ta4 = 1;
     ta1 = 1;
     ta2 = 1;
+    ta4 = 1;
 
     /* 
      * Timer A1 register 
@@ -267,8 +267,6 @@ PWM_Init(void)
     TABSR_bit.TA3S = 1;
 }
 
-
-
 void
 HardwareSetup(void)
 {
@@ -277,7 +275,6 @@ HardwareSetup(void)
      */
     DISABLE_IRQ;
     ConfigureOperatingFrequency(1);
-
 
     // Init_TMRB5 1 mS timer
     tb5mr = 0x80;                                          // timer mode,fc/8 = 1,0 MHz
@@ -381,11 +378,11 @@ ConfigurePortPins(void)
 
     p1_2s = 0; // charge
    
-pu02=1;
-pu03=1;
+    pu02=1;
+    pu03=1;
 
     p2 = 0x07;    
-    pd2 = 0x0F;                             
+    pd2 = 0xFF;                             
     p2_0s = p2_1s = p2_2s = p2_3s = 0;
     p2_4s = p2_5s = p2_6s = p2_7s = 0x80;
 
@@ -443,6 +440,6 @@ __interrupt void
 s_int(void)
 {
     if(++ticks % 48 == 0)
-      status.sek_flag=1;    
+      status.sek_flag=1;
 }
 

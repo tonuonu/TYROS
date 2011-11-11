@@ -30,8 +30,7 @@
 #define PF_SPI        (3)
 
 void
-SPI4_Init(void)
-{
+SPI4_Init(void) { // Melexis 90316
     /* 
      * CS
      */
@@ -56,7 +55,7 @@ SPI4_Init(void)
     prc2=1;
     p9_6s = PF_SPI;
     
-    pu27=1;
+//    pu27=1;
 
     smd0_u4mr  = 1;                                        // \ 
     smd1_u4mr  = 0;                                        //  | Synchronous Serial Mode
@@ -73,16 +72,16 @@ SPI4_Init(void)
     clk1_u4c0 = 0;                                         // 
     txept_u4c0 = 0;                                        // Transmit register empty flag 
     crd_u4c0 = 1;                                          // CTS disabled when 1
-    nch_u4c0 = 0;                                          // 0=Output mode "push-pull" for TXD and CLOCK pin 
+    nch_u4c0 = 1;                                          // 0=Output mode "open drain" for TXD and CLOCK pin 
     ckpol_u4c0 = 1;                                        // CLK Polarity 
     uform_u4c0 = 1;                                        // 1=MSB first
 
     te_u4c1 = 1;                                           // 1=Transmission Enable
     ti_u4c1 = 0;                                           // Must be 0 to send or receive
     re_u4c1 = 1;                                           // Reception Enable when 1
-    ri_u4c1 = 1;                                           // Receive complete flag - U4RB is empty.
+    ri_u4c1 = 0;                                           // Receive complete flag - U4RB is empty.
     u4irs_u4c1 = 0;                                        // Interrupt  when transmission  is completed, U4TB is empty. 
-    u4rrm_u4c1 = 0;                                        // Continuous receive mode off
+    u4rrm_u4c1 = 1;                                        // Continuous receive mode off
     u4lch_u4c1 = 0;                                        // Logical inversion off 
 
     u4smr = 0x00;                                          // Set 0 
@@ -101,11 +100,15 @@ SPI4_Init(void)
 
 //    u4brg = 55 /* 435kHz */ ;                                             // (unsigned char)(((f1_CLK_SPEED)/(2*BIT_RATE))-1);
     u4brg = 0x55;                                             // (unsigned char)(((f1_CLK_SPEED)/(2*BIT_RATE))-1);
-    s4tic = 0x0;
+    
+    
+    pu27=1;
 }
 
+
+
 void
-SPI3_Init(void)
+SPI3_Init(void) // OLED
 {
     /* 
      * CLK3 
