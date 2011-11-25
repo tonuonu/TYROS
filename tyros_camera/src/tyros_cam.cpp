@@ -61,7 +61,7 @@ int main(int argc, char **argv) {
 		printf("opening %s\n",argv[1]);
 	}
 	nh.param<std::string>("frame_id", frame_id, "camera");
-	nh.param<std::string>("camera_info_url", cinfo_url, "file:///home/it/TYROS/tyros_camera/calib.yaml");
+	nh.param<std::string>("camera_info_url", cinfo_url, "file:///home/robot/TYROS/tyros_camera/calib.yaml");
 	cinfo.loadCameraInfo(cinfo_url);
 
 	ROS_INFO("Opening device : %s", dev.c_str());
