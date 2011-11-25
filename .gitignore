@@ -1,0 +1,7 @@
+phippi/bin/
+phippi/build/
+phippi/srv_gen/
+tyros_camera/bin/
+tyros_camera/build/
+tyros_camera/srv_gen/
+tyros_camera/gen_msg/
