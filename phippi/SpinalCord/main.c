@@ -178,6 +178,8 @@ gyro_send_data(0x55);
                     pwmtarget[0]= -100;
                     pwmtarget[0]= +100;
                 } else {
+            
+                    // FIXME: clearly bit wrong algorithm here                  
                     // X axle speed
                     if(twist[0]>0.01) {
                         pwmtarget[0]= +100;
@@ -185,9 +187,8 @@ gyro_send_data(0x55);
                     } else if(twist[0]<0.01) {
                         pwmtarget[0]= -100;
                         pwmtarget[0]= -100;
-                    }                 
-                    
-                   
+                    }
+                                       
                     // Y axle speed
                     if(twist[1]>0.01) {
                         pwmtarget[0]= +100;
@@ -195,9 +196,8 @@ gyro_send_data(0x55);
                     } else if(twist[1]<0.01) {
                         pwmtarget[0]= -100;
                         pwmtarget[0]= -100;
-                    }                 
-                    
-                    
+                    }
+            
                 }                  
                 sprintf(buf,"new twist x=%f(m/s), y=%f(m/s), yaw=%f(deg)",twist[0],twist[1],twist[5]);
                 write(buf);
