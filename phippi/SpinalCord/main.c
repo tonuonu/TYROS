@@ -33,6 +33,29 @@ volatile unsigned short ticks;
 
 #define TIMERB2COUNT	10
 #define SPI_DELAY (50)
+
+void
+gyro_send_data(unsigned char c) {
+    while (ti_u6c1 == 0)
+        NOP();
+    uDelay(SPI_DELAY);
+    p5_1 = 1;
+    uDelay(SPI_DELAY);
+    u6tb = c;
+}
+
+short unsigned
+gyro_receive(void) {
+  short unsigned r;
+  gyro_send_data(0xFF);
+  while (ri_u6c1 == 0)
+        NOP();
+  r=u6rb;
+  ri_u6c1=0;
+  return r;
+}
+
+
 void
 SPI_send_data(unsigned char c) {
     while (ti_u3c1 == 0)
@@ -63,6 +86,16 @@ SPI4_send(unsigned short c) {
 
 }
 
+void
+SPI7_send(unsigned short c) {
+  while (ti_u7c1 == 0)
+        NOP();
+  uDelay(SPI_DELAY);
+  ti_u7c1=0;
+  u7tb = c;
+
+}
+
 short unsigned
 SPI4_receive(void) {
   short unsigned r;
@@ -85,75 +118,27 @@ void write(char *c) {
 extern char command[TX_BUFF_SIZE];
 
 double twist[6]={0,0,0,0,0,0};
+
 int pwm[2]={0,0};
 
-void tmr1_init(void) {
-	/* Configure the port pin to provide pulse output	*/
-	p3_2s = 1;
-	pd3_2 = 1;
 
-	/*setting the timer value for 40kHz frequency*/
-	ta1 = (unsigned short) (((8000000/16)/40000)-1);
-	
-	/*  ta1 mode register
-	  b1:b0	- TMOD0,TMOD1 - 00 (Timer mode selected)
-   	  b2 	- MR0		  - 0 (Set to 0)
-  	  b4:b3 - MR2:MR1	  - 0 (Gate function note selected)
-   	  b5	- MR3		  - 0 (Set to 0 in timer mode)
-   	  b7:b6	- TCK1,TCK0   - f/8 clock source selected
-  	  b7	- UFORM		 - 0 (LSB first selected) */
-
-   	ta1mr = 0x80;
-
-        /*start timer */ 
-	ta1s = 1;
-
-}
-
-void tmr2_init(void) {
-	/* Configure the port pin to provide pulse output	*/
-	p3_4s = 1;
-	pd3_4 = 1;
-
-	/*setting the timer value for 40kHz frequency*/
-	ta2 = (unsigned short) (((8000000/16)/40000)-1);
-	
-	/*  ta1 mode register
-	  b1:b0	- TMOD0,TMOD1 - 00 (Timer mode selected)
-   	  b2 	- MR0		  - 0 (Set to 0)
-  	  b4:b3 - MR2:MR1	  - 0 (Gate function note selected)
-   	  b5	- MR3		  - 0 (Set to 0 in timer mode)
-   	  b7:b6	- TCK1,TCK0   - f/8 clock source selected
-  	  b7	- UFORM		 - 0 (LSB first selected) */
-
-   	ta2mr = 0x80;
-
-        /*start timer */ 
-	ta2s = 1;
-}
-
-void tmr3_init(void) {
-    // Init_TMRA0 1 mS timer
-    ta3mr = 0x80;                                          // timer mode,fc/8 = 1,0 MHz
-    ta3 = 24;                                              // 1MHz/25 - 1; 48 oli Fi = 40kHz
-    ta3ud = 0;                                             // down count
-    ta3ic = 2;                                             // level 2 interrupt
-    ta3s = 1;
-    ticks = 0;
-}
 void
 main(void) {
     int j;
     HardwareSetup();
+    pu11=1;
+//    pu12=1;
+//    pu13=1;
+        
+    
     LED1=0;
-    LED2=1;
 #if 1
     OLED_Set_Display_Mode(0x02);                           // Entire Display On
     OLED_Set_Display_On_Off(0x01);                         // Display On
     OLED_Set_Display_Mode(0x00);                           // Entire Display Off
     OLED_Show_Logo();
     OLED_Set_Display_Mode(0x02);                           // Entire Display Off
-    LED2=0;
+ //   LED2=0;
     Delay(2);
     OLED_Fade_Out();
     OLED_Fill_RAM(0x00);
@@ -163,16 +148,42 @@ main(void) {
     write("http://phippi.jes.ee/");
     putchar('>');    
     putchar(' ');
+
+                
 #endif
-//    tmr1_init();
-//    tmr2_init();
-//    tmr3_init();
     while (1) {      
         char buf[256];
+gyro_send_data(0x55);
+//gyro_receive();
         if (status.sek_flag==1) {
             status.sek_flag=0;
             LED1 ^= 1;
         }
+        
+#if 1    
+/// temp! FIXME    by removing whole if
+                ta1=(int)abs(pwm[0]*TIMERB2COUNT);
+                ta2=(int)abs(pwm[1]*TIMERB2COUNT);
+                if(pwm[0] > 0) {
+                    p2_0=1;
+                    p2_1=0;
+                } else {
+                    p2_0=0;
+                    p2_1=1;
+                }
+                if(pwm[1] > 0) {
+                    p2_2=1;
+                    p2_3=0;
+                } else {
+                    p2_2=0;
+                    p2_3=1;
+                }
+                p2_4=1;
+                p2_5=1;
+                p2_6=1;
+                p2_7=1;
+#endif
+        
         if(command[0]!=0) {
             char *tok;
             if(strncmp(command,"twist ",6)==0) {
@@ -274,20 +285,14 @@ main(void) {
         int x;
         for(x=0;x<4;x++) {
             unsigned short c; /* 16 bit value */
+	
+#if 0
             pd9_6=0;
     dinc_u4smr3 = 1;                                       // Master mode when 0
             c=SPI4_receive();
             pd9_6=1;
     dinc_u4smr3 = 0;                                       // slave mode when 1
 
-#if 1
-            sprintf( /*(char *)*/ buf, "%s%s%s%s%s SPI4 %04x ",
-                (c & (1 << 11)) ? "Arbitr " : "",
-                (c & (1 << 12)) ? "Overr " : "",
-                (c & (1 << 13)) ? "Fram " : "",
-                (c & (1 << 14)) ? "Pari " : "",
-                (c & (1 << 15)) ? "Sum " : "", c & 0xFF);
-            OLED_Show_String(1, buf, 0 /* left */ , x*8 /* top */ );
 #endif
             for(j=0;j<2;j++)            
                 uDelay(255); 

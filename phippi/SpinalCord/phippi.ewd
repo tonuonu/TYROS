@@ -29,7 +29,7 @@
         </option>
         <option>
           <name>CRunToEnable</name>
-          <state>0</state>
+          <state>1</state>
         </option>
         <option>
           <name>CRunToName</name>
@@ -45,7 +45,7 @@
         </option>
         <option>
           <name>DynDriver</name>
-          <state>R32CEMUE8A</state>
+          <state>SIMR32C</state>
         </option>
         <option>
           <name>DDFOverride</name>
@@ -53,7 +53,7 @@
         </option>
         <option>
           <name>DDFFile</name>
-          <state>$TOOLKIT_DIR$\config\debugger\R5F64112.ddf</state>
+          <state>$TOOLKIT_DIR$\config\debugger\R32C.ddf</state>
         </option>
         <option>
           <name>DebuggerUseExtraOptions</name>
@@ -244,7 +244,7 @@
         </option>
         <option>
           <name>OCDownloadVerifyAll</name>
-          <state>1</state>
+          <state>0</state>
         </option>
       </data>
     </settings>
@@ -284,7 +284,7 @@
       </plugin>
       <plugin>
         <file>$EW_DIR$\common\plugins\Profiling\Profiling.ENU.ewplugin</file>
-        <loadFlag>0</loadFlag>
+        <loadFlag>1</loadFlag>
       </plugin>
       <plugin>
         <file>$EW_DIR$\common\plugins\Stack\Stack.ENU.ewplugin</file>
@@ -323,7 +323,7 @@
         </option>
         <option>
           <name>CRunToEnable</name>
-          <state>0</state>
+          <state>1</state>
         </option>
         <option>
           <name>CRunToName</name>
@@ -339,7 +339,7 @@
         </option>
         <option>
           <name>DynDriver</name>
-          <state>R32CEMUE8A</state>
+          <state>SIMR32C</state>
         </option>
         <option>
           <name>DDFOverride</name>
@@ -347,7 +347,7 @@
         </option>
         <option>
           <name>DDFFile</name>
-          <state>$TOOLKIT_DIR$\config\debugger\R5F64111.ddf</state>
+          <state></state>
         </option>
         <option>
           <name>DebuggerUseExtraOptions</name>
@@ -538,7 +538,7 @@
         </option>
         <option>
           <name>OCDownloadVerifyAll</name>
-          <state>1</state>
+          <state>0</state>
         </option>
       </data>
     </settings>
@@ -578,7 +578,7 @@
       </plugin>
       <plugin>
         <file>$EW_DIR$\common\plugins\Profiling\Profiling.ENU.ewplugin</file>
-        <loadFlag>0</loadFlag>
+        <loadFlag>1</loadFlag>
       </plugin>
       <plugin>
         <file>$EW_DIR$\common\plugins\Stack\Stack.ENU.ewplugin</file>

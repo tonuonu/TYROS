@@ -5,5 +5,8 @@ tyros_camera/bin/
 tyros_camera/build/
 tyros_camera/srv_gen/
 tyros_camera/msg_gen/
+phippi/SpinalCord/Release/*
+phippi/SpinalCord/Debug/*
+phippi/SpinalCord/settings/*
 *.pyc
 

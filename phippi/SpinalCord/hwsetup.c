@@ -30,6 +30,7 @@
 #include "uart.h"
 
 #define TIMERB2COUNT	1200
+#define TIMER4COUNT	200
 
 static void ConfigureOperatingFrequency(char mode);
 static void ConfigurePortPins(void);
@@ -143,7 +144,7 @@ PWM_Init(void)
      * MR2 Trigger selected by TRGSR register b5 MR3 Reserved b6:b7
      * TCK0:TCK1 Count Source f1 
      */
-    ta4mr = 0x12;
+    ta4mr = 0x13; // Toon! Mootori reziim, t2itetegurit muudetakse
 
     /* 
      * Timer A1 Mode Register - 00010001b b1:b0 TMOD0:TMOD1 One shot
@@ -188,9 +189,9 @@ PWM_Init(void)
     /* 
      * Timer A4 register 
      */
-    ta1 = 1;
-    ta2 = 1;
-    ta4 = 1;
+    ta1 = 0;
+    ta2 = 0;
+    ta4 = 0;
 
     /* 
      * Timer A1 register 
@@ -285,11 +286,12 @@ HardwareSetup(void)
     
     ConfigurePortPins();
 
-    SPI3_Init(); // OLED!
-    SPI4_Init(); // Melexis sensor
-    uart5_init();
-    uart7_init();
-    uart8_init();
+    SPI3_Init(); // OLED
+    SPI4_Init(); // Melexis sensor left
+    SPI6_Init(); // gyro
+    SPI7_Init(); // Melexis sensor right
+    uart5_init(); // Panda
+//    uart8_init(); // ?
 #if 1
     OLED_On();
     OLED_Init();
@@ -425,6 +427,10 @@ ConfigurePortPins(void)
     p10 = 0;
     p10_1 = 0;
     p10_0s = p10_1s = p10_2s = p10_3s = p10_4s = p10_5s = p10_6s = p10_7s = 0x80;
+// FIXME temportary hack
+//    p1_2=1; // charge on
+//    p3_5=1; // panda on
+
 }
 
 // 1000 Hz interrupt
@@ -437,9 +443,29 @@ ms_int(void)
 
 #pragma vector=TIMER_B5
 __interrupt void
-s_int(void)
-{
-    if(++ticks % 48 == 0)
+s_int(void) {
+    if(++ticks % 48 == 0) {
       status.sek_flag=1;
+      ta4=(int)abs(64 -  p1_3*2 + p1_4*2 + p1_5*4 + p1_6*8 + p1_3*16 *TIMER4COUNT);
+    }
+//    tabsr = 0x0;
+
+//    ta4=(int)abs(15 -  p1_3*32 + p1_4*2 + p1_5*4 + p1_6*8 + p1_3*16   *TIMER4COUNT);
+//   tb2=(int)abs(15 -  p1_3*32 + p1_4*2 + p1_5*4 + p1_6*8 + p1_3*16   *TIMER4COUNT);
+   // tabsr = 0x96;
+
+#if 0
+      p1_3 ? ""    :"up ",
+      p1_4 ? ""  :"down ",
+      p1_5 ? ""  :"left ",
+      p1_6 ? "" :"right ",
+      p1_7 ? "":"center" );
+#endif   
+   
+     if(ticks % 48 == 1  ) {
+         ta4=0;
+    }
+    
+    
 }
 

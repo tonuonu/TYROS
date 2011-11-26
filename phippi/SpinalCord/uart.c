@@ -97,7 +97,7 @@ void uart8_init(void) {
         pu23 = 1;  // RX8 pullup
 	u8c1 = 0x05; 		
 }
-
+#if 0
 void uart7_init(void) {
         u7brg = (f1_CLK_SPEED / 16 / 9600) - 1;
 	u7mr = 0x05;
@@ -111,7 +111,7 @@ void uart7_init(void) {
         pu13 = 1;  // RX7 pullup
 	u7c1 = 0x05;
 }
-
+#endif
 void putchar5hexnr (unsigned char d) {
     if (d> 9) 
         d+=7;
@@ -175,8 +175,6 @@ __interrupt void _uart4_receive(void)
 {
   
   LED1=0; 
-  LED2=1; 
-
   if (rx5_ptr >= RX_BUFF_SIZE) 
         rx5_ptr = RX_BUFF_SIZE-1;
 
