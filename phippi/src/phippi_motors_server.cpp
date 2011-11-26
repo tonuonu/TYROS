@@ -35,9 +35,10 @@
 #include <errno.h>   /* Error number definitions */
 #include <termios.h> /* POSIX terminal control definitions */
 
+int fd; 
+
 int
 open_port(void){
-	int fd; 
 
 	fd = open("/dev/ttyO2", O_RDWR | O_NOCTTY | O_NDELAY);
 	if (fd == -1) {
@@ -48,8 +49,6 @@ open_port(void){
 	}
 	return (fd);
 }
-
-
 
 bool add(phippi::TwoInts::Request  &req,
          phippi::TwoInts::Response &res ) {
@@ -77,7 +76,12 @@ bool add(phippi::TwoInts::Request  &req,
 
 void chatterCallback(const geometry_msgs::Twist::ConstPtr& msg)
 {
-  ROS_INFO("I heard: [%f]", msg->angular.x);
+  ROS_INFO("we got: angular [%.1f %.1f %.1f] linear [%.1f %.1f %.1f]", msg->angular.x,msg->angular.y,msg->angular.z,  msg->linear.x,msg->linear.y,msg->linear.z);
+  if(msg->angular.z > 0.1) {
+	ROS_INFO("pwm -100 100");
+#define	ROTATE "pwm -100 100\n"
+	write(fd,ROTATE,strlen(ROTATE));
+  }
 }
 
 
@@ -110,6 +114,7 @@ int main(int argc, char **argv)
  
     current_time = ros::Time::now();
 
+  ros::spinOnce();
     //compute odometry in a typical way given the velocities of the robot
     double dt = (current_time - last_time).toSec();
     double delta_x = (vx * cos(th) - vy * sin(th)) * dt;
