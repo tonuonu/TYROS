@@ -31,7 +31,7 @@ extern int alarm;
 
 volatile unsigned short ticks;
 
-#define TIMERB2COUNT	10
+//#define TIMERB2COUNT	10
 #define SPI_DELAY (50)
 
 void
@@ -206,7 +206,6 @@ main(void) {
                     pwmtarget[0]= -100;
                     pwmtarget[0]= +100;
                 } else {
-            
                     // FIXME: clearly bit wrong algorithm here                  
                     // X axle speed
                     if(twist[0]>0.01) {
