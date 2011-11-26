@@ -159,31 +159,7 @@ gyro_send_data(0x55);
             status.sek_flag=0;
             LED1 ^= 1;
         }
-        
-#if 1    
-/// temp! FIXME    by removing whole if
-                ta1=(int)abs(pwm[0]*TIMERB2COUNT);
-                ta2=(int)abs(pwm[1]*TIMERB2COUNT);
-                if(pwm[0] > 0) {
-                    p2_0=1;
-                    p2_1=0;
-                } else {
-                    p2_0=0;
-                    p2_1=1;
-                }
-                if(pwm[1] > 0) {
-                    p2_2=1;
-                    p2_3=0;
-                } else {
-                    p2_2=0;
-                    p2_3=1;
-                }
-                p2_4=1;
-                p2_5=1;
-                p2_6=1;
-                p2_7=1;
-#endif
-        
+                
         if(command[0]!=0) {
             char *tok;
             if(strncmp(command,"twist ",6)==0) {
@@ -193,6 +169,24 @@ gyro_send_data(0x55);
                         twist[tmp-1]=strtod(tok,NULL); 
                     }
                 }
+                
+                // Yaw
+                if(twist[5]>0.01) {
+                    pwmtarget[0]= 100;
+                    pwmtarget[0]= -100;
+                } else if(twist[5]<0.01) {
+                    pwmtarget[0]= -100;
+                    pwmtarget[0]= +100;
+                } else {
+                    // X axle speed
+                    if(twist[0]<0.01) {
+                        pwmtarget[0]= +100;
+                        pwmtarget[0]= +100;
+                    } else if(twist[0]<0.01) {
+                        pwmtarget[0]= -100;
+                        pwmtarget[0]= -100;
+                    }                 
+                }                  
                 sprintf(buf,"new twist x=%f(m/s), y=%f(m/s), yaw=%f(deg)",twist[0],twist[1],twist[5]);
                 write(buf);
             } else if(strncmp(command,"pwm ",4)==0) {
