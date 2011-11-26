@@ -35,14 +35,14 @@
 #include <errno.h>   /* Error number definitions */
 #include <termios.h> /* POSIX terminal control definitions */
 
-int fd; 
+int fd=-1; 
 
 int
 open_port(void){
 
 	fd = open("/dev/ttyO2", O_RDWR | O_NOCTTY | O_NDELAY);
 	if (fd == -1) {
-	    ROS_INFO("open_port: Unable to open /dev/ttyO2");
+	    ROS_ERROR("open_port: Unable to open /dev/ttyO2");
 	} else {
 	    ROS_INFO("open_port: opened /dev/ttyO2");
 	    fcntl(fd, F_SETFL, 0);
@@ -77,12 +77,20 @@ bool add(phippi::TwoInts::Request  &req,
 void chatterCallback(const geometry_msgs::Twist::ConstPtr& msg)
 {
   ROS_INFO("we got: angular [%.1f %.1f %.1f] linear [%.1f %.1f %.1f]", msg->angular.x,msg->angular.y,msg->angular.z,  msg->linear.x,msg->linear.y,msg->linear.z);
+  if(0 > fd) {
+    ROS_WARN("/dev/ttyO2 is not yet open. Trying to fix this...");
+    open_port();
+  } 
+
+  if(0 > fd)  {
+    ROS_ERROR("/dev/ttyO2 is still not open?! Now I give up!");
+ } else
   if(msg->angular.z > 0.1) {
 	char buf[256];
         int len,r;
 	snprintf(buf,256,"Twist %.1f %.1f %.1f %.1f %.1f %.1f\n",msg->linear.x,msg->linear.y,msg->linear.z,msg->angular.x,msg->angular.y,msg->angular.z);
         len=strlen(buf);
-	if(r=write(fd,buf,len)==len) {
+	if((r=write(fd,buf,len))==len) {
        	    ROS_INFO("successfully wrote: '%s'",buf);
 	} else {
        	    ROS_INFO("failed to write: '%s' (wrote %d of %d)",buf,r,len);
@@ -96,9 +104,7 @@ int main(int argc, char **argv)
 {
   ros::init(argc, argv, "phippi_motors");
   ros::NodeHandle n;
-
-  ros::Subscriber sub = n.subscribe("/cmd_vel", 10, chatterCallback);
-
+  ros::Subscriber sub = n.subscribe("/cmd_vel", 1, chatterCallback);
   ros::ServiceServer service = n.advertiseService("phippi_motors", add);
   ros::Publisher odom_pub = n.advertise<nav_msgs::Odometry>("/odom", 50);
   tf::TransformBroadcaster odom_broadcaster;
