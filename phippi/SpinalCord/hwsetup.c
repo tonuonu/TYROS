@@ -29,7 +29,7 @@
 #include "main.h"
 #include "uart.h"
 
-#define TIMERB2COUNT	10
+#define TIMERB2COUNT	100
 #define TIMER4COUNT	100
 
 static void ConfigureOperatingFrequency(char mode);
