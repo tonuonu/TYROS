@@ -162,9 +162,31 @@ main(void) {
             if(strncmp(command,"gyro",4)==0) {
                 short unsigned r;
 
-                gyro_send_data(0x55);
+                gyro_send_data(
+			(1 << 0) | // read mode on
+			(1 << 1) | // 
+			0x2c ;
+   		);
                 r=gyro_receive();
-                sprintf(buf,"gyro sent %x",r);
+                sprintf(buf,"gyro received1 %x",r);
+                write(buf);              
+
+                gyro_send_data(
+			(1 << 0) | // read mode on
+			(1 << 1) | // 
+			0x28 ;
+   		);
+                r=gyro_receive();
+                sprintf(buf,"gyro received2 %x",r);
+                write(buf);              
+
+                gyro_send_data(
+			(1 << 0) | // read mode on
+			(1 << 1) | // 
+			0x2a ;
+   		);
+                r=gyro_receive();
+                sprintf(buf,"gyro received3 %x",r);
                 write(buf);              
 
 
