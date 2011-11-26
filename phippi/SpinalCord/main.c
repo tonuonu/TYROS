@@ -118,7 +118,6 @@ void write(char *c) {
 extern char command[TX_BUFF_SIZE];
 
 double twist[6]={0,0,0,0,0,0};
-
 int pwm[2]={0,0};
 int pwmtarget[2]={0,0};
 

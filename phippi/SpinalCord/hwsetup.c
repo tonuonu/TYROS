@@ -472,8 +472,8 @@ s_int(void) {
     }
 
     // Update MCU PWM timers for new values
-    ta1=pwm[0];
-    ta2=pwm[1];
+    ta1=(int)abs(pwm[0]*TIMERB2COUNT);
+    ta2=(int)abs(pwm[1]*TIMERB2COUNT);
 
     // Make sure proper bits set on motor drivers to go forward or backward
     if(pwm[0] > 0) {
