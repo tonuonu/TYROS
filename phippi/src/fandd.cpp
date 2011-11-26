@@ -75,7 +75,10 @@ void chatterCallback(const phippi::Velocity::ConstPtr& msg)
     } else if(msg->linear < 0) {
 	snprintf(buf,256,"pwm -50 -50\n");
         len=strlen(buf);
-    } 
+    } else {
+	snprintf(buf,256,"pwm 0 0\n");
+        len=strlen(buf);
+    }
 
     if(len>0) {
         if ((r=write(fd,buf,len))==len) {
