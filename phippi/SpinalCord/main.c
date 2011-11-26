@@ -138,7 +138,6 @@ main(void) {
     OLED_Set_Display_Mode(0x00);                           // Entire Display Off
     OLED_Show_Logo();
     OLED_Set_Display_Mode(0x02);                           // Entire Display Off
- //   LED2=0;
     Delay(2);
     OLED_Fade_Out();
     OLED_Fill_RAM(0x00);
@@ -153,8 +152,6 @@ main(void) {
 #endif
     while (1) {      
         char buf[256];
-gyro_send_data(0x55);
-//gyro_receive();
         if (status.sek_flag==1) {
             status.sek_flag=0;
             LED1 ^= 1;
@@ -162,7 +159,16 @@ gyro_send_data(0x55);
                 
         if(command[0]!=0) {
             char *tok;
-            if(strncmp(command,"twist ",6)==0) {
+            if(strncmp(command,"joy",3)==0) {
+                short unsigned r;
+
+                gyro_send_data(0x55);
+                r=gyro_receive();
+                sprintf(buf,"gyro sent %x",r);
+                write(buf);              
+
+
+            } else if(strncmp(command,"twist ",6)==0) {
                 int tmp;
                 for(tmp=0,tok = strtok(command," "); tok && tmp<=6 ; tok=strtok(0," "),tmp++) {
                     if(tmp>0) {
@@ -269,11 +275,10 @@ gyro_send_data(0x55);
 
         int x;
         for(x=0;x<4;x++) {
+#if 0
             unsigned short c; /* 16 bit value */
-	
             pd9_6=0;
             c=SPI4_receive();
-#if 0
             sprintf(buf,"SPI4 %x",c);
             write(buf);
 #endif
