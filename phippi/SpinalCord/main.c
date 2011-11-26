@@ -273,11 +273,10 @@ gyro_send_data(0x55);
 	
             pd9_6=0;
             c=SPI4_receive();
-            
-#if 0          
+#if 0
             sprintf(buf,"SPI4 %x",c);
-            write(buf);              
-#endif            
+            write(buf);
+#endif
             pd9_6=1;
             for(j=0;j<2;j++)            
                 uDelay(255); 
