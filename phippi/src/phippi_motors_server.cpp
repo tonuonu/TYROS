@@ -78,9 +78,15 @@ void chatterCallback(const geometry_msgs::Twist::ConstPtr& msg)
 {
   ROS_INFO("we got: angular [%.1f %.1f %.1f] linear [%.1f %.1f %.1f]", msg->angular.x,msg->angular.y,msg->angular.z,  msg->linear.x,msg->linear.y,msg->linear.z);
   if(msg->angular.z > 0.1) {
-	ROS_INFO("pwm -100 100");
-#define	ROTATE "pwm -100 100\n"
-	write(fd,ROTATE,strlen(ROTATE));
+	char buf[256];
+        int len,r;
+	snprintf(buf,256,"Twist %.1f %.1f %.1f %.1f %.1f %.1f\n",msg->linear.x,msg->linear.y,msg->linear.z,msg->angular.x,msg->angular.y,msg->angular.z);
+        len=strlen(buf);
+	if(r=write(fd,buf,len)==len) {
+       	    ROS_INFO("successfully wrote: '%s'",buf);
+	} else {
+       	    ROS_INFO("failed to write: '%s' (wrote %d of %d)",buf,r,len);
+        }
   }
 }
 
