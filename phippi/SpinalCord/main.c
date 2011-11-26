@@ -159,7 +159,7 @@ main(void) {
                 
         if(command[0]!=0) {
             char *tok;
-            if(strncmp(command,"gyro",4)==0) {
+            if(strncmp(command,"gyro ",5)==0) {
                 short unsigned r;
 
                 gyro_send_data(
