@@ -165,7 +165,7 @@ main(void) {
                 gyro_send_data(
 			(1 << 0) | // read mode on
 			(1 << 1) | // 
-			0x2c ;
+			0x2c 
    		);
                 r=gyro_receive();
                 sprintf(buf,"gyro received1 %x",r);
@@ -174,7 +174,7 @@ main(void) {
                 gyro_send_data(
 			(1 << 0) | // read mode on
 			(1 << 1) | // 
-			0x28 ;
+			0x28 
    		);
                 r=gyro_receive();
                 sprintf(buf,"gyro received2 %x",r);
@@ -183,7 +183,7 @@ main(void) {
                 gyro_send_data(
 			(1 << 0) | // read mode on
 			(1 << 1) | // 
-			0x2a ;
+			0x2a 
    		);
                 r=gyro_receive();
                 sprintf(buf,"gyro received3 %x",r);
