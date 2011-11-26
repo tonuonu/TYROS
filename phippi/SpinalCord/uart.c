@@ -175,12 +175,6 @@ __interrupt void _uart4_receive(void)
 {
   
   LED1=0; 
-<<<<<<< HEAD
-//  LED2=1; 
-=======
-  LED2=1; 
->>>>>>> 0af8a399d5edef392ad9bddf7f0a7d3cdd74b071
-
   if (rx5_ptr >= RX_BUFF_SIZE) 
         rx5_ptr = RX_BUFF_SIZE-1;
 

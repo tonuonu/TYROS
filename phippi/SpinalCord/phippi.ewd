@@ -347,11 +347,7 @@
         </option>
         <option>
           <name>DDFFile</name>
-<<<<<<< HEAD
           <state>$TOOLKIT_DIR$\config\debugger\R5F64112.ddf</state>
-=======
-          <state>$TOOLKIT_DIR$\config\debugger\R5F64111.ddf</state>
->>>>>>> 0af8a399d5edef392ad9bddf7f0a7d3cdd74b071
         </option>
         <option>
           <name>DebuggerUseExtraOptions</name>
