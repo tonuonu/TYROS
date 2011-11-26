@@ -50,24 +50,24 @@
         <option>
           <name>GenRuntimeLibSelect</name>
           <version>0</version>
-          <state>1</state>
+          <state>2</state>
         </option>
         <option>
           <name>GenRuntimeLibSelectSlave</name>
           <version>0</version>
-          <state>1</state>
+          <state>2</state>
         </option>
         <option>
           <name>GenRTDescription</name>
-          <state>Use the normal configuration of the C/EC++ runtime library. No locale interface, C locale, no file descriptor support, no multibytes in printf and scanf, and no hex floats in strtod.</state>
+          <state>Use the full configuration of the C/EC++ runtime library. Full locale interface, C locale, file descriptor support, multibytes in printf and scanf, and hex floats in strtod.</state>
         </option>
         <option>
           <name>GenRTConfigPath</name>
-          <state>$TOOLKIT_DIR$\LIB\dlr32cfsfn.h</state>
+          <state>$TOOLKIT_DIR$\LIB\dlr32cfsff.h</state>
         </option>
         <option>
           <name>GenRTLibraryPath</name>
-          <state>$TOOLKIT_DIR$\LIB\dlr32cfsfn.r53</state>
+          <state>$TOOLKIT_DIR$\LIB\dlr32cfsff.r53</state>
         </option>
         <option>
           <name>GenLibInFormatter</name>
@@ -105,7 +105,7 @@
         </option>
         <option>
           <name>HeapSize</name>
-          <state>0x400</state>
+          <state>0x4000</state>
         </option>
         <option>
           <name>GenFloatImplementation</name>
@@ -823,7 +823,7 @@
         <debug>0</debug>
         <option>
           <name>OGChipSelectMenu</name>
-          <state></state>
+          <state>R5F64112	R5F64112</state>
         </option>
         <option>
           <name>GenDoubleSize</name>
@@ -865,15 +865,15 @@
         </option>
         <option>
           <name>GenRTDescription</name>
-          <state></state>
+          <state>Use the normal configuration of the C/EC++ runtime library. No locale interface, C locale, no file descriptor support, no multibytes in printf and scanf, and no hex floats in strtod.</state>
         </option>
         <option>
           <name>GenRTConfigPath</name>
-          <state></state>
+          <state>$TOOLKIT_DIR$\LIB\dlr32cfsfn.h</state>
         </option>
         <option>
           <name>GenRTLibraryPath</name>
-          <state></state>
+          <state>$TOOLKIT_DIR$\LIB\dlr32cfsfn.r53</state>
         </option>
         <option>
           <name>GenLibInFormatter</name>
@@ -882,7 +882,7 @@
         </option>
         <option>
           <name>GenLibInFormatterDescription</name>
-          <state></state>
+          <state>Full formatting.</state>
         </option>
         <option>
           <name>GenLibOutFormatter</name>
@@ -891,7 +891,7 @@
         </option>
         <option>
           <name>GenLibOutFormatterDescription</name>
-          <state></state>
+          <state>Full formatting.</state>
         </option>
         <option>
           <name>GeneralEnableMisra</name>
@@ -903,19 +903,19 @@
         </option>
         <option>
           <name>StackSize</name>
-          <state>###Uninitialized###</state>
+          <state>0x1000</state>
         </option>
         <option>
           <name>IStackSize</name>
-          <state>###Uninitialized###</state>
+          <state>0xE0</state>
         </option>
         <option>
           <name>HeapSize</name>
-          <state>###Uninitialized###</state>
+          <state>0x4000</state>
         </option>
         <option>
           <name>GenFloatImplementation</name>
-          <state>3</state>
+          <state>1</state>
         </option>
         <option>
           <name>GeneralMisraVer</name>
@@ -978,7 +978,7 @@
         </option>
         <option>
           <name>IccOutputFile</name>
-          <state></state>
+          <state>$FILE_BNAME$.r53</state>
         </option>
         <option>
           <name>IccProcessor</name>
@@ -1082,7 +1082,7 @@
         </option>
         <option>
           <name>CCStdIncludePath</name>
-          <state>###Uninitialized###</state>
+          <state>$TOOLKIT_DIR$\INC\</state>
         </option>
         <option>
           <name>CompilerMisraOverride</name>
@@ -1111,7 +1111,7 @@
         </option>
         <option>
           <name>IccOptLevelSlave</name>
-          <state>1</state>
+          <state>3</state>
         </option>
         <option>
           <name>IccOptAllowList</name>
@@ -1335,7 +1335,7 @@
         </option>
         <option>
           <name>OutputFile</name>
-          <state></state>
+          <state>phippi.a53</state>
         </option>
         <option>
           <name>OutputFormat</name>
@@ -1349,7 +1349,7 @@
         </option>
         <option>
           <name>SecondaryOutputFile</name>
-          <state></state>
+          <state>(None for the selected format)</state>
         </option>
         <option>
           <name>XDefines</name>
@@ -1389,7 +1389,7 @@
         </option>
         <option>
           <name>XIncludes</name>
-          <state>###Uninitialized###</state>
+          <state>$TOOLKIT_DIR$\LIB\</state>
         </option>
         <option>
           <name>ModuleStatus</name>
@@ -1401,7 +1401,7 @@
         </option>
         <option>
           <name>XclFile</name>
-          <state>lnk0t.xcl</state>
+          <state>$TOOLKIT_DIR$\CONFIG\lnkR5F64112.xcl</state>
         </option>
         <option>
           <name>XclFileSlave</name>
@@ -1477,7 +1477,7 @@
         </option>
         <option>
           <name>xcProgramEntryLabel</name>
-          <state></state>
+          <state>__program_start</state>
         </option>
         <option>
           <name>DebugInformation</name>
@@ -1505,7 +1505,7 @@
         </option>
         <option>
           <name>ExtraOutputFile</name>
-          <state></state>
+          <state>phippi.a53</state>
         </option>
         <option>
           <name>ExtraOutputFormat</name>

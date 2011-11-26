@@ -22,6 +22,8 @@
 
 #include "ior32c111.h"
 #include <stdio.h>
+#include <string.h>
+#include <stdlib.h>
 #include "main.h"
 #include "uart.h"
 #include "hwsetup.h"
@@ -29,7 +31,32 @@ extern int alarm;
 
 volatile unsigned short ticks;
 
+#define TIMERB2COUNT	10
+#define TIMER4COUNT	600
 #define SPI_DELAY (50)
+
+void
+gyro_send_data(unsigned char c) {
+    while (ti_u6c1 == 0)
+        NOP();
+    uDelay(SPI_DELAY);
+    p5_1 = 1;
+    uDelay(SPI_DELAY);
+    u6tb = c;
+}
+
+short unsigned
+gyro_receive(void) {
+  short unsigned r;
+  gyro_send_data(0xFF);
+  while (ri_u6c1 == 0)
+        NOP();
+  r=u6rb;
+  ri_u6c1=0;
+  return r;
+}
+
+
 void
 SPI_send_data(unsigned char c) {
     while (ti_u3c1 == 0)
@@ -60,6 +87,16 @@ SPI4_send(unsigned short c) {
 
 }
 
+void
+SPI7_send(unsigned short c) {
+  while (ti_u7c1 == 0)
+        NOP();
+  uDelay(SPI_DELAY);
+  ti_u7c1=0;
+  u7tb = c;
+
+}
+
 short unsigned
 SPI4_receive(void) {
   short unsigned r;
@@ -71,60 +108,199 @@ SPI4_receive(void) {
   return r;
 }
 
+void write(char *c) {
+   char *ptr=c;
+   while(*ptr)
+       putchar((int)*ptr++);
+   putchar(0x0a);
+   putchar(0x0d);
+}
+
+extern char command[TX_BUFF_SIZE];
+
+double twist[6]={0,0,0,0,0,0};
+int pwm[2]={30,30};
+
 void
 main(void) {
+    int j;
     HardwareSetup();
+    pu11=1;
+//    pu12=1;
+//    pu13=1;
+        
+    
     LED1=0;
-    LED2=1;
+//    LED2=1;
+#if 1
     OLED_Set_Display_Mode(0x02);                           // Entire Display On
     OLED_Set_Display_On_Off(0x01);                         // Display On
     OLED_Set_Display_Mode(0x00);                           // Entire Display Off
     OLED_Show_Logo();
     OLED_Set_Display_Mode(0x02);                           // Entire Display Off
-    LED2=0;
+ //   LED2=0;
     Delay(2);
     OLED_Fade_Out();
     OLED_Fill_RAM(0x00);
     OLED_Fade_In();
-    while (1) {      
-//      if (status.sek_flag==1) {
-            char buf[256];
-            status.sek_flag=0;
-            uart8_send(0x55);
-            LED1 ^= 1;
-            p9_4=0;
-            uDelay(255); 
-            uDelay(255); 
-//            uDelay(127); 
-            
-            SPI4_send(0xAA);
-            uDelay(255); 
-            uDelay(255); 
-//            uDelay(127); 
-      
-            SPI4_send(0xFF);
-            uDelay(255); 
-            uDelay(255); 
-//            uDelay(127);
-            int i;
-            for(i=0;i<4;i++) {
-                unsigned short c; /* 16 bit value */
-                c=SPI4_receive();
-                sprintf( /*(char *)*/ buf, "%s%s%s%s%s SPI4 %04x ",
-                    (c & (1 << 11)) ? "Arbitr " : "",
-                    (c & (1 << 12)) ? "Overr " : "",
-                    (c & (1 << 13)) ? "Fram " : "",
-                    (c & (1 << 14)) ? "Pari " : "",
-                    (c & (1 << 15)) ? "Sum " : "", c & 0xFF);
-                OLED_Show_String(1, buf, 0 /* left */ , i*8 /* top */ );
-                uDelay(255); 
-            }
-            p9_4=1;
-            uDelay(255);
-            uDelay(255);
-            uDelay(255);
-            uDelay(255);
+    write("");
+    write("Robot!");
+    write("http://phippi.jes.ee/");
+    putchar('>');    
+    putchar(' ');
 
-            //        }
+                
+#endif
+    while (1) {      
+        char buf[256];
+gyro_send_data(0x55);
+//gyro_receive();
+        if (status.sek_flag==1) {
+            status.sek_flag=0;
+            LED1 ^= 1;
+        }
+        
+#if 1    
+/// temp! FIXME    by removing whole if
+                ta1=(int)abs(pwm[0]*TIMERB2COUNT);
+                ta2=(int)abs(pwm[1]*TIMERB2COUNT);
+                if(pwm[0] > 0) {
+                    p2_0=1;
+                    p2_1=0;
+                } else {
+                    p2_0=0;
+                    p2_1=1;
+                }
+                if(pwm[1] > 0) {
+                    p2_2=1;
+                    p2_3=0;
+                } else {
+                    p2_2=0;
+                    p2_3=1;
+                }
+                p2_4=1;
+                p2_5=1;
+                p2_6=1;
+                p2_7=1;
+#endif
+        
+        if(command[0]!=0) {
+            char *tok;
+            if(strncmp(command,"twist ",6)==0) {
+                int tmp;
+                for(tmp=0,tok = strtok(command," "); tok && tmp<=6 ; tok=strtok(0," "),tmp++) {
+                    if(tmp>0) {
+                        twist[tmp-1]=strtod(tok,NULL); 
+                    }
+                }
+                sprintf(buf,"new twist x=%f(m/s), y=%f(m/s), yaw=%f(deg)",twist[0],twist[1],twist[5]);
+                write(buf);
+            } else if(strncmp(command,"pwm ",4)==0) {
+                int tmp;
+                for(tmp=0,tok = strtok(command," "); tok && tmp<=2 ; tok=strtok(0," "),tmp++) {
+                    if(tmp >= 1) {
+                        pwm[tmp-1]=(int)strtod(tok,NULL); 
+                    }
+                }
+                if(pwm[0]> 100) pwm[0]= 100;
+                if(pwm[1]> 100) pwm[1]= 100;
+                if(pwm[0]<-100) pwm[0]=-100;
+                if(pwm[1]<-100) pwm[1]=-100;
+                sprintf(buf,"manual pwm left=%d%%, right=%d%%",pwm[0],pwm[1]);
+                ta1=(int)abs(pwm[0]*TIMERB2COUNT);
+                ta2=(int)abs(pwm[1]*TIMERB2COUNT);
+                if(pwm[0] > 0) {
+                    p2_0=1;
+                    p2_1=0;
+                } else {
+                    p2_0=0;
+                    p2_1=1;
+                }
+                if(pwm[1] > 0) {
+                    p2_2=1;
+                    p2_3=0;
+                } else {
+                    p2_2=0;
+                    p2_3=1;
+                }
+                p2_4=1;
+                p2_5=1;
+                p2_6=1;
+                p2_7=1;
+               
+                write(buf);              
+            } else if(strncmp(command,"panda ",6)==0) {
+                int tmp;
+                for(tmp=0,tok = strtok(command," "); tok && tmp<=2 ; tok=strtok(0," "),tmp++) {
+                    if(tmp == 1) {
+                        p3_5=(int)strtod(tok,NULL); 
+                    }
+                }
+                sprintf(buf,"panda %s",p3_5 ? "on":"off");
+                write(buf);              
+            } else if(strncmp(command,"charge ",7)==0) {
+                int tmp;
+                for(tmp=0,tok = strtok(command," "); tok && tmp<=2 ; tok=strtok(0," "),tmp++) {
+                    if(tmp == 1) {
+                        p1_2=(int)strtod(tok,NULL); 
+                    }
+                }
+                sprintf(buf,"charge %s",p1_2 ? "on":"off");
+                write(buf);              
+            } else if(strncmp(command,"joy",3)==0) {
+                sprintf(buf,"joy %s%s%s%s%s",
+                        p1_3 ? ""    :"up ",
+                        p1_4 ? ""  :"down ",
+                        p1_5 ? ""  :"left ",
+                        p1_6 ? "" :"right ",
+                        p1_7 ? "":"center" );
+                write(buf);                            
+            } else       
+              write("Unknown command:'");
+            putchar('>');    
+            putchar(' ');
+            command[0]=0;
+        }        
+        // 300uS needed. On 48Mhz each cycle is ~21nS, so
+        // 300 000nS/21=~1200
+        for(j=0;j<7;j++)
+            uDelay(255); 
+
+        p9_4=0;
+        // 300uS needed. On 48Mhz each cycle is ~21nS, so
+        // 300 000nS/21=~1200
+        for(j=0;j<2;j++)
+            uDelay(255); 
+
+        SPI4_send(0xAA);
+        SPI7_send(0xAA);
+        // 12uS needed. On 48Mhz each cycle is ~21nS, so
+        // 2300nS/12=~220
+        for(j=0;j<2;j++)            
+            uDelay(255); 
+      
+        SPI4_send(0xFF);
+        SPI7_send(0xFF);
+        for(j=0;j<2;j++)
+            uDelay(255); 
+
+        int x;
+        for(x=0;x<4;x++) {
+            unsigned short c; /* 16 bit value */
+
+#if 0
+            sprintf( /*(char *)*/ buf, "%s%s%s%s%s SPI4 %04x ",
+                (c & (1 << 11)) ? "Arbitr " : "",
+                (c & (1 << 12)) ? "Overr " : "",
+                (c & (1 << 13)) ? "Fram " : "",
+                (c & (1 << 14)) ? "Pari " : "",
+                (c & (1 << 15)) ? "Sum " : "", c & 0xFF);
+            OLED_Show_String(1, buf, 0 /* left */ , x*8 /* top */ );
+#endif
+            for(j=0;j<2;j++)            
+                uDelay(255); 
+        }
+              
+        p9_4=1;
     }
 }
