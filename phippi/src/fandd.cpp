@@ -39,7 +39,6 @@ int fd=-1;
 
 int
 open_port(void){
-
 	fd = open("/dev/ttyO2", O_RDWR | O_NOCTTY | O_NDELAY);
 	if (fd == -1) {
 	    ROS_ERROR("open_port: Unable to open /dev/ttyO2");
@@ -54,26 +53,36 @@ open_port(void){
 
 void chatterCallback(const phippi::Velocity::ConstPtr& msg)
 {
-  ROS_INFO("we got: [%.1f %.1f]", msg->angular,msg->linear);
-  if(0 > fd) {
-    ROS_WARN("/dev/ttyO2 is not yet open. Trying to fix this...");
-    open_port();
-  } 
+    char buf[256];
+    int len,r;
+    ROS_INFO("we got: [%.1f %.1f]", msg->angular,msg->linear);
+    if(0 > fd) {
+        ROS_WARN("/dev/ttyO2 is not yet open. Trying to fix this...");
+        open_port();
+    } 
 
-  if(0 > fd)  {
-    ROS_ERROR("/dev/ttyO2 is still not open?! Now I give up!");
- } else
-  if(msg->angular > 0.1) {
-	char buf[256];
-        int len,r;
-	snprintf(buf,256,"pwm %.1f %.1f\n",msg->linear,msg->angular);
+    if(0 > fd)  {
+        ROS_ERROR("/dev/ttyO2 is still not open?! Now I give up!");
+    } else if(msg->angular > 0) {
+	snprintf(buf,256,"pwm -50 50\n");
         len=strlen(buf);
-	if((r=write(fd,buf,len))==len) {
+    } else if(msg->angular < 0) {
+	snprintf(buf,256,"pwm 50 -50\n");
+        len=strlen(buf);
+    } else if(msg->linear > 0) {
+	snprintf(buf,256,"pwm 50 50\n");
+        len=strlen(buf);
+    } else if(msg->linear < 0) {
+	snprintf(buf,256,"pwm -50 -50\n");
+        len=strlen(buf);
+    } 
+
+
+    if((r=write(fd,buf,len))==len) {
        	    ROS_INFO("successfully wrote: '%s'",buf);
-	} else {
+    } else {
        	    ROS_INFO("failed to write: '%s' (wrote %d of %d)",buf,r,len);
-        }
-  }
+    }
 }
 
 
