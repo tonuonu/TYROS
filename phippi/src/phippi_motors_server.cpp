@@ -24,6 +24,10 @@
 #include <tf/transform_broadcaster.h>
 #include <nav_msgs/Odometry.h>
 
+#include "ros/ros.h"
+#include "std_msgs/String.h"
+#include "geometry_msgs/Twist.h"
+
 #include <stdio.h>   /* Standard input/output definitions */
 #include <string.h>  /* String function definitions */
 #include <unistd.h>  /* UNIX standard function definitions */
@@ -71,10 +75,20 @@ bool add(phippi::TwoInts::Request  &req,
   return true;
 }
 
+void chatterCallback(const geometry_msgs::Twist::ConstPtr& msg)
+{
+  ROS_INFO("I heard: [%f]", msg->angular.x);
+}
+
+
+
 int main(int argc, char **argv)
 {
   ros::init(argc, argv, "phippi_motors");
   ros::NodeHandle n;
+
+  ros::Subscriber sub = n.subscribe("/cmd_vel", 10, chatterCallback);
+
   ros::ServiceServer service = n.advertiseService("phippi_motors", add);
   ros::Publisher odom_pub = n.advertise<nav_msgs::Odometry>("/odom", 50);
   tf::TransformBroadcaster odom_broadcaster;
