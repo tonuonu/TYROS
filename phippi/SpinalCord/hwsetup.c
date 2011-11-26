@@ -383,11 +383,14 @@ ConfigurePortPins(void)
     pu02=1;
     pu03=1;
 
+    // port 2 is all about motor driving simple digital signals
+    // usually all 8 bits are outputs
     p2 = 0x00;    
     pd2 = 0xFF;                             
     p2_0s = p2_1s = p2_2s = p2_3s = 0;
     p2_4s = p2_5s = p2_6s = p2_7s = 0;
 
+    // port 3 contains some PWMs for motors and buzzer
     p3 = 0;                                                 
     pd3 = 0xAB;                                            
     p3_0s = p3_1s = p3_3s = p3_5s = p3_7s = 0;
