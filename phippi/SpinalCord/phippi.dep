@@ -316,6 +316,10 @@
           <name>BICOMP</name>
           <file> 28</file>
         </tool>
+        <tool>
+          <name>ICCR32C</name>
+          <file> 37</file>
+        </tool>
       </outputs>
       <inputs>
         <tool>

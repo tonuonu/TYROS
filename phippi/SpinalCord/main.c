@@ -179,13 +179,25 @@ gyro_send_data(0x55);
                     pwmtarget[0]= +100;
                 } else {
                     // X axle speed
-                    if(twist[0]<0.01) {
+                    if(twist[0]>0.01) {
                         pwmtarget[0]= +100;
                         pwmtarget[0]= +100;
                     } else if(twist[0]<0.01) {
                         pwmtarget[0]= -100;
                         pwmtarget[0]= -100;
                     }                 
+                    
+                   
+                    // Y axle speed
+                    if(twist[1]>0.01) {
+                        pwmtarget[0]= +100;
+                        pwmtarget[0]= +100;
+                    } else if(twist[1]<0.01) {
+                        pwmtarget[0]= -100;
+                        pwmtarget[0]= -100;
+                    }                 
+                    
+                    
                 }                  
                 sprintf(buf,"new twist x=%f(m/s), y=%f(m/s), yaw=%f(deg)",twist[0],twist[1],twist[5]);
                 write(buf);
@@ -200,10 +212,7 @@ gyro_send_data(0x55);
                 if(pwmtarget[1]> 100) pwmtarget[1]= 100;
                 if(pwmtarget[0]<-100) pwmtarget[0]=-100;
                 if(pwmtarget[1]<-100) pwmtarget[1]=-100;
-                sprintf(buf,"manual pwm left=%d%%, right=%d%%",pwmtarget[0],pwmtarget[1]);
-//                ta1=(int)abs(pwm[0]*TIMERB2COUNT);
-//                ta2=(int)abs(pwm[1]*TIMERB2COUNT);
-               
+                sprintf(buf,"manual pwm left=%d%%, right=%d%%",pwmtarget[0],pwmtarget[1]);               
                 write(buf);              
             } else if(strncmp(command,"panda ",6)==0) {
                 int tmp;
