@@ -1,4 +1,5 @@
 <launch>
-       <node pkg="turtlesim" name="t1" type="turtlesim_node"/>
-       <node pkg="turtlesim" name="t2" type="turtle_teleop_key"/>
+<!--       <node pkg="turtlesim" name="t1" type="turtlesim_node"/> -->
+       <node pkg="phippi" name="t2" type="fandd"/>
+       <node pkg="turtlesim" name="t3" type="turtle_teleop_key"/>
 </launch>
