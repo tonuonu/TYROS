@@ -269,16 +269,16 @@ gyro_send_data(0x55);
 
         int x;
         for(x=0;x<4;x++) {
-//            unsigned short c; /* 16 bit value */
+            unsigned short c; /* 16 bit value */
 	
-#if 0
             pd9_6=0;
-            dinc_u4smr3 = 1;                                       // Master mode when 0
             c=SPI4_receive();
+            
+#if 0          
+            sprintf(buf,"SPI4 %x",c);
+            write(buf);              
+#endif            
             pd9_6=1;
-            dinc_u4smr3 = 0;                                       // slave mode when 1
-
-#endif
             for(j=0;j<2;j++)            
                 uDelay(255); 
         }
