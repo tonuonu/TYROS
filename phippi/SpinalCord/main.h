@@ -44,6 +44,10 @@ void OLED_Draw_Rectangle(unsigned char Data, unsigned char a,
     unsigned char b, unsigned char c, unsigned char d, unsigned char e);
 void OLED_Set_Display_On_Off(unsigned char);
 
+extern double twist[6];
+extern int pwm[2];
+extern int pwmtarget[2];
+
 /*
  * IAR-HEW compatibility 
  */

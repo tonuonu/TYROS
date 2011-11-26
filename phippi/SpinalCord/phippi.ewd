@@ -45,7 +45,7 @@
         </option>
         <option>
           <name>DynDriver</name>
-          <state>SIMR32C</state>
+          <state>R32CEMUE8A</state>
         </option>
         <option>
           <name>DDFOverride</name>
@@ -53,7 +53,7 @@
         </option>
         <option>
           <name>DDFFile</name>
-          <state>$TOOLKIT_DIR$\config\debugger\R32C.ddf</state>
+          <state>$TOOLKIT_DIR$\config\debugger\R5F64112.ddf</state>
         </option>
         <option>
           <name>DebuggerUseExtraOptions</name>
@@ -244,7 +244,7 @@
         </option>
         <option>
           <name>OCDownloadVerifyAll</name>
-          <state>0</state>
+          <state>1</state>
         </option>
       </data>
     </settings>
@@ -339,7 +339,7 @@
         </option>
         <option>
           <name>DynDriver</name>
-          <state>SIMR32C</state>
+          <state>R32CEMUE8A</state>
         </option>
         <option>
           <name>DDFOverride</name>
@@ -347,7 +347,7 @@
         </option>
         <option>
           <name>DDFFile</name>
-          <state></state>
+          <state>$TOOLKIT_DIR$\config\debugger\R5F64112.ddf</state>
         </option>
         <option>
           <name>DebuggerUseExtraOptions</name>
@@ -538,7 +538,7 @@
         </option>
         <option>
           <name>OCDownloadVerifyAll</name>
-          <state>0</state>
+          <state>1</state>
         </option>
       </data>
     </settings>

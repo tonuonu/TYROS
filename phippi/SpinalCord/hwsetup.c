@@ -30,7 +30,7 @@
 #include "uart.h"
 
 #define TIMERB2COUNT	1200
-#define TIMER4COUNT	200
+#define TIMER4COUNT	100
 
 static void ConfigureOperatingFrequency(char mode);
 static void ConfigurePortPins(void);
@@ -444,16 +444,74 @@ ms_int(void)
 #pragma vector=TIMER_B5
 __interrupt void
 s_int(void) {
+    // This interrupt gets called 48 times per second
+  
+    // We may want to do something once per second in main loop
+    // so we set flag to indicate when to do.
     if(++ticks % 48 == 0) {
       status.sek_flag=1;
-      ta4=(int)abs(64 -  p1_3*2 + p1_4*2 + p1_5*4 + p1_6*8 + p1_3*16 *TIMER4COUNT);
+      // This turns on PWM on buzzer
+        ta4=(int)abs(64 -  p1_3*2 + p1_4*2 + p1_5*4 + p1_6*8 + p1_3*16 *TIMER4COUNT);
+    } else
+    if(ticks % 48 == 1  ) {
+        // Turn off buzzer
+        ta4=0;
     }
-//    tabsr = 0x0;
+    
+    // Make sure pwm-s get closer to targets but not too fast. 
+    if(pwmtarget[0] < pwm[0]) {
+        pwm[0]--;
+    } else if(pwmtarget[0] > pwm[0]) { 
+        pwm[0]++;
+    }
+    
+    if(pwmtarget[1] < pwm[1]) {
+        pwm[0]--;
+    } else if(pwmtarget[1] > pwm[1]) {
+        pwm[1]++;
+    }
 
-//    ta4=(int)abs(15 -  p1_3*32 + p1_4*2 + p1_5*4 + p1_6*8 + p1_3*16   *TIMER4COUNT);
-//   tb2=(int)abs(15 -  p1_3*32 + p1_4*2 + p1_5*4 + p1_6*8 + p1_3*16   *TIMER4COUNT);
-   // tabsr = 0x96;
+    // Update MCU PWM timers for new values
+    ta1=(int)abs(pwm[0]*TIMERB2COUNT);
+    ta2=(int)abs(pwm[1]*TIMERB2COUNT);
 
+    // Make sure proper bits set on motor drivers to go forward or backward
+    if(pwm[0] > 0) {
+        p2_0=1;
+        p2_1=0;
+    } else {
+        p2_0=0;
+        p2_1=1;
+    }
+    
+    if(pwm[1] > 0) {
+        p2_2=1;
+        p2_3=0;
+    } else {
+        p2_2=0;
+        p2_3=1;
+    }
+
+    // Enable motors
+    p2_4=1;
+    p2_5=1;
+    p2_6=1;
+    p2_7=1;
+        
+    // Reduce PWM targets for next turn. This makes motors slow down in 
+    // ~2 seconds if no new commands are received.
+    if(pwmtarget[0] > 0) {
+        pwmtarget[0]--;
+    } else if(pwmtarget[0] < 0) {
+        pwmtarget[0]++;
+    }
+
+    if(pwmtarget[1] > 0) {
+        pwmtarget[1]--;
+    } else if(pwmtarget[1] < 0) { 
+        pwmtarget[1]++;
+    }
+    
 #if 0
       p1_3 ? ""    :"up ",
       p1_4 ? ""  :"down ",

@@ -17,7 +17,7 @@
         <debug>1</debug>
         <option>
           <name>OGChipSelectMenu</name>
-          <state>r32c	Generic R32C</state>
+          <state>R5F64112	R5F64112</state>
         </option>
         <option>
           <name>GenDoubleSize</name>
@@ -59,7 +59,7 @@
         </option>
         <option>
           <name>GenRTDescription</name>
-          <state></state>
+          <state>Use the normal configuration of the C/EC++ runtime library. No locale interface, C locale, no file descriptor support, no multibytes in printf and scanf, and no hex floats in strtod.</state>
         </option>
         <option>
           <name>GenRTConfigPath</name>
@@ -76,7 +76,7 @@
         </option>
         <option>
           <name>GenLibInFormatterDescription</name>
-          <state></state>
+          <state>Full formatting.</state>
         </option>
         <option>
           <name>GenLibOutFormatter</name>
@@ -85,7 +85,7 @@
         </option>
         <option>
           <name>GenLibOutFormatterDescription</name>
-          <state></state>
+          <state>Full formatting.</state>
         </option>
         <option>
           <name>GeneralEnableMisra</name>
@@ -109,7 +109,7 @@
         </option>
         <option>
           <name>GenFloatImplementation</name>
-          <state>0</state>
+          <state>1</state>
         </option>
         <option>
           <name>GeneralMisraVer</name>
@@ -823,7 +823,7 @@
         <debug>0</debug>
         <option>
           <name>OGChipSelectMenu</name>
-          <state></state>
+          <state>R5F64112	R5F64112</state>
         </option>
         <option>
           <name>GenDoubleSize</name>
@@ -865,15 +865,15 @@
         </option>
         <option>
           <name>GenRTDescription</name>
-          <state></state>
+          <state>Use the normal configuration of the C/EC++ runtime library. No locale interface, C locale, no file descriptor support, no multibytes in printf and scanf, and no hex floats in strtod.</state>
         </option>
         <option>
           <name>GenRTConfigPath</name>
-          <state></state>
+          <state>$TOOLKIT_DIR$\LIB\dlr32cfsfn.h</state>
         </option>
         <option>
           <name>GenRTLibraryPath</name>
-          <state></state>
+          <state>$TOOLKIT_DIR$\LIB\dlr32cfsfn.r53</state>
         </option>
         <option>
           <name>GenLibInFormatter</name>
@@ -882,7 +882,7 @@
         </option>
         <option>
           <name>GenLibInFormatterDescription</name>
-          <state></state>
+          <state>Full formatting.</state>
         </option>
         <option>
           <name>GenLibOutFormatter</name>
@@ -891,7 +891,7 @@
         </option>
         <option>
           <name>GenLibOutFormatterDescription</name>
-          <state></state>
+          <state>Full formatting.</state>
         </option>
         <option>
           <name>GeneralEnableMisra</name>
@@ -903,19 +903,19 @@
         </option>
         <option>
           <name>StackSize</name>
-          <state>###Uninitialized###</state>
+          <state>0x100</state>
         </option>
         <option>
           <name>IStackSize</name>
-          <state>###Uninitialized###</state>
+          <state>0xE0</state>
         </option>
         <option>
           <name>HeapSize</name>
-          <state>###Uninitialized###</state>
+          <state>0x400</state>
         </option>
         <option>
           <name>GenFloatImplementation</name>
-          <state>3</state>
+          <state>1</state>
         </option>
         <option>
           <name>GeneralMisraVer</name>
@@ -978,7 +978,7 @@
         </option>
         <option>
           <name>IccOutputFile</name>
-          <state></state>
+          <state>$FILE_BNAME$.r53</state>
         </option>
         <option>
           <name>IccProcessor</name>
@@ -1082,7 +1082,7 @@
         </option>
         <option>
           <name>CCStdIncludePath</name>
-          <state>###Uninitialized###</state>
+          <state>$TOOLKIT_DIR$\INC\</state>
         </option>
         <option>
           <name>CompilerMisraOverride</name>
@@ -1111,7 +1111,7 @@
         </option>
         <option>
           <name>IccOptLevelSlave</name>
-          <state>1</state>
+          <state>3</state>
         </option>
         <option>
           <name>IccOptAllowList</name>
@@ -1335,7 +1335,7 @@
         </option>
         <option>
           <name>OutputFile</name>
-          <state></state>
+          <state>phippi.a53</state>
         </option>
         <option>
           <name>OutputFormat</name>

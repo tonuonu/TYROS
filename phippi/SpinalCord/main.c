@@ -118,8 +118,8 @@ void write(char *c) {
 extern char command[TX_BUFF_SIZE];
 
 double twist[6]={0,0,0,0,0,0};
-
 int pwm[2]={0,0};
+int pwmtarget[2]={0,0};
 
 
 void
@@ -138,7 +138,6 @@ main(void) {
     OLED_Set_Display_Mode(0x00);                           // Entire Display Off
     OLED_Show_Logo();
     OLED_Set_Display_Mode(0x02);                           // Entire Display Off
- //   LED2=0;
     Delay(2);
     OLED_Fade_Out();
     OLED_Fill_RAM(0x00);
@@ -153,81 +152,73 @@ main(void) {
 #endif
     while (1) {      
         char buf[256];
-gyro_send_data(0x55);
-//gyro_receive();
         if (status.sek_flag==1) {
             status.sek_flag=0;
             LED1 ^= 1;
         }
-        
-#if 1    
-/// temp! FIXME    by removing whole if
-                ta1=(int)abs(pwm[0]*TIMERB2COUNT);
-                ta2=(int)abs(pwm[1]*TIMERB2COUNT);
-                if(pwm[0] > 0) {
-                    p2_0=1;
-                    p2_1=0;
-                } else {
-                    p2_0=0;
-                    p2_1=1;
-                }
-                if(pwm[1] > 0) {
-                    p2_2=1;
-                    p2_3=0;
-                } else {
-                    p2_2=0;
-                    p2_3=1;
-                }
-                p2_4=1;
-                p2_5=1;
-                p2_6=1;
-                p2_7=1;
-#endif
-        
+                
         if(command[0]!=0) {
             char *tok;
-            if(strncmp(command,"twist ",6)==0) {
+            if(strncmp(command,"joy",3)==0) {
+                short unsigned r;
+
+                gyro_send_data(0x55);
+                r=gyro_receive();
+                sprintf(buf,"gyro sent %x",r);
+                write(buf);              
+
+
+            } else if(strncmp(command,"twist ",6)==0) {
                 int tmp;
                 for(tmp=0,tok = strtok(command," "); tok && tmp<=6 ; tok=strtok(0," "),tmp++) {
                     if(tmp>0) {
                         twist[tmp-1]=strtod(tok,NULL); 
                     }
                 }
+                
+                // Yaw
+                if(twist[5]>0.01) {
+                    pwmtarget[0]= 100;
+                    pwmtarget[0]= -100;
+                } else if(twist[5]<0.01) {
+                    pwmtarget[0]= -100;
+                    pwmtarget[0]= +100;
+                } else {
+            
+                    // FIXME: clearly bit wrong algorithm here                  
+                    // X axle speed
+                    if(twist[0]>0.01) {
+                        pwmtarget[0]= +100;
+                        pwmtarget[0]= +100;
+                    } else if(twist[0]<0.01) {
+                        pwmtarget[0]= -100;
+                        pwmtarget[0]= -100;
+                    }
+                                       
+                    // Y axle speed
+                    if(twist[1]>0.01) {
+                        pwmtarget[0]= +100;
+                        pwmtarget[0]= +100;
+                    } else if(twist[1]<0.01) {
+                        pwmtarget[0]= -100;
+                        pwmtarget[0]= -100;
+                    }
+            
+                }                  
                 sprintf(buf,"new twist x=%f(m/s), y=%f(m/s), yaw=%f(deg)",twist[0],twist[1],twist[5]);
                 write(buf);
             } else if(strncmp(command,"pwm ",4)==0) {
                 int tmp;
                 for(tmp=0,tok = strtok(command," "); tok && tmp<=2 ; tok=strtok(0," "),tmp++) {
                     if(tmp >= 1) {
-                        pwm[tmp-1]=(int)strtod(tok,NULL); 
+                        pwmtarget[tmp-1]=(int)strtod(tok,NULL); 
                     }
                 }
-                if(pwm[0]> 100) pwm[0]= 100;
-                if(pwm[1]> 100) pwm[1]= 100;
-                if(pwm[0]<-100) pwm[0]=-100;
-                if(pwm[1]<-100) pwm[1]=-100;
-                sprintf(buf,"manual pwm left=%d%%, right=%d%%",pwm[0],pwm[1]);
-                ta1=(int)abs(pwm[0]*TIMERB2COUNT);
-                ta2=(int)abs(pwm[1]*TIMERB2COUNT);
-                if(pwm[0] > 0) {
-                    p2_0=1;
-                    p2_1=0;
-                } else {
-                    p2_0=0;
-                    p2_1=1;
-                }
-                if(pwm[1] > 0) {
-                    p2_2=1;
-                    p2_3=0;
-                } else {
-                    p2_2=0;
-                    p2_3=1;
-                }
-                p2_4=1;
-                p2_5=1;
-                p2_6=1;
-                p2_7=1;
-               
+                if(pwmtarget[0]> 100) pwmtarget[0]= 100;
+                if(pwmtarget[1]> 100) pwmtarget[1]= 100;
+                if(pwmtarget[0]<-100) pwmtarget[0]=-100;
+                if(pwmtarget[1]<-100) pwmtarget[1]=-100;
+                sprintf(buf,"manual pwm left=%d%%, right=%d%%",pwmtarget[0],pwmtarget[1]);               
                 write(buf);              
             } else if(strncmp(command,"panda ",6)==0) {
                 int tmp;
@@ -284,16 +275,14 @@ gyro_send_data(0x55);
 
         int x;
         for(x=0;x<4;x++) {
-            unsigned short c; /* 16 bit value */
-	
 #if 0
+            unsigned short c; /* 16 bit value */
             pd9_6=0;
-    dinc_u4smr3 = 1;                                       // Master mode when 0
             c=SPI4_receive();
-            pd9_6=1;
-    dinc_u4smr3 = 0;                                       // slave mode when 1
-
+            sprintf(buf,"SPI4 %x",c);
+            write(buf);
 #endif
+            pd9_6=1;
             for(j=0;j<2;j++)            
                 uDelay(255); 
         }
