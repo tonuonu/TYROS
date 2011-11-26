@@ -17,7 +17,7 @@
         <debug>1</debug>
         <option>
           <name>OGChipSelectMenu</name>
-          <state>R5F64112	R5F64112</state>
+          <state>R5F64111	R5F64111</state>
         </option>
         <option>
           <name>GenDoubleSize</name>
@@ -595,7 +595,7 @@
         </option>
         <option>
           <name>XclFile</name>
-          <state>$TOOLKIT_DIR$\CONFIG\lnkR5F64112.xcl</state>
+          <state>$TOOLKIT_DIR$\CONFIG\lnkR5F64111.xcl</state>
         </option>
         <option>
           <name>XclFileSlave</name>
@@ -823,7 +823,11 @@
         <debug>0</debug>
         <option>
           <name>OGChipSelectMenu</name>
+<<<<<<< HEAD
           <state>R5F64112	R5F64112</state>
+=======
+          <state>R5F64111	R5F64111</state>
+>>>>>>> 0af8a399d5edef392ad9bddf7f0a7d3cdd74b071
         </option>
         <option>
           <name>GenDoubleSize</name>
@@ -903,7 +907,11 @@
         </option>
         <option>
           <name>StackSize</name>
+<<<<<<< HEAD
           <state>0x1000</state>
+=======
+          <state>0x100</state>
+>>>>>>> 0af8a399d5edef392ad9bddf7f0a7d3cdd74b071
         </option>
         <option>
           <name>IStackSize</name>
@@ -911,7 +919,11 @@
         </option>
         <option>
           <name>HeapSize</name>
+<<<<<<< HEAD
           <state>0x4000</state>
+=======
+          <state>0x400</state>
+>>>>>>> 0af8a399d5edef392ad9bddf7f0a7d3cdd74b071
         </option>
         <option>
           <name>GenFloatImplementation</name>
@@ -1401,7 +1413,11 @@
         </option>
         <option>
           <name>XclFile</name>
+<<<<<<< HEAD
           <state>$TOOLKIT_DIR$\CONFIG\lnkR5F64112.xcl</state>
+=======
+          <state>$TOOLKIT_DIR$\CONFIG\lnkR5F64111.xcl</state>
+>>>>>>> 0af8a399d5edef392ad9bddf7f0a7d3cdd74b071
         </option>
         <option>
           <name>XclFileSlave</name>

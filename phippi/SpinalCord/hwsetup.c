@@ -30,7 +30,10 @@
 #include "uart.h"
 
 #define TIMERB2COUNT	1200
+<<<<<<< HEAD
 #define TIMER4COUNT	60
+=======
+>>>>>>> 0af8a399d5edef392ad9bddf7f0a7d3cdd74b071
 
 static void ConfigureOperatingFrequency(char mode);
 static void ConfigurePortPins(void);
@@ -144,7 +147,11 @@ PWM_Init(void)
      * MR2 Trigger selected by TRGSR register b5 MR3 Reserved b6:b7
      * TCK0:TCK1 Count Source f1 
      */
+<<<<<<< HEAD
     ta4mr = 0x13; // Toon! Mootori reziim, t2itetegurit muudetakse
+=======
+    ta4mr = 0x12;
+>>>>>>> 0af8a399d5edef392ad9bddf7f0a7d3cdd74b071
 
     /* 
      * Timer A1 Mode Register - 00010001b b1:b0 TMOD0:TMOD1 One shot
@@ -189,9 +196,15 @@ PWM_Init(void)
     /* 
      * Timer A4 register 
      */
+<<<<<<< HEAD
     ta1 = 0;
     ta2 = 0;
     ta4 = 0;
+=======
+    ta1 = 1;
+    ta2 = 1;
+    ta4 = 1;
+>>>>>>> 0af8a399d5edef392ad9bddf7f0a7d3cdd74b071
 
     /* 
      * Timer A1 register 
@@ -286,12 +299,20 @@ HardwareSetup(void)
     
     ConfigurePortPins();
 
+<<<<<<< HEAD
     SPI3_Init(); // OLED
     SPI4_Init(); // Melexis sensor left
     SPI6_Init(); // gyro
     SPI7_Init(); // Melexis sensor right
     uart5_init(); // Panda
 //    uart8_init(); // ?
+=======
+    SPI3_Init(); // OLED!
+    SPI4_Init(); // Melexis sensor
+    uart5_init();
+    uart7_init();
+    uart8_init();
+>>>>>>> 0af8a399d5edef392ad9bddf7f0a7d3cdd74b071
 #if 1
     OLED_On();
     OLED_Init();
@@ -443,6 +464,7 @@ ms_int(void)
 
 #pragma vector=TIMER_B5
 __interrupt void
+<<<<<<< HEAD
 s_int(void) {
     if(++ticks % 48 == 0) {
       status.sek_flag=1;
@@ -467,5 +489,11 @@ s_int(void) {
     }
     
     
+=======
+s_int(void)
+{
+    if(++ticks % 48 == 0)
+      status.sek_flag=1;
+>>>>>>> 0af8a399d5edef392ad9bddf7f0a7d3cdd74b071
 }
 
