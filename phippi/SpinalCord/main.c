@@ -32,6 +32,7 @@ extern int alarm;
 volatile unsigned short ticks;
 
 #define TIMERB2COUNT	10
+#define SPI_DELAY (50)
 
 void
 gyro_send_data(unsigned char c) {

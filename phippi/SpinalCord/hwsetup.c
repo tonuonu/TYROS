@@ -30,6 +30,7 @@
 #include "uart.h"
 
 #define TIMERB2COUNT	1200
+#define TIMER4COUNT	200
 
 static void ConfigureOperatingFrequency(char mode);
 static void ConfigurePortPins(void);
