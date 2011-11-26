@@ -60,7 +60,7 @@ void chatterCallback(const phippi::Velocity::ConstPtr& msg)
         ROS_WARN("/dev/ttyO2 is not yet open. Trying to fix this...");
         open_port();
     } 
-
+    len=0;
     if(0 > fd)  {
         ROS_ERROR("/dev/ttyO2 is still not open?! Now I give up!");
     } else if(msg->angular > 0) {
@@ -77,11 +77,12 @@ void chatterCallback(const phippi::Velocity::ConstPtr& msg)
         len=strlen(buf);
     } 
 
-
-    if((r=write(fd,buf,len))==len) {
+    if(len>0) {
+        if ((r=write(fd,buf,len))==len) {
        	    ROS_INFO("successfully wrote: '%s'",buf);
-    } else {
+        } else {
        	    ROS_INFO("failed to write: '%s' (wrote %d of %d)",buf,r,len);
+        }
     }
 }
 
@@ -92,6 +93,7 @@ int main(int argc, char **argv)
   ros::init(argc, argv, "phippi_motors");
   ros::NodeHandle n;
   ros::Subscriber sub = n.subscribe("/turtle1/command_velocity", 1, chatterCallback);
+double angular=0,linear=0;
 #if 0
   double x = 0.0;
   double y = 0.0;
@@ -105,16 +107,19 @@ int main(int argc, char **argv)
   current_time = ros::Time::now();
   last_time = ros::Time::now();
 
-  ros::Rate r(20.0);
-  ros::spin();
-#if 0
+  ros::Rate r(10.0);
+//  ros::spin();
   while(n.ok()){
- 
+   if(angular>0) angular--;
+   if(angular<0) angular++;
+   if(linear>0) linear--;
+   if(linear<0) linear++;
     current_time = ros::Time::now();
 
   ros::spinOnce();
     //compute odometry in a typical way given the velocities of the robot
     double dt = (current_time - last_time).toSec();
+#if 0
     double delta_x = (vx * cos(th) - vy * sin(th)) * dt;
     double delta_y = (vx * sin(th) + vy * cos(th)) * dt;
     double delta_th = vth * dt;
@@ -161,11 +166,11 @@ int main(int argc, char **argv)
     odom_pub.publish(odom);
  //   ros::spin();
 
+
+#endif
     last_time = current_time;
     r.sleep();
   }
-
-#endif
   return 0;
 }
 
