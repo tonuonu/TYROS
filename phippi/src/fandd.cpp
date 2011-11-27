@@ -53,7 +53,6 @@ open_port(void){
 	} else {
 	    ROS_INFO("open_port: opened /dev/ttyO2");
 	    fcntl(fd, F_SETFL, 0);
-
             cfsetospeed(&tio,B115200);            // 115200 baud
             cfsetispeed(&tio,B115200);            // 115200 baud
 	}
@@ -105,7 +104,7 @@ int main(int argc, char **argv)
   ros::init(argc, argv, "phippi_motors");
   ros::NodeHandle n;
   ros::Subscriber sub = n.subscribe("/turtle1/command_velocity", 1, chatterCallback);
-double angular=0,linear=0;
+  double angular=0,linear=0;
 
   ros::Time current_time, last_time;
   current_time = ros::Time::now();
@@ -118,7 +117,7 @@ double angular=0,linear=0;
     if(linear>0) linear--;
     if(linear<0) linear++;
     if(!linear && !angular) {
-        snprintf(buf,256,"pwm 0 0\n");
+        snprintf(buf,256,"pwm 0 0%c",0x0d);
         len=strlen(buf);
     }
     current_time = ros::Time::now();
