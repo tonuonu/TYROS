@@ -60,8 +60,6 @@ open_port(void){
 	return (fd);
 }
 
-
-
 void chatterCallback(const phippi::Velocity::ConstPtr& msg)
 {
     char buf[256];
@@ -115,13 +113,17 @@ double angular=0,linear=0;
 
   ros::Rate r(10.0);
   while(n.ok()){
-   if(angular>0) angular--;
-   if(angular<0) angular++;
-   if(linear>0) linear--;
-   if(linear<0) linear++;
+    if(angular>0) angular--;
+    if(angular<0) angular++;
+    if(linear>0) linear--;
+    if(linear<0) linear++;
+    if(!linear && !angular) {
+        snprintf(buf,256,"pwm 0 0\n");
+        len=strlen(buf);
+    }
     current_time = ros::Time::now();
 
-  ros::spinOnce();
+     ros::spinOnce();
  //   double dt = (current_time - last_time).toSec();
 
     last_time = current_time;
