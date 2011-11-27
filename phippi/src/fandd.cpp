@@ -39,17 +39,26 @@ int fd=-1;
 
 int
 open_port(void){
+        struct termios tio;
+        memset(&tio,0,sizeof(tio));
+        tio.c_iflag=0;
+        tio.c_oflag=0;
+        tio.c_cflag=CS8|CREAD|CLOCAL;           // 8n1, see termios.h for more information
+        tio.c_lflag=0;
+        tio.c_cc[VMIN]=1;
+        tio.c_cc[VTIME]=5;
 	fd = open("/dev/ttyO2", O_RDWR | O_NOCTTY | O_NDELAY);
 	if (fd == -1) {
 	    ROS_ERROR("open_port: Unable to open /dev/ttyO2");
 	} else {
 	    ROS_INFO("open_port: opened /dev/ttyO2");
 	    fcntl(fd, F_SETFL, 0);
+
+            cfsetospeed(&tio,B115200);            // 115200 baud
+            cfsetispeed(&tio,B115200);            // 115200 baud
 	}
 	return (fd);
 }
-
-
 
 void chatterCallback(const phippi::Velocity::ConstPtr& msg)
 {
@@ -104,13 +113,17 @@ double angular=0,linear=0;
 
   ros::Rate r(10.0);
   while(n.ok()){
-   if(angular>0) angular--;
-   if(angular<0) angular++;
-   if(linear>0) linear--;
-   if(linear<0) linear++;
+    if(angular>0) angular--;
+    if(angular<0) angular++;
+    if(linear>0) linear--;
+    if(linear<0) linear++;
+    if(!linear && !angular) {
+        snprintf(buf,256,"pwm 0 0\n");
+        len=strlen(buf);
+    }
     current_time = ros::Time::now();
 
-  ros::spinOnce();
+     ros::spinOnce();
  //   double dt = (current_time - last_time).toSec();
 
     last_time = current_time;
