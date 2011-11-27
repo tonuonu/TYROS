@@ -73,18 +73,24 @@ void chatterCallback(const phippi::Velocity::ConstPtr& msg)
     if(0 > fd)  {
         ROS_ERROR("/dev/ttyO2 is still not open?! Now I give up!");
     } else if(msg->angular > 0) {
+	angular=msg->angular;
 	snprintf(buf,256,"pwm -50 500%c",0x0d);
         len=strlen(buf);
     } else if(msg->angular < 0) {
+	angular=msg->angular;
 	snprintf(buf,256,"pwm 50 -50%c",0x0d);
         len=strlen(buf);
     } else if(msg->linear > 0) {
+	linear=msg->linear;
 	snprintf(buf,256,"pwm 50 50%c",0x0d);
         len=strlen(buf);
     } else if(msg->linear < 0) {
+	linear=msg->linear;
 	snprintf(buf,256,"pwm -50 -50%c",0x0d);
         len=strlen(buf);
     } else {
+	angular=msg->angular;
+	linear=msg->linear;
 	snprintf(buf,256,"pwm 0 0%c",0x0d);
         len=strlen(buf);
     }
