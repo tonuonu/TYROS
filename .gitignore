@@ -16,3 +16,4 @@ phippi/CMakeFiles/*
 *.pyc
 cmake_install.cmake
 CMakeCache.txt
+Makefile
