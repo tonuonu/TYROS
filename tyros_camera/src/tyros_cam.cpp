@@ -46,7 +46,7 @@ int main(int argc, char **argv) {
 	ros::init(argc, argv, "tyros_cam");
 	ros::NodeHandle nh("~");
 
-	CameraInfoManager cinfo(nh);
+	//CameraInfoManager cinfo(nh);
 
 	image_transport::ImageTransport it(nh);
 	image_transport::CameraPublisher image_pub = it.advertiseCamera("image_raw", 1);
@@ -62,7 +62,7 @@ int main(int argc, char **argv) {
 	}
 	nh.param<std::string>("frame_id", frame_id, "camera");
 	nh.param<std::string>("camera_info_url", cinfo_url, "file:///home/robot/TYROS/tyros_camera/calib.yaml");
-	cinfo.loadCameraInfo(cinfo_url);
+	//cinfo.loadCameraInfo(cinfo_url);
 
 	ROS_INFO("Opening device : %s", dev.c_str());
 	Camera cam(dev.c_str(), 240, 320);
@@ -114,7 +114,7 @@ int main(int argc, char **argv) {
                                 ] = ptr[i+Y2];
         	}
 		find_circles(imgy);
-//		draw_circles(imgy)
+		draw_circles(imgy);
 
 #ifdef DEBUG
                 double hScale=0.7;
@@ -123,14 +123,14 @@ int main(int argc, char **argv) {
                 CvFont font;
                 cvInitFont(&font,CV_FONT_HERSHEY_SIMPLEX, hScale,vScale,0,lineWidth,0);
 #endif
-                for (i=0; circles[i].x_in_picture != -1; i++) {
+                for (i=0; circles_st[i].x_in_picture != -1; i++) {
 #ifdef DEBUG
                     char buf[256];
 #endif
                     tyros_camera::Object o;
 
-                    o.vector.x=circles[i].x_in_picture;
-                    o.vector.y=circles[i].y_in_picture;
+                    o.vector.x=circles_st[i].x_in_picture;
+                    o.vector.y=circles_st[i].y_in_picture;
                     o.vector.z=i;
                     o.certainity=i;
                     o.type="Ball";
@@ -138,16 +138,16 @@ int main(int argc, char **argv) {
 
 
 #ifdef DEBUG
-                    printf("Circle[%d] x:%d y:%d r:%d\n", i, circles[i].x_in_picture, circles[i].y_in_picture, circles[i].r_in_picture);
-                    printf("Circle[%d] real: x:%lf y:%lf r:%lf\n", i, circles[i].x_from_robot, circles[i].y_from_robot, circles[i].r_from_robot);
+                    printf("Circle[%d] x:%d y:%d r:%d\n", i, circles_st[i].x_in_picture, circles_st[i].y_in_picture, circles_st[i].r_in_picture);
+                    printf("Circle[%d] real: x:%lf y:%lf r:%lf\n", i, circles_st[i].x_from_robot, circles_st[i].y_from_robot, circles_st[i].r_from_robot);
 //                    cvCircle(imgy[devnum], cvPoint(cvRound(circles[i].x_in_picture), cvRound(circles[i].y_in_picture)), 3, CV_RGB(0,255,0), -1, 8, 0);
-                    cvCircle(imgy, cvPoint(cvRound(circles[i].x_in_picture), cvRound(circles[i].y_in_picture)), cvRound(circles[i].r_in_picture), CV_RGB(0,255,0), 3, 8, 0);
+                    cvCircle(imgy, cvPoint(cvRound(circles_st[i].x_in_picture), cvRound(circles_st[i].y_in_picture)), cvRound(circles_st[i].r_in_picture), CV_RGB(0,255,0), 3, 8, 0);
 
 
-                    sprintf(buf, "%d x:%d y:%d r:%d", i, circles[i].x_in_picture, circles[i].y_in_picture, circles[i].r_in_picture);
-                    cvPutText (imgy,buf,cvPoint(circles[i].x_in_picture-110,circles[i].y_in_picture+circles[i].r_in_picture*2), &font, cvScalarAll(255));
-                    sprintf(buf, "%d x: %.1lf y: %.1lf r: %.1lf", i, circles[i].x_from_robot, circles[i].y_from_robot, circles[i].r_from_robot);
-                    cvPutText (imgy,buf,cvPoint(circles[i].x_in_picture-110,circles[i].y_in_picture+circles[i].r_in_picture*2+20), &font, cvScalarAll(255));
+                    sprintf(buf, "%d x:%d y:%d r:%d", i, circles_st[i].x_in_picture, circles_st[i].y_in_picture, circles_st[i].r_in_picture);
+                    cvPutText (imgy,buf,cvPoint(circles_st[i].x_in_picture-110,circles_st[i].y_in_picture+circles_st[i].r_in_picture*2), &font, cvScalarAll(255));
+                    sprintf(buf, "%d x: %.1lf y: %.1lf r: %.1lf", i, circles_st[i].x_from_robot, circles_st[i].y_from_robot, circles_st[i].r_from_robot);
+                    cvPutText (imgy,buf,cvPoint(circles_st[i].x_in_picture-110,circles_st[i].y_in_picture+circles_st[i].r_in_picture*2+20), &font, cvScalarAll(255));
 #endif
                 }
 

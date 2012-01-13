@@ -29,7 +29,7 @@
 #include "libcam.h"
 #include "image.h"
 
-struct circle circles[11];
+struct circles circles_st[11];
 
 
 double find_distance_y(double pixel_y){
@@ -46,7 +46,7 @@ double find_distance_x(double distance_y, double pixel_x){
 }
 
 
-struct circle* find_circles(IplImage* input) {
+void find_circles(IplImage* input) {
 	IplImage* gray;
 	CvMemStorage* storage;
 	gray = cvCloneImage(input);
@@ -63,30 +63,30 @@ struct circle* find_circles(IplImage* input) {
 		int step = gray->widthStep/sizeof(uchar);
 		unsigned char* data = (unsigned char *)gray->imageData;
 
-		circles[ball].x_in_picture = p[0];
-		circles[ball].y_in_picture = p[1];
+		circles_st[ball].x_in_picture = p[0];
+		circles_st[ball].y_in_picture = p[1];
 
-               if(data[(circles[ball].y_in_picture*step
-                       +circles[ball].x_in_picture)]<120)
+               if(data[(circles_st[ball].y_in_picture*step
+                       +circles_st[ball].x_in_picture)]<120)
                        continue;
 
-		circles[ball].r_in_picture = p[2];
-		circles[ball].y_from_robot = find_distance_y(p[1]);
-		circles[ball].x_from_robot = find_distance_x(circles[ball].y_from_robot, p[0]);
-		circles[ball].r_from_robot = find_distance_x(circles[ball].y_from_robot, p[0]+p[2]) - circles[ball].x_from_robot;
+		circles_st[ball].r_in_picture = p[2];
+		circles_st[ball].y_from_robot = find_distance_y(p[1]);
+		circles_st[ball].x_from_robot = find_distance_x(circles_st[ball].y_from_robot, p[0]);
+		circles_st[ball].r_from_robot = find_distance_x(circles_st[ball].y_from_robot, p[0]+p[2]) - circles_st[ball].x_from_robot;
 		/*
-		if ((BALL_RADIUS-0.5)> circles[ball].r_from_robot || 
-			circles[ball].r_from_robot > (BALL_RADIUS+0.5)) 
+		if ((BALL_RADIUS-0.5)> circles_st[ball].r_from_robot || 
+			circles_st[ball].r_from_robot > (BALL_RADIUS+0.5)) 
 			continue;*/
 		//rosmain((double)p[0],(double)p[1],(double)p[2]);
 		ball++;
 	}
-	circles[ball].x_in_picture = -1; 
+	circles_st[ball].x_in_picture = -1; 
 	assert(gray!=0);
 	cvReleaseImage(&gray);
 	if(results)
 		cvClearSeq(results);
 	cvReleaseMemStorage( &storage );
-	return circles;
+	return ;
 }
 
