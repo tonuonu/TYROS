@@ -36,6 +36,7 @@
 
 #include "libcam.h"
 #include "image.h"
+#define DEBUG 1
 
 int main(int argc, char **argv) {
 	int height, width, input;
@@ -46,13 +47,11 @@ int main(int argc, char **argv) {
 	ros::init(argc, argv, "tyros_cam");
 	ros::NodeHandle nh("~");
 
-	//CameraInfoManager cinfo(nh);
-
 	image_transport::ImageTransport it(nh);
 	image_transport::CameraPublisher image_pub = it.advertiseCamera("image_raw", 1);
 
-	nh.param<int>("width", width, 240);
-	nh.param<int>("height", height, 320);
+	nh.param<int>("width", width, IMAGE_WIDTH);
+	nh.param<int>("height", height, IMAGE_HEIGHT);
 	nh.param<int>("input", input, 0);
 	if(argc<2) {
 		nh.param<std::string>("device", dev, "/dev/video0");
@@ -61,17 +60,15 @@ int main(int argc, char **argv) {
 		printf("opening %s\n",argv[1]);
 	}
 	nh.param<std::string>("frame_id", frame_id, "camera");
-	nh.param<std::string>("camera_info_url", cinfo_url, "file:///home/robot/TYROS/tyros_camera/calib.yaml");
-	//cinfo.loadCameraInfo(cinfo_url);
 
 	ROS_INFO("Opening device : %s", dev.c_str());
-	Camera cam(dev.c_str(), 240, 320);
+	Camera cam(dev.c_str(), IMAGE_WIDTH, IMAGE_HEIGHT);
 
 	cam.setInput(input);
 
 	image.header.frame_id = frame_id;
-	image.height = 320;
-	image.width = 240;
+	image.height = IMAGE_HEIGHT;
+	image.width = IMAGE_WIDTH;
 	image.encoding = sensor_msgs::image_encodings::MONO8;
 
         ros::init(argc, argv, "tyros_cam");
@@ -81,10 +78,14 @@ int main(int argc, char **argv) {
 
         pub = n.advertise<tyros_camera::Objects>("vision_publisher", 5); /* Message queue length is 5 */
 
-	IplImage* imgy;
+	IplImage* imgy,*imgu,*imgv;
         imgy= cvCreateImage(cvSize(IMAGE_WIDTH,IMAGE_HEIGHT), 8, 1);
+        imgu= cvCreateImage(cvSize(IMAGE_WIDTH,IMAGE_HEIGHT), 8, 1);
+        imgv= cvCreateImage(cvSize(IMAGE_WIDTH,IMAGE_HEIGHT), 8, 1);
 #ifdef DEBUG
-	cvNamedWindow( "result", 1 );
+	cvNamedWindow( "result Y", 0 );
+	cvNamedWindow( "result U", 0 );
+	cvNamedWindow( "result V", 0 );
         cvStartWindowThread();
 #endif
 	while (ros::ok()) {
@@ -92,8 +93,8 @@ int main(int argc, char **argv) {
 		int i,j;
 	
 		image.header.stamp = ros::Time::now();
-		int image_size = 320*240;
-		image.step = 240;
+		int image_size = IMAGE_HEIGHT*IMAGE_WIDTH;
+		image.step = IMAGE_WIDTH;
 		image.data.resize(image_size);
                 tyros_camera::Objects msg;
 
@@ -106,15 +107,35 @@ int main(int argc, char **argv) {
 	                image.data[
 				tmp1-(int)((j%(IMAGE_WIDTH*IMAGE_HEIGHT))/IMAGE_HEIGHT-1)
                         	] = ptr[i+Y2];
+#if 1
 		        imgy->imageData[
                                 tmp1-(int)((j%(IMAGE_WIDTH*IMAGE_HEIGHT))/IMAGE_HEIGHT)
                                 ] = ptr[i+Y1];
                         imgy->imageData[
                                 tmp1-(int)((j%(IMAGE_WIDTH*IMAGE_HEIGHT))/IMAGE_HEIGHT-1)
                                 ] = ptr[i+Y2];
+#endif
+#if 1
+		        imgu->imageData[
+                                tmp1-(int)((j%(IMAGE_WIDTH*IMAGE_HEIGHT))/IMAGE_HEIGHT)
+                                ] = ptr[i+U];
+                        imgu->imageData[
+                                tmp1-(int)((j%(IMAGE_WIDTH*IMAGE_HEIGHT))/IMAGE_HEIGHT-1)
+                                ] = ptr[i+U];
+#endif
+#if 1
+		        imgv->imageData[
+                                tmp1-(int)((j%(IMAGE_WIDTH*IMAGE_HEIGHT))/IMAGE_HEIGHT)
+                                ] = ptr[i+V];
+                        imgv->imageData[
+                                tmp1-(int)((j%(IMAGE_WIDTH*IMAGE_HEIGHT))/IMAGE_HEIGHT-1)
+                                ] = ptr[i+V];
+#endif
+
+
         	}
 		find_circles(imgy);
-		draw_circles(imgy);
+	//	draw_circles(imgy);
 
 #ifdef DEBUG
                 double hScale=0.7;
@@ -136,13 +157,11 @@ int main(int argc, char **argv) {
                     o.type="Ball";
                     msg.object.push_back(o);
 
-
 #ifdef DEBUG
                     printf("Circle[%d] x:%d y:%d r:%d\n", i, circles_st[i].x_in_picture, circles_st[i].y_in_picture, circles_st[i].r_in_picture);
                     printf("Circle[%d] real: x:%lf y:%lf r:%lf\n", i, circles_st[i].x_from_robot, circles_st[i].y_from_robot, circles_st[i].r_from_robot);
-//                    cvCircle(imgy[devnum], cvPoint(cvRound(circles[i].x_in_picture), cvRound(circles[i].y_in_picture)), 3, CV_RGB(0,255,0), -1, 8, 0);
+//                  cvCircle(imgy[devnum], cvPoint(cvRound(circles[i].x_in_picture), cvRound(circles[i].y_in_picture)), 3, CV_RGB(0,255,0), -1, 8, 0);
                     cvCircle(imgy, cvPoint(cvRound(circles_st[i].x_in_picture), cvRound(circles_st[i].y_in_picture)), cvRound(circles_st[i].r_in_picture), CV_RGB(0,255,0), 3, 8, 0);
-
 
                     sprintf(buf, "%d x:%d y:%d r:%d", i, circles_st[i].x_in_picture, circles_st[i].y_in_picture, circles_st[i].r_in_picture);
                     cvPutText (imgy,buf,cvPoint(circles_st[i].x_in_picture-110,circles_st[i].y_in_picture+circles_st[i].r_in_picture*2), &font, cvScalarAll(255));
@@ -151,11 +170,12 @@ int main(int argc, char **argv) {
 #endif
                 }
 
-
                 pub.publish(msg);
            //     msg.object.clear();
 #ifdef DEBUG
-                cvShowImage( "result", imgy );
+                cvShowImage( "result Y", imgy );
+                cvShowImage( "result U", imgu );
+                cvShowImage( "result V", imgv );
 #endif
 //		cam_info = cinfo.getCameraInfo();
   	        cam_info.header.frame_id = image.header.frame_id;
@@ -167,6 +187,8 @@ int main(int argc, char **argv) {
 	}
 #ifdef DEBUG
         cvReleaseImage(&imgy);
+        cvReleaseImage(&imgu);
+        cvReleaseImage(&imgv);
 #endif
 	return 0;
 }

@@ -28,6 +28,8 @@
 
 #include "libcam.h"
 #include "image.h"
+#include <stdio.h>
+
 
 struct circles circles_st[11];
 
@@ -55,10 +57,12 @@ void find_circles(IplImage* input) {
 	cvSmooth(gray, gray, CV_GAUSSIAN, 5, 5, 0, 0); 
 
 	// cvHoughCircles(image, circleStorage, method, dp, minDist, param1, param2, minRadius, maxRadius)
-	CvSeq* results = cvHoughCircles(gray, storage, CV_HOUGH_GRADIENT, 2, 40, 60, 40, 3, 33);
+	CvSeq* results = cvHoughCircles(gray, storage, CV_HOUGH_GRADIENT, 2, 10, 60, 40, 3, 133);
+	//CvSeq* results = cvHoughCircles(gray, storage, CV_HOUGH_GRADIENT, 2, 40, 60, 40, 3, 33);
 	int i;
 	int ball = 0;
 	for (i=0; i<results->total && i<10; i++) {
+//printf("%s, %d \n",__FILE__,__LINE__);
 		float* p = (float*)cvGetSeqElem(results, i);
 		int step = gray->widthStep/sizeof(uchar);
 		unsigned char* data = (unsigned char *)gray->imageData;
@@ -69,7 +73,7 @@ void find_circles(IplImage* input) {
                if(data[(circles_st[ball].y_in_picture*step
                        +circles_st[ball].x_in_picture)]<120)
                        continue;
-
+printf("%s, %d \n",__FILE__,__LINE__);
 		circles_st[ball].r_in_picture = p[2];
 		circles_st[ball].y_from_robot = find_distance_y(p[1]);
 		circles_st[ball].x_from_robot = find_distance_x(circles_st[ball].y_from_robot, p[0]);
