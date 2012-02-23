@@ -40,6 +40,7 @@
 
 CvRect box;
 bool drawing_box = false;
+bool setroi = false;
 
 void draw_box( IplImage* img, CvRect rect ) {
     cvRectangle (img,
@@ -60,11 +61,13 @@ void my_mouse_callback(int event, int x, int y, int flags, void* param) {
         break;
         case CV_EVENT_LBUTTONDOWN: {
             drawing_box = true;
+            setroi= false;
             box = cvRect(x, y, 0, 0);
         }
         break;
         case CV_EVENT_LBUTTONUP: {
             drawing_box = false;
+            setroi = true;
             if(box.width<0) {
                 box.x+=box.width;
                 box.width *=-1;
@@ -74,6 +77,7 @@ void my_mouse_callback(int event, int x, int y, int flags, void* param) {
                 box.height*=-1;
             }
             draw_box(image, box);
+	    
         }
         break;
     }
@@ -203,7 +207,15 @@ int main(int argc, char **argv) {
             1 
           ); 
         }
+if(setroi) {
+	cvSetImageROI( imgy, cvRect (box.x,box.y,box.width,box.height));
+	cvSetImageROI( imgu, cvRect (box.x,box.y,box.width,box.height));
+}
         cvCalcHist( planes, hist, 0, 0 );
+if(setroi) {
+cvResetImageROI( imgy);
+cvResetImageROI( imgu);
+}
 
         // Create an image to use to visualize our histogram.
         //
@@ -263,6 +275,7 @@ int main(int argc, char **argv) {
                     msg.object.push_back(o);
 
 #ifdef DEBUG
+#if 0
                     printf("Circle[%d] x:%d y:%d r:%d\n", i, circles_st[i].x_in_picture, circles_st[i].y_in_picture, circles_st[i].r_in_picture);
                     printf("Circle[%d] real: x:%lf y:%lf r:%lf\n", i, circles_st[i].x_from_robot, circles_st[i].y_from_robot, circles_st[i].r_from_robot);
 //                  cvCircle(imgy[devnum], cvPoint(cvRound(circles[i].x_in_picture), cvRound(circles[i].y_in_picture)), 3, CV_RGB(0,255,0), -1, 8, 0);
@@ -272,6 +285,7 @@ int main(int argc, char **argv) {
                     cvPutText (imgy,buf,cvPoint(circles_st[i].x_in_picture-110,circles_st[i].y_in_picture+circles_st[i].r_in_picture*2), &font, cvScalarAll(255));
                     sprintf(buf, "%d x: %.1lf y: %.1lf r: %.1lf", i, circles_st[i].x_from_robot, circles_st[i].y_from_robot, circles_st[i].r_from_robot);
                     cvPutText (imgy,buf,cvPoint(circles_st[i].x_in_picture-110,circles_st[i].y_in_picture+circles_st[i].r_in_picture*2+20), &font, cvScalarAll(255));
+#endif 
 #endif
                 }
 
