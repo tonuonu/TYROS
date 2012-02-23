@@ -188,8 +188,6 @@ int main(int argc, char **argv) {
 	//	draw_circles(imgy);
 
 
-
-
         // Build the histogram and compute its contents.
         //
         int h_bins = 30, s_bins = 32; 
@@ -207,15 +205,28 @@ int main(int argc, char **argv) {
             1 
           ); 
         }
-if(setroi) {
-	cvSetImageROI( imgy, cvRect (box.x,box.y,box.width,box.height));
-	cvSetImageROI( imgu, cvRect (box.x,box.y,box.width,box.height));
-}
+	if(setroi) {
+		cvSetImageROI( imgy, cvRect (box.x,box.y,box.width,box.height));
+		cvSetImageROI( imgu, cvRect (box.x,box.y,box.width,box.height));
+	}
         cvCalcHist( planes, hist, 0, 0 );
-if(setroi) {
-cvResetImageROI( imgy);
-cvResetImageROI( imgu);
-}
+	//cvSave("histogram.yaml",hist);
+
+        FILE *f=fopen("histogram.raw","w");
+        if(f==NULL) {
+            printf("error: %s\n",strerror(errno));
+	    exit(1);
+        }
+        if(fwrite(hist,sizeof(CvHistogram),1,f) != 1) {
+            printf("error: %s\n",strerror(errno));
+	    exit(1);
+        }
+        fclose(f);
+
+	if(setroi) {
+		cvResetImageROI( imgy);
+		cvResetImageROI( imgu);
+	}
 
         // Create an image to use to visualize our histogram.
         //
