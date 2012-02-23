@@ -210,7 +210,6 @@ int main(int argc, char **argv) {
 		cvSetImageROI( imgu, cvRect (box.x,box.y,box.width,box.height));
 	}
         cvCalcHist( planes, hist, 0, 0 );
-	//cvSave("histogram.yaml",hist);
 
         FILE *f=fopen("histogram.raw","w");
         if(f==NULL) {
@@ -264,6 +263,25 @@ int main(int argc, char **argv) {
         cvShowImage(   "H-S Histogram", hist_img );
 
 
+//0 Correlation, 1 ChiSqr, 2 Intersect, 3 Bhattacharyya
+        int type=1;
+/*
+#define patchx 61
+#define patchy 61
+                        int iwidth = imgy->width - patchx + 1;
+                        int iheight = imgy->height - patchy + 1;
+
+            IplImage *ftmp = cvCreateImage( cvSize(iwidth,iheight),32,1);
+*/
+ //           printf("Doing cvCalcBackProjectPatch() with type =%d\n",type);
+ //           cvCalcBackProjectPatch(planes[1],ftmp,cvSize(61,61),hist,type,1.0);
+ //           printf("ftmp count = %d\n",cvCountNonZero(ftmp));
+ IplImage * dst = cvCreateImage( cvGetSize(imgy),8,1);
+
+            cvCalcBackProject(planes,dst,hist);
+
+        cvNamedWindow( "back", 1 );
+        cvShowImage(   "back", dst);
 
 #ifdef DEBUG
                 double hScale=0.7;
