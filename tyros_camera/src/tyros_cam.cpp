@@ -38,11 +38,54 @@
 #include "image.h"
 #define DEBUG 1
 
+CvRect box;
+bool drawing_box = false;
+
+void draw_box( IplImage* img, CvRect rect ) {
+    cvRectangle (img,
+	cvPoint(box.x,box.y),
+	cvPoint(box.x+box.width,box.y+box.height),
+        cvScalar(0xff,0x00,0x00)/* red */);
+}
+
+void my_mouse_callback(int event, int x, int y, int flags, void* param) {
+    IplImage* image = (IplImage*) param;
+    switch( event ) {
+        case CV_EVENT_MOUSEMOVE: {
+            if( drawing_box ) {
+                box.width = x-box.x;
+                box.height = y-box.y;
+            }
+        }
+        break;
+        case CV_EVENT_LBUTTONDOWN: {
+            drawing_box = true;
+            box = cvRect(x, y, 0, 0);
+        }
+        break;
+        case CV_EVENT_LBUTTONUP: {
+            drawing_box = false;
+            if(box.width<0) {
+                box.x+=box.width;
+                box.width *=-1;
+            }
+            if(box.height<0) {
+                box.y+=box.height;
+                box.height*=-1;
+            }
+            draw_box(image, box);
+        }
+        break;
+    }
+}
+
+
 int main(int argc, char **argv) {
 	int height, width, input;
 	std::string dev, frame_id, cinfo_url;
 	sensor_msgs::Image image;
 	sensor_msgs::CameraInfo cam_info;
+        box = cvRect(-1,-1,0,0);
 
 	ros::init(argc, argv, "tyros_cam");
 	ros::NodeHandle nh("~");
@@ -87,6 +130,7 @@ int main(int argc, char **argv) {
 	cvNamedWindow( "result U", 0 );
 	cvNamedWindow( "result V", 0 );
         cvStartWindowThread();
+	cvSetMouseCallback("result Y",my_mouse_callback,(void*) imgy);
 #endif
 	while (ros::ok()) {
 		unsigned char* ptr = cam.Update();
@@ -173,6 +217,9 @@ int main(int argc, char **argv) {
                 pub.publish(msg);
            //     msg.object.clear();
 #ifdef DEBUG
+	        if( drawing_box ) {
+			draw_box( imgy, box );
+		}
                 cvShowImage( "result Y", imgy );
                 cvShowImage( "result U", imgu );
                 cvShowImage( "result V", imgv );
