@@ -45,55 +45,55 @@ Delay(unsigned char n)
 //-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=
 void
 OLED_Set_Column_Address(unsigned char a, unsigned char b) {
-    SPI_send_cmd(0x15);				   // Set Column Address
-    SPI_send_data(a);					   //   Default => 0x00
-    SPI_send_data(b);					   //   Default => 0x77
+    SPI3_send_cmd(0x15);				   // Set Column Address
+    SPI3_send_data(a);					   //   Default => 0x00
+    SPI3_send_data(b);					   //   Default => 0x77
 }
 
 void
 OLED_Set_Row_Address(unsigned char a, unsigned char b) {
-    SPI_send_cmd(0x75);				   // Set Row Address
-    SPI_send_data(a);					   //   Default => 0x00
-    SPI_send_data(b);					   //   Default => 0x7F
+    SPI3_send_cmd(0x75);				   // Set Row Address
+    SPI3_send_data(a);					   //   Default => 0x00
+    SPI3_send_data(b);					   //   Default => 0x7F
 }
 
 void
 OLED_Set_Write_RAM() {
-    SPI_send_cmd(0x5C);				   // Enable MCU to Write into RAM
+    SPI3_send_cmd(0x5C);				   // Enable MCU to Write into RAM
 }
 
 void
 OLED_Set_Read_RAM() {
-    SPI_send_cmd(0x5D);				   // Enable MCU to Read from RAM
+    SPI3_send_cmd(0x5D);				   // Enable MCU to Read from RAM
 }
 
 void
 OLED_Set_Remap_Format(unsigned char d) {
-    SPI_send_cmd(0xA0);				   // Set Re-Map / Dual COM Line Mode
-    SPI_send_data(d);					   //   Default => 0x40
+    SPI3_send_cmd(0xA0);				   // Set Re-Map / Dual COM Line Mode
+    SPI3_send_data(d);					   //   Default => 0x40
     //     Horizontal Address Increment
     //     Column Address 0 Mapped to SEG0
     //     Disable Nibble Remap
     //     Scan from COM0 to COM[N-1]
     //     Disable COM Split Odd Even
-    SPI_send_data(0x11);				   //   Default => 0x01 (Disable Dual COM Mode)
+    SPI3_send_data(0x11);				   //   Default => 0x01 (Disable Dual COM Mode)
 }
 void
 
 OLED_Set_Start_Line(unsigned char d) {
-    SPI_send_cmd(0xA1);				   // Set Vertical Scroll by RAM
-    SPI_send_data(d);					   //   Default => 0x00
+    SPI3_send_cmd(0xA1);				   // Set Vertical Scroll by RAM
+    SPI3_send_data(d);					   //   Default => 0x00
 }
 
 void
 OLED_Set_Display_Offset(unsigned char d) {
-    SPI_send_cmd(0xA2);				   // Set Vertical Scroll by Row
-    SPI_send_data(d);					   //   Default => 0x00
+    SPI3_send_cmd(0xA2);				   // Set Vertical Scroll by Row
+    SPI3_send_data(d);					   //   Default => 0x00
 }
 
 void
 OLED_Set_Display_Mode(unsigned char d) {
-    SPI_send_cmd(0xA4 | d);				   // Set Display Mode
+    SPI3_send_cmd(0xA4 | d);				   // Set Display Mode
     //   Default => 0xA4
     //     0xA4 (0x00) => Entire Display Off, All Pixels Turn Off
     //     0xA5 (0x01) => Entire Display On, All Pixels Turn On at GS Level 15
@@ -103,24 +103,24 @@ OLED_Set_Display_Mode(unsigned char d) {
 
 void
 OLED_Set_Partial_Display(unsigned char a, unsigned char b, unsigned char c) {
-    SPI_send_cmd(0xA8 | a);				   // Default => 0x8F
+    SPI3_send_cmd(0xA8 | a);				   // Default => 0x8F
     //   Select Internal Booster at Display On
     if (a == 0x00) {
-	SPI_send_data(b);
-	SPI_send_data(c);
+	SPI3_send_data(b);
+	SPI3_send_data(c);
     }
 }
 
 void
 OLED_Set_Function_Selection(unsigned char d) {
-    SPI_send_cmd(0xAB);				   // Function Selection
-    SPI_send_data(d);					   //   Default => 0x01
+    SPI3_send_cmd(0xAB);				   // Function Selection
+    SPI3_send_data(d);					   //   Default => 0x01
     //     Enable Internal VDD Regulator
 }
 
 void
 OLED_Set_Display_On_Off(unsigned char d) {
-    SPI_send_cmd(0xAE | d);				   // Set Display On/Off
+    SPI3_send_cmd(0xAE | d);				   // Set Display On/Off
     //   Default => 0xAE
     //     0xAE (0x00) => Display Off (Sleep Mode On)
     //     0xAF (0x01) => Display On (Sleep Mode Off)
@@ -128,86 +128,86 @@ OLED_Set_Display_On_Off(unsigned char d) {
 
 void
 OLED_Set_Phase_Length(unsigned char d) {
-    SPI_send_cmd(0xB1);				   // Phase 1 (Reset) & Phase 2 (Pre-Charge) Period Adjustment
-    SPI_send_data(d);					   //   Default => 0x74 (7 Display Clocks [Phase 2] / 9 Display Clocks [Phase 1])
+    SPI3_send_cmd(0xB1);				   // Phase 1 (Reset) & Phase 2 (Pre-Charge) Period Adjustment
+    SPI3_send_data(d);					   //   Default => 0x74 (7 Display Clocks [Phase 2] / 9 Display Clocks [Phase 1])
     //     D[3:0] => Phase 1 Period in 5~31 Display Clocks
     //     D[7:4] => Phase 2 Period in 3~15 Display Clocks
 }
 
 void
 OLED_Set_Display_Clock(unsigned char d) {
-    SPI_send_cmd(0xB3);				   // Set Display Clock Divider / Oscillator Frequency
-    SPI_send_data(d);					   //   Default => 0xD0
+    SPI3_send_cmd(0xB3);				   // Set Display Clock Divider / Oscillator Frequency
+    SPI3_send_data(d);					   //   Default => 0xD0
     //     A[3:0] => Display Clock Divider
     //     A[7:4] => Oscillator Frequency
 }
 
 void
 OLED_Set_Display_Enhancement_A(unsigned char a, unsigned char b) {
-    SPI_send_cmd(0xB4);				   // Display Enhancement
-    SPI_send_data(0xA0 | a);				   //   Default => 0xA2
+    SPI3_send_cmd(0xB4);				   // Display Enhancement
+    SPI3_send_data(0xA0 | a);				   //   Default => 0xA2
     //     0xA0 (0x00) => Enable External VSL
     //     0xA2 (0x02) => Enable Internal VSL (Kept VSL Pin N.C.)
-    SPI_send_data(0x05 | b);				   //   Default => 0xB5
+    SPI3_send_data(0x05 | b);				   //   Default => 0xB5
     //     0xB5 (0xB0) => Normal
     //     0xFD (0xF8) => Enhance Low Gray Scale Display Quality
 }
 
 void
 OLED_Set_GPIO(unsigned char d) {
-    SPI_send_cmd(0xB5);				   // General Purpose IO
-    SPI_send_data(d);					   //   Default => 0x0A (GPIO Pins output Low Level.)
+    SPI3_send_cmd(0xB5);				   // General Purpose IO
+    SPI3_send_data(d);					   //   Default => 0x0A (GPIO Pins output Low Level.)
 }
 
 void
 OLED_Set_Precharge_Period(unsigned char d) {
-    SPI_send_cmd(0xB6);				   // Set Second Pre-Charge Period
-    SPI_send_data(d);					   //   Default => 0x08 (8 Display Clocks)
+    SPI3_send_cmd(0xB6);				   // Set Second Pre-Charge Period
+    SPI3_send_data(d);					   //   Default => 0x08 (8 Display Clocks)
 }
 
 void
 OLED_Set_Precharge_Voltage(unsigned char d) {
-    SPI_send_cmd(0xBB);				   // Set Pre-Charge Voltage Level
-    SPI_send_data(d);					   //   Default => 0x17 (0.50*VCC)
+    SPI3_send_cmd(0xBB);				   // Set Pre-Charge Voltage Level
+    SPI3_send_data(d);					   //   Default => 0x17 (0.50*VCC)
 }
 
 void
 OLED_Set_VCOMH(unsigned char d) {
-    SPI_send_cmd(0xBE);				   // Set COM Deselect Voltage Level
-    SPI_send_data(d);					   //   Default => 0x04 (0.80*VCC)
+    SPI3_send_cmd(0xBE);				   // Set COM Deselect Voltage Level
+    SPI3_send_data(d);					   //   Default => 0x04 (0.80*VCC)
 }
 
 void
 OLED_Set_Contrast_Current(unsigned char d) {
-    SPI_send_cmd(0xC1);				   // Set Contrast Current
-    SPI_send_data(d);					   //   Default => 0x7F
+    SPI3_send_cmd(0xC1);				   // Set Contrast Current
+    SPI3_send_data(d);					   //   Default => 0x7F
 }
 
 void
 OLED_Set_Master_Current(unsigned char d) {
-    SPI_send_cmd(0xC7);				   // Master Contrast Current Control
-    SPI_send_data(d);					   //   Default => 0x0f (Maximum)
+    SPI3_send_cmd(0xC7);				   // Master Contrast Current Control
+    SPI3_send_data(d);					   //   Default => 0x0f (Maximum)
 }
 
 void
 OLED_Set_Multiplex_Ratio(unsigned char d) {
-    SPI_send_cmd(0xCA);				   // Set Multiplex Ratio
-    SPI_send_data(d);					   //   Default => 0x7F (1/128 Duty)
+    SPI3_send_cmd(0xCA);				   // Set Multiplex Ratio
+    SPI3_send_data(d);					   //   Default => 0x7F (1/128 Duty)
 }
 
 void
 OLED_Set_Display_Enhancement_B(unsigned char d) {
-    SPI_send_cmd(0xD1);				   // Display Enhancement
-    SPI_send_data(0x82 | d);				   //   Default => 0xA2
+    SPI3_send_cmd(0xD1);				   // Display Enhancement
+    SPI3_send_data(0x82 | d);				   //   Default => 0xA2
     //     0x82 (0x00) => Reserved
     //     0xA2 (0x20) => Normal
-    SPI_send_data(0x20);
+    SPI3_send_data(0x20);
 }
 
 void
 OLED_Set_Command_Lock(unsigned char d) {
-    SPI_send_cmd(0xFD);				   // Set Command Lock
-    SPI_send_data(0x12 | d);				   //   Default => 0x12
+    SPI3_send_cmd(0xFD);				   // Set Command Lock
+    SPI3_send_data(0x12 | d);				   //   Default => 0x12
     //     0x12 => Driver IC interface is unlocked from entering command.
     //     0x16 => All Commands are locked except 0xFD.
 }
@@ -225,19 +225,19 @@ OLED_Show_Logo(void) {
     OLED_Set_Write_RAM();
     for (i = 0; i <OLED_Max_Row+1 ; i++) { /* row */
 	for (j = 0; j < 11; j++) {
-	    SPI_send_data(0x00);
+	    SPI3_send_data(0x00);
 	}
         for (j = 0; j < 106; j++,k++) { /* col */
             if(phippi[k]==' ')
-              SPI_send_data(0x00);
+              SPI3_send_data(0x00);
             else if(phippi[k]=='.')
-              SPI_send_data(0xFF);
+              SPI3_send_data(0xFF);
             else 
-              SPI_send_data(phippi[k]);
+              SPI3_send_data(phippi[k]);
 	}
         k--;
 	for (j = 0; j < 11; j++) {
-	    SPI_send_data(0x00);
+	    SPI3_send_data(0x00);
 	}
     }
 }
@@ -253,8 +253,8 @@ OLED_Fill_RAM(unsigned char Data) {
     OLED_Set_Write_RAM();
     for (i = 0; i < 128; i++)
 	for (j = 0; j < 120; j++) {
-	    SPI_send_data(Data);
-	    SPI_send_data(Data);
+	    SPI3_send_data(Data);
+	    SPI3_send_data(Data);
 	}
 }
 
@@ -275,8 +275,8 @@ OLED_Fill_Block(unsigned char Data, unsigned char a, unsigned char b,
     OLED_Set_Write_RAM();
     for (i = 0; i < (d - c + 1); i++) {
 	for (j = 0; j < (b - a + 1); j++) {
-	    SPI_send_data(Data);
-	    SPI_send_data(Data);
+	    SPI3_send_data(Data);
+	    SPI3_send_data(Data);
 	}
     }
 }
@@ -391,7 +391,7 @@ OLED_Show_Font57(unsigned char a, unsigned char b, unsigned char c,
                 Font |= OLED_BRIGHTNESS; 
             else 
                 Font &= 0xF0;
-	    SPI_send_data(Font);
+	    SPI3_send_data(Font);
             if (MSB_2 & n) 
                 Font = OLED_BR_1B; 
             else 
@@ -400,7 +400,7 @@ OLED_Show_Font57(unsigned char a, unsigned char b, unsigned char c,
                 Font |= OLED_BRIGHTNESS; 
             else 
                 Font &= 0xF0;
-            SPI_send_data(Font);
+            SPI3_send_data(Font);
             n<<=1;
         }
 	c++;
@@ -451,9 +451,9 @@ OLED_Show_Pattern(unsigned char *Data_Pointer, unsigned char a,
     OLED_Set_Write_RAM();
     for (i = 0; i < (d - c + 1); i++) {
 	for (j = 0; j < (b - a + 1); j++) {
-	    SPI_send_data(*Src_Pointer);
+	    SPI3_send_data(*Src_Pointer);
 	    Src_Pointer++;
-	    SPI_send_data(*Src_Pointer);
+	    SPI3_send_data(*Src_Pointer);
 	    Src_Pointer++;
 	}
     }
@@ -514,28 +514,28 @@ OLED_Sleep(unsigned char a) {
 //  Gray Scale Table Setting (Full Screen)
 //-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=
 OLED_Set_Gray_Scale_Table() {
-    SPI_send_cmd(0xB8);				   // Set Gray Scale Table
-    SPI_send_data(0x0C);				   //   Gray Scale Level 1
-    SPI_send_data(0x18);				   //   Gray Scale Level 2
-    SPI_send_data(0x24);				   //   Gray Scale Level 3
-    SPI_send_data(0x30);				   //   Gray Scale Level 4
-    SPI_send_data(0x3C);				   //   Gray Scale Level 5
-    SPI_send_data(0x48);				   //   Gray Scale Level 6
-    SPI_send_data(0x54);				   //   Gray Scale Level 7
-    SPI_send_data(0x60);				   //   Gray Scale Level 8
-    SPI_send_data(0x6C);				   //   Gray Scale Level 9
-    SPI_send_data(0x78);				   //   Gray Scale Level 10
-    SPI_send_data(0x84);				   //   Gray Scale Level 11
-    SPI_send_data(0x90);				   //   Gray Scale Level 12
-    SPI_send_data(0x9C);				   //   Gray Scale Level 13
-    SPI_send_data(0xA8);				   //   Gray Scale Level 14
-    SPI_send_data(0xB4);				   //   Gray Scale Level 15
-    SPI_send_cmd(0x00);					   // Enable Gray Scale Table
+    SPI3_send_cmd(0xB8);				   // Set Gray Scale Table
+    SPI3_send_data(0x0C);				   //   Gray Scale Level 1
+    SPI3_send_data(0x18);				   //   Gray Scale Level 2
+    SPI3_send_data(0x24);				   //   Gray Scale Level 3
+    SPI3_send_data(0x30);				   //   Gray Scale Level 4
+    SPI3_send_data(0x3C);				   //   Gray Scale Level 5
+    SPI3_send_data(0x48);				   //   Gray Scale Level 6
+    SPI3_send_data(0x54);				   //   Gray Scale Level 7
+    SPI3_send_data(0x60);				   //   Gray Scale Level 8
+    SPI3_send_data(0x6C);				   //   Gray Scale Level 9
+    SPI3_send_data(0x78);				   //   Gray Scale Level 10
+    SPI3_send_data(0x84);				   //   Gray Scale Level 11
+    SPI3_send_data(0x90);				   //   Gray Scale Level 12
+    SPI3_send_data(0x9C);				   //   Gray Scale Level 13
+    SPI3_send_data(0xA8);				   //   Gray Scale Level 14
+    SPI3_send_data(0xB4);				   //   Gray Scale Level 15
+    SPI3_send_cmd(0x00);					   // Enable Gray Scale Table
 } 
 
 void
 OLED_Set_Linear_Gray_Scale_Table() {
-    SPI_send_cmd(0xB9);				   // Set Default Linear Gray Scale Table
+    SPI3_send_cmd(0xB9);				   // Set Default Linear Gray Scale Table
 }
 
 

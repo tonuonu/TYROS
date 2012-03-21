@@ -19,24 +19,157 @@
  *
  */
 
-
-
+#define PD_INPUT    (0)
+#define PD_OUTPUT   (1)
+#define PF_TIMER    (1)
+#define PF_UART     (3)
 
 void HardwareSetup(void);
 
-#define LED1     p3_3
-//#define LED2     p3_5
-#define KEY_1   p5_3
-#define KEY_2   p5_2
-#define KEY_3   p5_1
+#define LED1         p3_3
+#define LED1d        pd3_3
 
+// Serial 0, acceleration sensor 
+#define CLOCK0       p6_1
+#define CLOCK0d      pd6_1
+#define CLOCK0s      p6_1s
+#define RX0          p6_2
+#define RX0s         p6_2s
+#define TX0          p6_3
+#define TX0s         p6_3s
+#define TX0d         pd6_3
+
+
+// Serial 2, acceleration sensor
+#define TX2          p7_0
+#define RX2          p7_1
+#define TX2s         p7_0s
+#define RX2s         p7_1s
+#define TX2d         pd7_0
+#define RX2d         pd7_1
+#define CLOCK2       p7_2
+#define CLOCK2d      pd7_2
+
+// Serial 3, OLED
+#define OLED_DATACOMMAND p4_0
+#define OLED_DATACOMMANDd pd4_0
+
+#define CLOCK3       p4_1
+#define CLOCK3d      pd4_1
+#define CLOCK3s      p4_1s
+
+#define OLED_RESET   p4_2
+#define OLED_RESETd  pd4_2
+
+#define TX3          p4_3
+#define TX3s         p4_3s
+#define TX3d         pd4_3
+
+#define OLED_ENABLE  p4_4
+#define OLED_ENABLEd pd4_4
+
+#define OLED_VDD     p4_5
+#define OLED_VDDd    pd4_5
+
+#define CS_LCD       p5_7
+
+// Serial 4, melexis rotation sensor
+#define CS4         p9_4
+#define CLOCK4      p9_5
+#define CLOCK4s     p9_5s
+#define CLOCK4d     pd9_5
+#define TX4         p9_6
+#define TX4s        p9_6s
+#define TX4d        pd9_6
+
+#define RX4         p9_7
+#define RX4s        p9_7s
+
+// Serial 5, panda interface
+#define TX5         p7_6
+#define TX5s        p7_6s
+#define TX5d        pd7_6
+
+#define RX5         p8_0
+#define RX5s        p8_0s
+
+// Serial 6, gyroscope
+#define CLOCK6      p4_5
+#define CLOCK6s     p4_5s
+#define CLOCK6d     pd4_5
+#define RX6         p4_6
+#define RX6s        p4_6s
+#define RX6d        pd4_6
+#define TX6         p4_7
+#define TX6s        p4_7s
+#define TX6d        pd4_7
+#define CS6         p5_1
+#define CS6d        pd5_1
+#define GYRO_INT1   p8_3
+#define GYRO_INT2   p8_4
+
+// Serial 7, melexis rotational
+#define CS7         p5_3
+#define CS7d        pd5_3
+
+#define TX7         p5_4
+#define TX7s        p5_4s
+#define TX7d        pd5_4
+
+#define RX7         p5_6
+#define RX7s        p5_6s
+#define RX7d        pd5_6
+
+#define CLOCK7      p5_5
+#define CLOCK7s     p5_5s
+#define CLOCK7d     pd5_5
+
+// Coilgun
+#define BALL_DETECT p7_3
+#define KICK        p7_5
+#define KICKd       pd7_5
+
+// Capacitor charger
+#define CHARGE      p1_2
+#define CHARGEd     pd1_2
+
+// uart 5 for pandaboard communications
+#define RX5         p8_0
+#define RX5d        pd8_0
+#define RX5s        p8_0s
+#define TX5         p7_6
+#define TX5d        pd7_6
+#define TX5s        p7_6s
+
+// 5v power supply for Pandaboard
+#define PANDA       p3_5
+#define PANDAd      pd3_5
+
+// Joystick
+#define JOY_UP      p1_3
+#define JOY_DOWN    p1_4
+#define JOY_LEFT    p1_5
+#define JOY_RIGHT   p1_6
+#define JOY_CENTER  p1_7
+
+// Analog
+#define AN0         p10_0
+#define AN1         p10_1
+#define AN2         p10_2
+#define AN3         p10_3
+
+// Buzzer
+#define BUZZERd     pd3_6
+#define BUZZERs     p3_6s
+
+void SPI0_Init(void);
+void SPI2_Init(void);
 void SPI3_Init(void);
 void SPI4_Init(void);
 void SPI6_Init(void);
 void SPI7_Init(void);
-//void uart7_Init(void);
-struct statuses
-{
+
+struct statuses {
     char sek_flag;
 };
 
