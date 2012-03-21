@@ -22,11 +22,6 @@
 void *ProcessImages(void *thdptr) ;
 
 
-//#include "imgproc/imgproc_c.h"
-//#include "highgui/highgui_c.h"
-//#include "legacy/compat.hpp"
-//#include "objdetect/objdetect.hpp"
-
 // YUYV byte order
 #define Y1 0
 #define U  1
@@ -47,7 +42,7 @@ void *ProcessImages(void *thdptr) ;
 #define BALL_RADIUS 2.13
 #define CAMERA_CENTER_HEIGHT CAMERA_ANGLE_Y_START+(CAMERA_Y_ANGLE/2)
 
-struct circle {
+struct circles {
         int x_in_picture;
         int y_in_picture;
         int r_in_picture;
@@ -56,7 +51,7 @@ struct circle {
         double r_from_robot;
 };
 
-extern struct circle circles[11];
+extern struct circles circles_st[11];
 
 
 //extern pthread_mutex_t image_mutex ;
@@ -73,7 +68,8 @@ void open_device (int fd);
 void start_capturing (int fd);
 void stop_capturing (int fd);
 
-struct circle* find_circles(IplImage* input) ;
+void find_circles(IplImage* input) ;
+void draw_circles(IplImage* input) ;
 
 
 #ifdef USE_SPINLOCK

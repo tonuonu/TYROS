@@ -17,14 +17,14 @@ set(EXECUTABLE_OUTPUT_PATH ${PROJECT_SOURCE_DIR}/bin)
 set(LIBRARY_OUTPUT_PATH ${PROJECT_SOURCE_DIR}/lib)
 
 #uncomment if you have defined messages
-rosbuild_genmsg()
+#rosbuild_genmsg()
 #uncomment if you have defined services
 #rosbuild_gensrv()
 
 #common commands for building c++ executables and libraries
 #rosbuild_add_library(${PROJECT_NAME} src/example.cpp)
+#target_link_libraries(${PROJECT_NAME} another_library)
 #rosbuild_add_boost_directories()
 #rosbuild_link_boost(${PROJECT_NAME} thread)
-rosbuild_add_executable(tyros_camera src/tyros_cam.cpp src/libcam.cpp src/find_circles.cpp src/draw_circles.cpp)
-#target_link_libraries(${PROJECT_NAME} opencv2)
+rosbuild_add_executable(ti_bluetoothle_joy src/ti_bluetooth_le.cpp)
 #target_link_libraries(example ${PROJECT_NAME})

@@ -29,7 +29,7 @@
 #include "main.h"
 #include "uart.h"
 
-#define TIMERB2COUNT	1200
+#define TIMERB2COUNT	100
 #define TIMER4COUNT	100
 
 volatile struct statuses status;
@@ -461,26 +461,26 @@ s_int(void) {
 
     // Make sure proper bits set on motor drivers to go forward or backward
     if(pwm[0] > 0) {
-        p2_0=1;
-        p2_1=0;
+        p2_0=1; // right in a
+        p2_1=0; // right in b
     } else {
-        p2_0=0;
-        p2_1=1;
+        p2_0=0; // right in a
+        p2_1=1; // right in b
     }
     
     if(pwm[1] > 0) {
-        p2_2=1;
-        p2_3=0;
+        p2_2=1; // left in a
+        p2_3=0; // left in b
     } else {
-        p2_2=0;
-        p2_3=1;
+        p2_2=0; // left in a
+        p2_3=1; // left in b
     }
 
     // Enable motors
-    p2_4=1;
-    p2_5=1;
-    p2_6=1;
-    p2_7=1;
+    p2_4=1; // right diag a (enable)
+    p2_5=1; // right diag b (enable)
+    p2_6=1; // left diag a (enable)
+    p2_7=1; // left diag b (enable)
         
     // Reduce PWM targets for next turn. This makes motors slow down in 
     // ~2 seconds if no new commands are received.
