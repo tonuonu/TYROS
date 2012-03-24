@@ -31,39 +31,56 @@ extern int alarm;
 
 volatile unsigned short ticks;
 
-//#define TIMERB2COUNT	10
 #define SPI_DELAY (50)
 
 void
-gyro_send_data(unsigned char c) {
-    u6tb = c;
-    while (ti_u6c1 == 0) {
-        // wait till transmission is over 
-        // NOP();
+SPI0_send_data(unsigned char c) {
+    while (ti_u0c1 == 0) {
+        NOP();
     }
-    uDelay(100);
+    u0tb = c;
+    uDelay(60);
 }
 
 unsigned short 
-gyro_receive(void) {
+SPI0_receive(void) {
     unsigned short r;
-    gyro_send_data(0xFF);
-    while (ri_u6c1 == 0) {
+    SPI0_send_data(0xFF);
+//    while (ri_u0c1 == 0) {
         //NOP();
-    }
-    r=u6rb;    
-    ri_u6c1=0;
+//    }
+    r=u0rb;    
+    ri_u0c1=0;
     return r;
 }
 
+void
+SPI2_send_data(unsigned char c) {
+    while (ti_u2c1 == 0) {
+        NOP();
+    }
+    u2tb = c;
+    uDelay(60);
+}
 
+unsigned short 
+SPI2_receive(void) {
+    unsigned short r;
+    SPI2_send_data(0xFF);
+//    while (ri_u2c1 == 0) {
+        //NOP();
+//    }
+    r=u2rb;    
+    ri_u2c1=0;
+    return r;
+}
 
 void
 SPI3_send_data(unsigned char c) {
     while (ti_u3c1 == 0)
         NOP();
     uDelay(SPI_DELAY);
-    p4_0 = 1;
+    OLED_DATACOMMAND = 1;
     uDelay(SPI_DELAY);
     u3tb = c;
 }
@@ -73,19 +90,9 @@ SPI3_send_cmd(unsigned char c) {
     while (ti_u3c1 == 0)
         NOP();
     uDelay(SPI_DELAY);
-    p4_0 = 0;
+    OLED_DATACOMMAND = 0;
     uDelay(SPI_DELAY);
     u3tb = c;
-}
-
-void
-SPI7_send(unsigned short c) {
-  while (ti_u7c1 == 0)
-        NOP();
-  uDelay(SPI_DELAY);
-  ti_u7c1=0;
-  u7tb = c;
-
 }
 
 void
@@ -130,6 +137,16 @@ SPI6_receive(void) {
   return r;
 }
 
+void
+SPI7_send(unsigned short c) {
+  while (ti_u7c1 == 0)
+        NOP();
+  uDelay(SPI_DELAY);
+  ti_u7c1=0;
+  u7tb = c;
+
+}
+
 void write(char *c) {
    char *ptr=c;
    while(*ptr)
@@ -149,28 +166,43 @@ main(void) {
     HardwareSetup();    
     LED1=1;
 #if 1
-    OLED_Set_Display_Mode(0x02);                           // Entire Display On
+    // Mode:
+    //     0xA4 (0x00) => Entire Display Off, All Pixels Turn Off
+    //     0xA5 (0x01) => Entire Display On, All Pixels Turn On at GS Level 15
+    //     0xA6 (0x02) => Normal Display
+    //     0xA7 (0x03) => Inverse Display
+
+//    OLED_Set_Display_Mode(0x02);                           // Entire Display On
+    //     0xAE (0x00) => Display Off (Sleep Mode On)
+    //     0xAF (0x01) => Display On (Sleep Mode Off)
     OLED_Set_Display_On_Off(0x01);                         // Display On
-    OLED_Set_Display_Mode(0x00);                           // Entire Display Off
+//    OLED_Set_Display_Mode(0x00);                           // Entire Display Off
     OLED_Show_Logo();
-    OLED_Set_Display_Mode(0x02);                           // Entire Display Off
-    Delay(2);
-    OLED_Fade_Out();
-    OLED_Fill_RAM(0x00);
-    OLED_Fade_In();
+//    OLED_Set_Display_Mode(0x02);                           // Entire Display On
+//    Delay(2);
+//    OLED_Fade_Out();
+//    OLED_Fill_RAM(0x00);
+//    OLED_Fade_In();
     write("");
     write("Robot!");
     write("http://phippi.jes.ee/");
-    putchar('>');    
+    putchar('>'); 
     putchar(' ');
+    PANDA=1;
 #endif
     while (1) {
         char buf[256];
         if (status.sek_flag==1) {
             status.sek_flag=0;
             LED1 ^= 1;
+//            OLED_On();    // ?
+//            OLED_Init();
+//            OLED_Set_Display_Mode(0x02);                           // Normal display
+//            OLED_Set_Display_On_Off(0x00);                         // Display On
+  //          OLED_Show_Logo();
+
         }
-                
+
         if(command[0]!=0) {
             char *tok;
             if(strncmp(command,"gyro",4)==0) {
@@ -261,7 +293,6 @@ main(void) {
         }        
         
 #if 0        
-        
         // 300uS needed. On 48Mhz each cycle is ~21nS, so
         // 300 000nS/21=~1200
         for(j=0;j<7;j++)
@@ -294,12 +325,11 @@ main(void) {
             for(j=0;j<2;j++)
                 uDelay(255); 
         }
-        CS4=1; // disable melexis
-        
+        CS4=1; // disable melexis   
 #endif        
 
-unsigned short c1,c2,c3,c4; /* 16 bit value */
 #if 0
+        unsigned short c,c1,c2,c3,c4; /* 16 bit value */
         CS6=0; // enable gyro
         uDelay(100);
         /*
@@ -307,15 +337,26 @@ unsigned short c1,c2,c3,c4; /* 16 bit value */
          * want to read register, not write. 0x0F is "whoami"
          * and should be responded by 1101 0011 or 211 in dec or 0xd3 in hex 
          */
-        gyro_send_data(0x0F | 0x80); 
+        SPI6_send(0x0F | 0x80); 
         uDelay(100);
-        c=gyro_receive();
+        c=SPI6_receive();
         CS6=1; // disable gyro
         sprintf(buf,"gyro %x",c);
         write(buf);
-#endif
         uDelay(50);
-#if 1
+
+        CS6=0; // enable gyro
+        uDelay(100);
+        /*
+         * 0x80 is most significant bit=1 and indicates we 
+         * want to read register, not write. 0x20 is "turn on"
+         * and should be responded by 1101 0011 or 211 in dec or 0xd3 in hex 
+         */
+        SPI6_send(0x20 | 0x00); 
+        uDelay(100);
+        SPI6_send(1|2|4|8); 
+        CS6=1; // disable gyro
+        uDelay(100);
         CS6=0; // enable gyro
         uDelay(100);
         /*
@@ -323,13 +364,11 @@ unsigned short c1,c2,c3,c4; /* 16 bit value */
          * want to read register, not write. 0x0F is "whoami"
          * and should be responded by 1101 0011 or 211 in dec or 0xd3 in hex 
          */
-        gyro_send_data(0x20 | 0x00); 
+        SPI6_send(0x26 | 0x80); 
         uDelay(100);
-        gyro_send_data(1|2|4|8); 
+        c1=SPI6_receive();
         CS6=1; // disable gyro
-#endif
         uDelay(100);
-#if 1
         CS6=0; // enable gyro
         uDelay(100);
         /*
@@ -337,13 +376,11 @@ unsigned short c1,c2,c3,c4; /* 16 bit value */
          * want to read register, not write. 0x0F is "whoami"
          * and should be responded by 1101 0011 or 211 in dec or 0xd3 in hex 
          */
-        gyro_send_data(0x26 | 0x80); 
+        SPI6_send(0x29 | 0x80); 
         uDelay(100);
-        c1=gyro_receive();
+        c2=SPI6_receive();
         CS6=1; // disable gyro
-#endif
         uDelay(100);
-#if 1
         CS6=0; // enable gyro
         uDelay(100);
         /*
@@ -351,27 +388,11 @@ unsigned short c1,c2,c3,c4; /* 16 bit value */
          * want to read register, not write. 0x0F is "whoami"
          * and should be responded by 1101 0011 or 211 in dec or 0xd3 in hex 
          */
-        gyro_send_data(0x29 | 0x80); 
+        SPI6_send(0x2b | 0x80); 
         uDelay(100);
-        c2=gyro_receive();
+        c3=SPI6_receive();
         CS6=1; // disable gyro
-#endif
-        uDelay(100);
-#if 1
-        CS6=0; // enable gyro
-        uDelay(100);
-        /*
-         * 0x80 is most significant bit=1 and indicates we 
-         * want to read register, not write. 0x0F is "whoami"
-         * and should be responded by 1101 0011 or 211 in dec or 0xd3 in hex 
-         */
-        gyro_send_data(0x2b | 0x80); 
-        uDelay(100);
-        c3=gyro_receive();
-        CS6=1; // disable gyro
-#endif
         uDelay(100);        
-#if 1
         CS6=0; // enable gyro
         uDelay(100);
         /*
@@ -379,9 +400,9 @@ unsigned short c1,c2,c3,c4; /* 16 bit value */
          * want to read register, not write. 0x0F is "whoami"
          * and should be responded by 1101 0011 or 211 in dec or 0xd3 in hex 
          */
-        gyro_send_data(0x2d | 0x80); 
+        SPI6_send(0x2d | 0x80); 
         uDelay(100);
-        c4=gyro_receive();
+        c4=SPI6_receive();
         CS6=1; // disable gyro
 
         sprintf(buf,"gyro temp %d x_h %d y_h %d z_h %d",(signed char)(c1 &0xff),(signed char)(c2&0xff),(signed char)(c3&0xff),(signed char)(c4&0xff));
@@ -406,5 +427,29 @@ unsigned short c1,c2,c3,c4; /* 16 bit value */
         write(buf);
 #endif
 #endif
+        
+#if 0
+//        uDelay(100);
+        /*
+         * 0x80 is most significant bit=1 and indicates we 
+         * want to read register, not write. 0x0b is "temperature"
+         */
+        SPI0_send_data( (0x0b >> 1) | 0x80); 
+//        uDelay(100);
+        unsigned short c=SPI0_receive();
+        sprintf(buf,"acce0 %x",c);
+        write(buf);
+        uDelay(100);
+        /*
+         * 0x80 is most significant bit=1 and indicates we 
+         * want to read register, not write. 0x0b is "temperature"
+         */
+        SPI2_send_data( (0x0b >> 1) | 0x80); 
+//        uDelay(100);
+        c=SPI2_receive();
+        sprintf(buf,"acce2 %x",c);
+        write(buf);
+#endif
+
     }
 }

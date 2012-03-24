@@ -21,9 +21,9 @@
 
 #include "ior32c111.h"
 #include "main.h"
+#include "hwsetup.h"
 #include "tnroman.h"
 
-#define LCD_RESET p4_2
 
 #define	OLED_Shift	0x1C
 #define OLED_Max_Column	0x3F				   // 256/4-1
@@ -545,10 +545,10 @@ OLED_Set_Linear_Gray_Scale_Table() {
 void
 OLED_Init() {
     unsigned char i;
-    LCD_RESET = 0;
+    OLED_RESET = 0;
     for (i = 0; i < 200; i++)
 	uDelay(200);
-    LCD_RESET = 1;
+    OLED_RESET = 1;
     OLED_Set_Command_Lock(0x12);			   // Unlock Basic Commands (0x12/0x16)
     OLED_Set_Display_On_Off(0x00);			   // Display Off (0x00/0x01)
     OLED_Set_Display_Clock(0xD0);			   // Set Clock as 80 Frames/Sec

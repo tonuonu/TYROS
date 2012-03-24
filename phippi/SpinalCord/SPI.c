@@ -26,31 +26,12 @@
 
 void
 SPI0_Init(void) { // Accel sensor left
-    /* 
-     * CS - no CS on accel sensor?!
-     */
-//    prc2=1;
-//    pd9_4 = PD_OUTPUT;
-//    p9_4=1;
 
-    /* 
-     * CLK0
-     */
-//    prc2=1;
-    CLOCK6d = PD_OUTPUT;
-
-//    prc2=1;
-    CLOCK6s = PF_UART;
-    /* 
-     * TXD0
-     */
-//    prc2=1;
+    CLOCK0d = PD_OUTPUT;
+    CLOCK0s = PF_UART;
     TX0d = PD_OUTPUT;
-
-//    prc2=1;
     TX0s = PF_UART;
-    
-//    pu27=1;
+    RX0s = PF_UART;
 
     smd0_u0mr  = 1;                                        // \ 
     smd1_u0mr  = 0;                                        //  | Synchronous Serial Mode
@@ -93,40 +74,20 @@ SPI0_Init(void) { // Accel sensor left
 
     u0smr4 = 0x00;                                         // Set 0. u4c0 must be set before this function
 
-//    u4brg = 55 /* 435kHz */ ;                                             // (unsigned char)(((f1_CLK_SPEED)/(2*BIT_RATE))-1);
-    u0brg = 0x55;                                             // (unsigned char)(((f1_CLK_SPEED)/(2*BIT_RATE))-1);
+    u0brg = 0x55;                                          // (unsigned char)(((f1_CLK_SPEED)/(2*BIT_RATE))-1);
+
+    pu20=1; // pullup for p6_1, p6_2, p6_3 or CLK0, RX0, TX0
     
-    
-//    pu27=1;
 }
 
 void
 SPI2_Init(void) { // Accel sensor right
-    /* 
-     * CS - no CS on accel sensor?!
-     */
-//    prc2=1;
-//    pd9_4 = PD_OUTPUT;
-//    p9_4=1;
 
-    /* 
-     * CLK0
-     */
-//    prc2=1;
-    pd7_2 = PD_OUTPUT;
-
-//    prc2=1;
-    p7_2s = PF_UART;
-    /* 
-     * TXD0
-     */
-//    prc2=1;
-    pd7_0 = PD_OUTPUT;
-
-//    prc2=1;
-    p7_0s = PF_UART;
-    
-//    pu27=1;
+    CLOCK2d = PD_OUTPUT;
+    CLOCK2s = PF_UART;
+    TX2d = PD_OUTPUT;
+    TX2s = PF_UART;
+    RX2s = PF_UART;
 
     smd0_u2mr  = 1;                                        // \ 
     smd1_u2mr  = 0;                                        //  | Synchronous Serial Mode
@@ -169,11 +130,9 @@ SPI2_Init(void) { // Accel sensor right
 
     u2smr4 = 0x00;                                         // Set 0. u4c0 must be set before this function
 
-//    u4brg = 55 /* 435kHz */ ;                                             // (unsigned char)(((f1_CLK_SPEED)/(2*BIT_RATE))-1);
-    u2brg = 0x55;                                             // (unsigned char)(((f1_CLK_SPEED)/(2*BIT_RATE))-1);
+    u2brg = 0x55;                                          // (unsigned char)(((f1_CLK_SPEED)/(2*BIT_RATE))-1);
     
-    
-//    pu27=1;
+    pu22=1; // pull up for CLK2 or p7_2
 }
 
 void
@@ -202,8 +161,6 @@ SPI4_Init(void) { // Melexis 90316
     prc2=1;
     TX4s = PF_UART;
     
-//    pu27=1;
-
     smd0_u4mr  = 1;                                        // \ 
     smd1_u4mr  = 0;                                        //  | Synchronous Serial Mode
     smd2_u4mr  = 0;                                        // /
@@ -244,8 +201,7 @@ SPI4_Init(void) { // Melexis 90316
     dl2_u4smr3 = 0;                                        // Set 0 for no  delay 
     u4smr4 = 0x00;                                         // Set 0. u4c0 must be set before this function
 
-//    u4brg = 55 /* 435kHz */ ;                                             // (unsigned char)(((f1_CLK_SPEED)/(2*BIT_RATE))-1);
-    u4brg = 0x55;                                             // (unsigned char)(((f1_CLK_SPEED)/(2*BIT_RATE))-1);    
+    u4brg = 0x55;                                          // (unsigned char)(((f1_CLK_SPEED)/(2*BIT_RATE))-1);    
     pu27=1;
 }
 
@@ -306,7 +262,7 @@ SPI6_Init(void) { // Gyro
 //    u4brg = 55 /* 435kHz */ ;                                             // (unsigned char)(((f1_CLK_SPEED)/(2*BIT_RATE))-1);
     u6brg = 0x10;                                             // (unsigned char)(((f1_CLK_SPEED)/(2*BIT_RATE))-1);
 
-    pu11 = 1; // gyro RX interface needs pullup on RX^ or p4_6
+    pu11 = 1; // gyro RX interface needs pullup on RX6 or p4_6
 }
 
 void
@@ -370,6 +326,9 @@ SPI7_Init(void) { // Melexis 90316
 void
 SPI3_Init(void) // OLED
 {
+    OLED_DATACOMMANDd = PD_OUTPUT;
+    OLED_RESETd = PD_OUTPUT;
+  
     CLOCK3d = PD_OUTPUT;
     CLOCK3s = PF_UART;
 

@@ -22,12 +22,37 @@
 #define PD_INPUT    (0)
 #define PD_OUTPUT   (1)
 #define PF_TIMER    (1)
+#define PF_MOTOR    (2)
 #define PF_UART     (3)
 
 void HardwareSetup(void);
 
 #define LED1         p3_3
 #define LED1d        pd3_3
+
+#define LEFT_PWMd    pd3_2
+#define LEFT_PWMs    p3_2s
+#define RIGHT_PWMd   pd3_4
+#define RIGHT_PWMs   p3_4s
+
+#define RIGHT_INA        p2_0
+#define RIGHT_INB        p2_1
+#define LEFT_INA         p2_2
+#define LEFT_INB         p2_3
+#define RIGHT_INAd       pd2_0
+#define RIGHT_INBd       pd2_1
+#define LEFT_INAd        pd2_2
+#define LEFT_INBd        pd2_3
+
+#define RIGHT_DIAGA      p2_4
+#define RIGHT_DIAGB      p2_5
+#define LEFT_DIAGA       p2_6
+#define LEFT_DIAGB       p2_7
+#define RIGHT_DIAGAd     pd2_4
+#define RIGHT_DIAGBd     pd2_5
+#define LEFT_DIAGAd      pd2_6
+#define LEFT_DIAGBd      pd2_7
+
 
 // Serial 0, acceleration sensor 
 #define CLOCK0       p6_1
@@ -49,6 +74,7 @@ void HardwareSetup(void);
 #define RX2d         pd7_1
 #define CLOCK2       p7_2
 #define CLOCK2d      pd7_2
+#define CLOCK2s      p7_2s
 
 // Serial 3, OLED
 #define OLED_DATACOMMAND p4_0
@@ -71,7 +97,8 @@ void HardwareSetup(void);
 #define OLED_VDD     p4_5
 #define OLED_VDDd    pd4_5
 
-#define CS_LCD       p5_7
+#define OLED_CS       p5_7
+#define OLED_CSd      pd5_7
 
 // Serial 4, melexis rotation sensor
 #define CS4         p9_4
@@ -168,6 +195,8 @@ void SPI3_Init(void);
 void SPI4_Init(void);
 void SPI6_Init(void);
 void SPI7_Init(void);
+void 
+OLED_On(void);
 
 struct statuses {
     char sek_flag;

@@ -35,6 +35,7 @@
 volatile struct statuses status;
 unsigned int base_freq;
 
+#if 0
 static void
 ConfigurePortPins(void) {
     /* 
@@ -57,8 +58,8 @@ ConfigurePortPins(void) {
     // usually all 8 bits are outputs
     p2 = 0x00;    
     pd2 = 0xFF;                             
-    p2_0s = p2_1s = p2_2s = p2_3s = 0;
-    p2_4s = p2_5s = p2_6s = p2_7s = 0;
+    RIGHT_INAs = RIGHT_INBs = LEFT_INAs = LEFT_INBs = 0;
+    RIGHT_DIAGAs = RIGHT_DIAGBs = LEFT_DIAGAs = LEFT_DIAGBs = 0;
 
     // port 3 contains some PWMs for motors and buzzer
     p3 = 0;                                                 
@@ -105,6 +106,7 @@ ConfigurePortPins(void) {
 //    p3_5=1; // panda on
 
 }
+#endif
 
 static void
 ConfigureOperatingFrequency(char mode) {
@@ -168,26 +170,16 @@ ConfigureOperatingFrequency(char mode) {
     cst_tcspr = 1;                                        
 }
 
-static void 
+void 
 OLED_On(void) {
-    // Makes safe
-//    p4_0 = 0;                                              // DC (data/command)
-//    p4_2 = 0;                                              // reset pin
-//    p4_4 = 0;                                              // VCC pin
-//    p4_5 = 0;                                              // VDD is reversed (0-on, 1-off), but switched ON first, so keep it like that  :)
-
-    // Port function is IO
-//    p4_0s = 0;
-//    p4_2s = 0;
-//    OLED_ENABLEs = 0;
-//    p4_5s = 0;
-
     // Ports are output
     OLED_DATACOMMANDd = PD_OUTPUT;                                             
-    OLED_RESETd       = PD_OUTPUT;                         // Reset pin
-    OLED_ENABLEd      = PD_OUTPUT;                         // VCC
-    OLED_VDDd         = PD_OUTPUT;
+    OLED_RESETd       = PD_OUTPUT;   // Reset pin
+    OLED_ENABLEd      = PD_OUTPUT;   // VCC
+    OLED_VDDd         = PD_OUTPUT;   // VDD is reversed (0-on, 1-off), but switched ON first, so keep it like that  :)
 
+    OLED_CSd          = PD_OUTPUT;
+    
     // Make sure VCC is Off
     OLED_ENABLE = 0;
     uDelay(10);
@@ -347,6 +339,21 @@ PWM_Init(void) {
      */
     tabsr = 0x96;
 
+    LEFT_INAd    = PD_OUTPUT;
+    LEFT_INBd    = PD_OUTPUT;
+    RIGHT_INAd   = PD_OUTPUT;
+    RIGHT_INBd   = PD_OUTPUT;
+
+    LEFT_DIAGAd  = PD_OUTPUT;
+    LEFT_DIAGBd  = PD_OUTPUT;
+    RIGHT_DIAGAd = PD_OUTPUT;
+    RIGHT_DIAGBd = PD_OUTPUT;
+    
+    LEFT_PWMd    = PD_OUTPUT;
+    LEFT_PWMs    = PF_TIMER;
+    RIGHT_PWMd   = PD_OUTPUT;
+    RIGHT_PWMs   = PF_TIMER;
+
     // FIXME, timer3 start into right place
     TABSR_bit.TA3S = 1;
 }
@@ -365,7 +372,7 @@ Heartbeat_Init(void) {
 
 static void 
 Buzzer_Init(void) {
-    BUZZERs = PF_TIMER;
+    BUZZERs = PF_MOTOR;
     BUZZERd = PD_OUTPUT; 
 }
 
@@ -378,6 +385,7 @@ Panda_Init(void) {
 static void 
 Coilgun_Init(void) {
     KICKd = PD_OUTPUT; 
+    pu22 = 1; // ball detect p7_3 pullup on
 }
 
 static void 
@@ -459,28 +467,29 @@ s_int(void) {
     ta1=(int)abs(pwm[0]*TIMERB2COUNT);
     ta2=(int)abs(pwm[1]*TIMERB2COUNT);
 
+
     // Make sure proper bits set on motor drivers to go forward or backward
     if(pwm[0] > 0) {
-        p2_0=1; // right in a
-        p2_1=0; // right in b
+        RIGHT_INA=1; // right in a
+        RIGHT_INB=0; // right in b
     } else {
-        p2_0=0; // right in a
-        p2_1=1; // right in b
+        RIGHT_INA=0; // right in a
+        RIGHT_INB=1; // right in b
     }
     
     if(pwm[1] > 0) {
-        p2_2=1; // left in a
-        p2_3=0; // left in b
+        LEFT_INA=1; // left in a
+        LEFT_INB=0; // left in b
     } else {
-        p2_2=0; // left in a
-        p2_3=1; // left in b
+        LEFT_INA=0; // left in a
+        LEFT_INB=1; // left in b
     }
 
     // Enable motors
-    p2_4=1; // right diag a (enable)
-    p2_5=1; // right diag b (enable)
-    p2_6=1; // left diag a (enable)
-    p2_7=1; // left diag b (enable)
+    RIGHT_DIAGA=1; // right diag a (enable)
+    RIGHT_DIAGB=1; // right diag b (enable)
+    LEFT_DIAGA=1; // left diag a (enable)
+    LEFT_DIAGB=1; // left diag b (enable)
         
     // Reduce PWM targets for next turn. This makes motors slow down in 
     // ~2 seconds if no new commands are received.

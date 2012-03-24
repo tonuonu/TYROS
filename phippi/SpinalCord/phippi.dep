@@ -49,6 +49,15 @@
       <file>$TOOLKIT_DIR$\config\fpu_compliant.xcl</file>
     </outputs>
     <file>
+      <name>[ROOT_NODE]</name>
+      <outputs>
+        <tool>
+          <name>XLINK</name>
+          <file> 31</file>
+        </tool>
+      </outputs>
+    </file>
+    <file>
       <name>$PROJ_DIR$\hwsetup.c</name>
       <outputs>
         <tool>
@@ -86,11 +95,11 @@
       <inputs>
         <tool>
           <name>ICCR32C</name>
-          <file> 34 18 16 7</file>
+          <file> 34 18 13 16 7</file>
         </tool>
         <tool>
           <name>BICOMP</name>
-          <file> 34 18 16 7</file>
+          <file> 34 18 13 16 7</file>
         </tool>
       </inputs>
     </file>
@@ -181,15 +190,6 @@
         </tool>
       </inputs>
     </file>
-    <file>
-      <name>[ROOT_NODE]</name>
-      <outputs>
-        <tool>
-          <name>XLINK</name>
-          <file> 31</file>
-        </tool>
-      </outputs>
-    </file>
   </configuration>
   <configuration>
     <name>Release</name>
@@ -236,6 +236,15 @@
       <file>$PROJ_DIR$\Release\Exe\phippi.a53</file>
       <file>$PROJ_DIR$\Release\Obj\uart.pbi</file>
     </outputs>
+    <file>
+      <name>[ROOT_NODE]</name>
+      <outputs>
+        <tool>
+          <name>XLINK</name>
+          <file> 39</file>
+        </tool>
+      </outputs>
+    </file>
     <file>
       <name>$PROJ_DIR$\hwsetup.c</name>
       <outputs>
@@ -350,15 +359,6 @@
           <file> 23 9 14 10 21 20 19 12 18 11 17 16 8 24 15</file>
         </tool>
       </inputs>
-    </file>
-    <file>
-      <name>[ROOT_NODE]</name>
-      <outputs>
-        <tool>
-          <name>XLINK</name>
-          <file> 39</file>
-        </tool>
-      </outputs>
     </file>
     <file>
       <name>$PROJ_DIR$\Release\Obj\phippi.pbd</name>
