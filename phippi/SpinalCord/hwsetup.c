@@ -398,6 +398,17 @@ Analog_Init(void) {
 
 }
 
+static void 
+Joy_Init(void) {
+//    JOY_LEFTd = PD_OUTPUT;
+//    JOY_RIGHTd = PD_OUTPUT;
+//    JOY_UPd = PD_OUTPUT;
+//    JOY_DOWNd = PD_OUTPUT;
+//    JOY_CENTERd = PD_OUTPUT;
+    pu02 = 1; // P1_0 to P1_3 Pull-up Control Bit
+    pu03 = 1; // P1_4 to P1_7 Pull-up Control Bit
+}
+
 void
 HardwareSetup(void) {
     /* 
@@ -413,6 +424,7 @@ HardwareSetup(void) {
     CapacitorCharger_Init();
     Coilgun_Init();
     Panda_Init();
+    Joy_Init();
     SPI0_Init();  // Accel sensor left
     SPI2_Init();  // Accel sensor right
     SPI3_Init();  // OLED

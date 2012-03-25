@@ -179,6 +179,12 @@ void HardwareSetup(void);
 #define JOY_RIGHT   p1_6
 #define JOY_CENTER  p1_7
 
+#define JOY_UPd     pd1_3
+#define JOY_DOWNd   pd1_4
+#define JOY_LEFTd   pd1_5
+#define JOY_RIGHTd  pd1_6
+#define JOY_CENTERd pd1_7
+
 // Analog
 #define AN0         p10_0
 #define AN1         p10_1
