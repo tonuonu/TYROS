@@ -32,8 +32,10 @@ void HardwareSetup(void);
 
 #define LEFT_PWMd    pd3_2
 #define LEFT_PWMs    p3_2s
+#define LEFT_PWM     p3_2
 #define RIGHT_PWMd   pd3_4
 #define RIGHT_PWMs   p3_4s
+#define RIGHT_PWM    p3_4
 
 #define RIGHT_INA        p2_0
 #define RIGHT_INB        p2_1
@@ -194,6 +196,11 @@ void HardwareSetup(void);
 // Buzzer
 #define BUZZERd     pd3_6
 #define BUZZERs     p3_6s
+
+#define TIMERB2COUNT	100
+#define TIMER4COUNT	100
+
+#define SPI_DELAY (50)
 
 void SPI0_Init(void);
 void SPI2_Init(void);

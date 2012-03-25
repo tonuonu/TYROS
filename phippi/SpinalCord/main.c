@@ -31,8 +31,6 @@ extern int alarm;
 
 volatile unsigned short ticks;
 
-#define SPI_DELAY (50)
-
 void
 SPI0_send_data(unsigned char c) {
     while (ti_u0c1 == 0) {
@@ -285,7 +283,8 @@ main(void) {
                         JOY_CENTER ? "":"center" );
                 write(buf);                            
             } else {      
-              write("Unknown command:'");
+                sprintf(buf,"Unknown command:'%s'",command);
+                write(buf);                            
             }
             putchar('>');    
             putchar(' ');
