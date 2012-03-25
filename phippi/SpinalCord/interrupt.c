@@ -28,24 +28,22 @@
 #include "uart.h"
 #include "hwsetup.h"
 
-
-
 #pragma vector=TIMER_B5
 __interrupt void
 s_int(void) {
     // This interrupt gets called 48 times per second
-  
     // We may want to do something once per second in main loop
     // so we set flag to indicate when to do.
-    if(++ticks % 48 == 0) {
-      status.sek_flag=1;
-      // This turns on PWM on buzzer
-        ta4=(int)abs(64 -  p1_3*2 + p1_4*2 + p1_5*4 + p1_6*8 + p1_3*16 *TIMER4COUNT);
-    } else if(ticks % 48 == 1  ) {
+    ticks++;
+    if(ticks % 100 == 0) {
+        status.sek_flag=1;
+        // This turns on PWM on buzzer
+        ta4=1;
+    } else if(ticks % 100 == 1  ) {
         // Turn off buzzer
         ta4=0;
     }
-    
+#if 1
     // Make sure pwm-s get closer to targets but not too fast. 
     if(pwmtarget[0] < pwm[0]) {
         pwm[0]--;
@@ -54,41 +52,57 @@ s_int(void) {
     }
     
     if(pwmtarget[1] < pwm[1]) {
-        pwm[0]--;
+        pwm[1]--;
     } else if(pwmtarget[1] > pwm[1]) {
         pwm[1]++;
     }
-
+#else
+    pwm[0]=pwmtarget[0];
+    pwm[1]=pwmtarget[1];
+#endif    
     // Update MCU PWM timers for new values
-    ta1=(int)abs(pwm[0]*TIMERB2COUNT);
-    ta2=(int)abs(pwm[1]*TIMERB2COUNT);
-
+    ta1=(int)abs(pwm[0]*TIMERB2COUNT/100);
+    ta2=(int)abs(pwm[1]*TIMERB2COUNT/100);
 
     // Make sure proper bits set on motor drivers to go forward or backward
-    if(pwm[0] > 0) {
+    if(pwm[0] == 0) {
+        RIGHT_INA=0; // right in a
+        RIGHT_INB=0; // right in b      
+//        RIGHT_DIAGA=0; // right diag a (disable)
+//        RIGHT_DIAGB=0; // right diag b (disable)
+    } else if(pwm[0] > 0) {
         RIGHT_INA=1; // right in a
         RIGHT_INB=0; // right in b
+        RIGHT_DIAGA=1; // right diag a (enable)
+        RIGHT_DIAGB=1; // right diag b (enable)
     } else {
         RIGHT_INA=0; // right in a
         RIGHT_INB=1; // right in b
+        RIGHT_DIAGA=1; // right diag a (enable)
+        RIGHT_DIAGB=1; // right diag b (enable)
     }
     
-    if(pwm[1] > 0) {
+    if(pwm[1] == 0) {
+        LEFT_INA=0; // right in a
+        LEFT_INB=0; // right in b      
+//        LEFT_DIAGA=0; // left diag a (disable)
+//        LEFT_DIAGB=0; // left diag b (disable)
+    } else if(pwm[1] > 0) {
         LEFT_INA=1; // left in a
         LEFT_INB=0; // left in b
+        LEFT_DIAGA=1; // left diag a (enable)
+        LEFT_DIAGB=1; // left diag b (enable)
     } else {
         LEFT_INA=0; // left in a
         LEFT_INB=1; // left in b
+        LEFT_DIAGA=1; // left diag a (enable)
+        LEFT_DIAGB=1; // left diag b (enable)
     }
-
-    // Enable motors
-    RIGHT_DIAGA=1; // right diag a (enable)
-    RIGHT_DIAGB=1; // right diag b (enable)
-    LEFT_DIAGA=1; // left diag a (enable)
-    LEFT_DIAGB=1; // left diag b (enable)
         
     // Reduce PWM targets for next turn. This makes motors slow down in 
     // ~2 seconds if no new commands are received.
+    
+#if 0
     if(pwmtarget[0] > 0) {
         pwmtarget[0]--;
     } else if(pwmtarget[0] < 0) {
@@ -100,23 +114,18 @@ s_int(void) {
     } else if(pwmtarget[1] < 0) { 
         pwmtarget[1]++;
     }
-    
-#if 0
-      p1_3 ? ""    :"up ",
-      p1_4 ? ""  :"down ",
-      p1_5 ? ""  :"left ",
-      p1_6 ? "" :"right ",
-      p1_7 ? "":"center" );
-#endif   
-   
+#endif    
+       
      if(ticks % 48 == 1  ) {
          ta4=0;
     }    
 }
 
+#if 0
 // 1000 Hz interrupt
 #pragma vector=TIMER_A3
 __interrupt void
 ms_int(void) {
-
+ 
 }
+#endif

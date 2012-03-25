@@ -544,10 +544,28 @@ OLED_Set_Linear_Gray_Scale_Table() {
 //=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=
 void
 OLED_Init() {
+    // Ports are output
+    OLED_DATACOMMANDd = PD_OUTPUT;                                             
+    OLED_RESETd       = PD_OUTPUT;   // Reset pin
+    OLED_ENABLEd      = PD_OUTPUT;   // VCC
+    OLED_VDDd         = PD_OUTPUT;   // VDD is reversed (0-on, 1-off), but switched ON first, so keep it like that  :)
+
+    OLED_CSd          = PD_OUTPUT;
+    
+    // Make sure VCC is Off
+//    OLED_ENABLE = 0;
+//    uDelay(10);
+
+    // Enable VCC
+    OLED_ENABLE = 1;
+    uDelay(100);
+    
+    // Reset sequence
     unsigned char i;
     OLED_RESET = 0;
-    for (i = 0; i < 200; i++)
+    for (i = 0; i < 200; i++) {
 	uDelay(200);
+    }
     OLED_RESET = 1;
     OLED_Set_Command_Lock(0x12);			   // Unlock Basic Commands (0x12/0x16)
     OLED_Set_Display_On_Off(0x00);			   // Display Off (0x00/0x01)

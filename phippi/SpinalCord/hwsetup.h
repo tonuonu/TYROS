@@ -24,6 +24,7 @@
 #define PF_TIMER    (1)
 #define PF_MOTOR    (2)
 #define PF_UART     (3)
+#define PF_ANALOG   (0x80)
 
 void HardwareSetup(void);
 
@@ -188,16 +189,24 @@ void HardwareSetup(void);
 #define JOY_CENTERd pd1_7
 
 // Analog
-#define AN0         p10_0
-#define AN1         p10_1
-#define AN2         p10_2
-#define AN3         p10_3
+#define AN00         p10_0
+#define AN01         p10_1
+#define AN02         p10_2
+#define AN03         p10_3
+#define AN00d        pd10_0
+#define AN01d        pd10_1
+#define AN02d        pd10_2
+#define AN03d        pd10_3
+#define AN00s        p10_0s
+#define AN01s        p10_1s
+#define AN02s        p10_2s
+#define AN03s        p10_3s
 
 // Buzzer
 #define BUZZERd     pd3_6
 #define BUZZERs     p3_6s
 
-#define TIMERB2COUNT	100
+#define TIMERB2COUNT	2000 // about 12,5kHz
 #define TIMER4COUNT	100
 
 #define SPI_DELAY (50)
@@ -214,5 +223,6 @@ OLED_On(void);
 struct statuses {
     char sek_flag;
 };
+void Read_AD(void);
 
 extern volatile struct statuses status;

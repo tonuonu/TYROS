@@ -29,82 +29,8 @@
 #include "main.h"
 #include "uart.h"
 
-
 volatile struct statuses status;
 unsigned int base_freq;
-
-#if 0
-static void
-ConfigurePortPins(void) {
-    /* 
-     * All pins are input by default 
-     */
-    pur0 = 0;                            
-
-    pd0 = 0;
-    pd1 = 4; // charge is output                                
-    p0 = p1 = 0;
-    p0_0s = p0_1s = p0_2s = p0_3s = p0_4s = p0_5s = p0_6s = p0_7s = 0;
-    p1_0s = p1_1s = p1_3s = p1_4s = p1_5s = p1_6s = p1_7s = 0;
-
-    p1_2s = 0; // charge
-   
-    pu02=1;
-    pu03=1;
-
-    // port 2 is all about motor driving simple digital signals
-    // usually all 8 bits are outputs
-    p2 = 0x00;    
-    pd2 = 0xFF;                             
-    RIGHT_INAs = RIGHT_INBs = LEFT_INAs = LEFT_INBs = 0;
-    RIGHT_DIAGAs = RIGHT_DIAGBs = LEFT_DIAGAs = LEFT_DIAGBs = 0;
-
-    // port 3 contains some PWMs for motors and buzzer
-    p3 = 0;                                                 
-    pd3 = 0xAB;                                            
-    p3_0s = p3_1s = p3_3s = p3_5s = p3_7s = 0;
-    p3_2s = p3_4s = 0x01;// PWM ports
-    pur1 = 0x04;        
-    pd5 =  (1 << 7); 
-    p5_0s = p5_1s = p5_2s = p5_3s = p5_5s = p5_7s = 0;
-    p5_6s = p5_4s = 0x03;
-   
-    p5 = 0;                                                // 
-
-    // P6_4...P6_7 is E8a
-    pur2 = 0;       
-    pd6_0 = 0;
-    pd6_1 = 0;
-    pd6_2 = 0;
-    pd6_3 = 0;
-    p6_2s = 3;
-    p6_3s = 3;
-
-    pd7 = 0x90;                                            
-    p7 = 0;                                               
-    p7_0s = p7_1s = p7_3s = p7_5s = p7_6s = 3;             
-    p7_2s = p7_4s = p7_7s = 0;                             
-    pd8 = 2;                                               
-    p8 = 0;
-    p8_0s = 3;
-
-    p8_1s = 0;
-
-    p8_2s = 0;                                             
-    p8_3s = 0;                                             
-    pd8_4 = 0;                                             
-    p8_4s = 0;                                             
-    pu24 = 1;  
-    pd10 = 0;                                              
-    p10 = 0;
-    p10_1 = 0;
-    p10_0s = p10_1s = p10_2s = p10_3s = p10_4s = p10_5s = p10_6s = p10_7s = 0x80;
-// FIXME temportary hack
-//    p1_2=1; // charge on
-//    p3_5=1; // panda on
-
-}
-#endif
 
 static void
 ConfigureOperatingFrequency(char mode) {
@@ -170,29 +96,6 @@ ConfigureOperatingFrequency(char mode) {
 
 void 
 OLED_On(void) {
-    // Ports are output
-    OLED_DATACOMMANDd = PD_OUTPUT;                                             
-    OLED_RESETd       = PD_OUTPUT;   // Reset pin
-    OLED_ENABLEd      = PD_OUTPUT;   // VCC
-    OLED_VDDd         = PD_OUTPUT;   // VDD is reversed (0-on, 1-off), but switched ON first, so keep it like that  :)
-
-    OLED_CSd          = PD_OUTPUT;
-    
-    // Make sure VCC is Off
-    OLED_ENABLE = 0;
-    uDelay(10);
-
-    // Reset sequence
-    OLED_RESET = 1;
-    uDelay(100);
-    OLED_RESET = 0;
-    uDelay(100);
-    OLED_RESET = 1;
-    uDelay(100);
-
-    // Enable VCC
-    OLED_ENABLE = 1;
-    uDelay(100);
 }
 
 
@@ -314,45 +217,27 @@ PWM_Init(void) {
     ta4 = 0;
 
     /* 
-     * Initialize port 3 for output 
-     */
-//    pd3 = 0xFF;
-
-    /* 
-     * Port P3_2 Function Select Register - 00000010b b2:b0
-     * PSEL2:PSEL0 Three-phase motor control output b7:b3 - No
-     * register bits; 
-     */
-//    p3_2s = 0x01;
-
-    /* 
-     * Port P3_4 Function Select Register - 00000010b b2:b0
-     * PSEL2:PSEL0 Three-phase motor control output b7:b3 - No
-     * register bits; 
-     */
-//    p3_4s = 0x01;
-
-    /* 
      * Setting timer A4, timer A1, timer A2 and timer B2 start flag 
      */
     tabsr = 0x96;
 
+    /* Configure outputs */
     
     LEFT_INAd    = PD_OUTPUT;
     LEFT_INBd    = PD_OUTPUT;
     RIGHT_INAd   = PD_OUTPUT;
     RIGHT_INBd   = PD_OUTPUT;
-    // make ports safe
+
     LEFT_INA    = 0;
     LEFT_INB    = 0;
     RIGHT_INA   = 0;
     RIGHT_INB   = 0;
 
-
     LEFT_DIAGAd  = PD_OUTPUT;
     LEFT_DIAGBd  = PD_OUTPUT;
     RIGHT_DIAGAd = PD_OUTPUT;
     RIGHT_DIAGBd = PD_OUTPUT;
+
     LEFT_DIAGA   = 0;
     LEFT_DIAGB   = 0;
     RIGHT_DIAGA  = 0;
@@ -374,12 +259,11 @@ static void
 Heartbeat_Init(void) {
     // Init_TMRB5 1 mS timer
     tb5mr = 0x80;                                          // timer mode,fc/8 = 1,0 MHz
-    tb5 = 9999;                                            // 1MHz/25 - 1; Fi = 40kHz
+    tb5 = 4800;                                            // 1MHz/25 - 1; Fi = 40kHz
     tb5ic = 1;                                             // level 1 interrupt
     tb5s = 1;
     ticks = 0;
-    LED1d  = PD_OUTPUT; 
-    BUZZERd  = PD_OUTPUT; 
+    LED1d  = PD_OUTPUT;
 }
 
 static void 
@@ -408,7 +292,74 @@ CapacitorCharger_Init(void) {
 static void 
 Analog_Init(void) {
 
+    AN00s = PF_ANALOG;
+    AN01s = PF_ANALOG;
+    AN02s = PF_ANALOG;
+    AN03s = PF_ANALOG;
+
+    AN00d = PD_INPUT;
+    AN01d = PD_INPUT;
+    AN02d = PD_INPUT;
+    AN03d = PD_INPUT;
+
+    AN00 = 0;
+    AN01 = 0;
+    AN02 = 0;
+    AN03 = 0;
+    
+    ch0_ad0con0  = 0; // does not matter in single sweep mode       
+    ch1_ad0con0  = 0; // does not matter in single sweep mode           
+    ch2_ad0con0  = 0; // does not matter in single sweep mode
+    md0_ad0con0  = 0; // single sweep mode          
+    md1_ad0con0  = 1; // single sweep mode
+    trg_ad0con0  = 0; // software tells when to start, not HW            
+    adst_ad0con0 = 0; // we set this later to 1 when we start AD conversion to start
+    cks0_ad0con0 = 0; // divide by 8   
+    
+    bits_ad0con1 = 8; // 8 bit resolution
+    vcut_ad0con1 = 1; // Disable reference voltage to save power
+
+    smp_ad0con2  = 1; // with sample and hold
+    aps0_ad0con2 = 0; // an0_0 to an0_7
+    aps1_ad0con2 = 1; // an0_0 to an0_7
+    trg0_ad0con2 = 0; // does not matter
+
+    scan0_ad0con1 = 1; // read AN0_0 to AN0_3
+    scan1_ad0con1 = 0; // read AN0_0 to AN0_3
+    md2_ad0con1   = 0; // not repeat sweep mode         
+    cks1_ad0con1  = 0; // divide by 8
+    opa0_ad0con1  = 0; // External op amp not used
+    opa1_ad0con1  = 0; // External op amp not used
+
+    dus_ad0con3    = 0; // no DMA
+    mss_ad0con3    = 0; // not multi-port sweep mode
+    cks2_ad0con3   = 1; // divide by 8
+    msf0_ad0con3   = 0; // multi port sweep status flag. Disabled.
+    msf1_ad0con3   = 0; // multi port sweep status flag. Disabled.
 }
+
+// Reading all AD-s in single sweep mode (chapter 19.1.3 on HW manual)
+void
+Read_AD(void) {
+    // Converts the analog voltage input to a set of pins into a digital code one-by-one.
+    // The pins are selected by setting bits SCAN1 and SCAN0 in the AD0CON1
+    // register and bits APS1 and APS0 in the AD0CON2 register  
+      
+    vcut_ad0con1 = 1; // Enable reference voltage
+    uDelay(10); // Wait 1uS. FIXME proper number
+    
+    // Start reading AD
+    adst_ad0con0 = 1;   
+    uDelay(100);
+    // Wait till complete
+    while(adst_ad0con0 == 1) {
+     NOP();
+    };
+//   vcut_ad0con1 = 0; // Disable reference voltage to save power
+    
+   return;
+}
+
 
 static void 
 Joy_Init(void) {
@@ -432,7 +383,6 @@ HardwareSetup(void) {
 
     Buzzer_Init();
     Heartbeat_Init();
-    Analog_Init();
     CapacitorCharger_Init();
     Coilgun_Init();
     Panda_Init();
@@ -444,9 +394,10 @@ HardwareSetup(void) {
     uart5_init(); // Panda
     SPI6_Init();  // gyro
     SPI7_Init();  // Melexis sensor right
-    OLED_On();    // ?
+//    OLED_On();    // ?
     OLED_Init();
     ENABLE_IRQ;
+    Analog_Init();
     PWM_Init();
 }
 

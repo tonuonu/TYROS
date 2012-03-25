@@ -205,14 +205,17 @@ main(void) {
             char *tok;
             if(strncmp(command,"gyro",4)==0) {
 
+            } else if(strncmp(command,"ad",2)==0) {
+                Read_AD();
+                sprintf(buf,"joy 0x%03x 0x%03x 0x%03x 0x%03x", AD00, AD01, AD02, AD03);
+                write(buf);
             } else if(strncmp(command,"twist ",6)==0) {
                 int tmp;
                 for(tmp=0,tok = strtok(command," "); tok && tmp<=6 ; tok=strtok(0," "),tmp++) {
                     if(tmp>0) {
-                        twist[tmp-1]=strtod(tok,NULL); 
+                        twist[tmp-1]=strtod(tok,NULL);
                     }
-                }
-                
+                }                
                 // Yaw
                 if(twist[5]>0.01) {
                     pwmtarget[0]= 100;
