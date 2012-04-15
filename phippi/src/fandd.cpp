@@ -37,6 +37,8 @@
 
 int fd=-1; 
 
+double angular=0.0, linear=0.0;
+
 int
 open_port(void){
         struct termios tio;
@@ -59,10 +61,11 @@ open_port(void){
 	return (fd);
 }
 
+char buf[256];
+int len;
 void chatterCallback(const phippi::Velocity::ConstPtr& msg)
 {
-    char buf[256];
-    int len,r;
+    int r;
     ROS_INFO("we got: [%.1f %.1f]", msg->angular,msg->linear);
     if(0 > fd) {
         ROS_WARN("/dev/ttyO2 is not yet open. Trying to fix this...");
