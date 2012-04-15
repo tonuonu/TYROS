@@ -23,11 +23,117 @@
 #include <intrinsics.h>
 #include "hwsetup.h"
 
-#define PDIR_INPUT    (0)
-#define PDIR_OUTPUT    (1)
-#define PF_SPI_CLK    (p4_1s)
-#define PF_SPI_DATA   (p4_3s)
-#define PF_SPI        (3)
+
+void
+SPI0_Init(void) { // Accel sensor left
+
+    CLOCK0d = PD_OUTPUT;
+    CLOCK0s = PF_UART;
+    TX0d = PD_OUTPUT;
+    TX0s = PF_UART;
+    RX0s = PF_UART;
+
+    smd0_u0mr  = 1;                                        // \ 
+    smd1_u0mr  = 0;                                        //  | Synchronous Serial Mode
+    smd2_u0mr  = 0;                                        // /
+
+    ckdir_u0mr = 0;                                        // 0=internal clock 
+    
+    stps_u0mr  = 0;                                        // 0=1 stop bit, 0 required
+    pry_u0mr   = 0;                                        // Parity, 0=odd, 0 required 
+    prye_u0mr  = 0;                                        // Parity Enable? 0=disable, 0 required 
+    iopol_u0mr = 0;                                        // IO Polarity, 0=not inverted, 0 required
+
+    clk0_u0c0 = 0;                                         // Clock source f1 for u4brg
+    clk1_u0c0 = 0;                                         // 
+    txept_u0c0 = 0;                                        // Transmit register empty flag 
+    crd_u0c0 = 1;                                          // CTS disabled when 1
+    nch_u0c0 = 1;                                          // 0=Output mode "open drain" for TXD and CLOCK pin 
+    ckpol_u0c0 = 1;                                        // CLK Polarity 
+    uform_u0c0 = 1;                                        // 1=MSB first
+
+    te_u0c1 = 1;                                           // 1=Transmission Enable
+    ti_u0c1 = 0;                                           // Must be 0 to send or receive
+    re_u0c1 = 1;                                           // Reception Enable when 1
+    ri_u0c1 = 0;                                           // Receive complete flag - U4RB is empty.
+    u0irs_u0c1 = 0;                                        // Interrupt  when transmission  is completed, U4TB is empty. 
+    u0rrm_u0c1 = 1;                                        // Continuous receive mode off
+    u0lch_u0c1 = 0;                                        // Logical inversion off 
+
+    u0smr = 0x00;                                          // Set 0 
+    u0smr2 = 0x00;                                         // Set 0 
+
+    sse_u0smr3 = 0;                                        // SS is disabled when 0
+    ckph_u0smr3 = 0;                                       // Non clock delayed 
+    dinc_u0smr3 = 0;                                       // Master mode when 0
+    nodc_u0smr3 = 0;                                       // Select a clock output  mode "push-pull" when 0 
+    err_u0smr3 = 0;                                        // Error flag, no error when 0 
+    dl0_u0smr3 = 0;                                        // Set 0 for no  delay 
+    dl1_u0smr3 = 0;                                        // Set 0 for no  delay 
+    dl2_u0smr3 = 0;                                        // Set 0 for no  delay 
+
+    u0smr4 = 0x00;                                         // Set 0. u4c0 must be set before this function
+
+    u0brg = 0x55;                                          // (unsigned char)(((f1_CLK_SPEED)/(2*BIT_RATE))-1);
+
+    pu20=1; // pullup for p6_1, p6_2, p6_3 or CLK0, RX0, TX0
+    
+}
+
+void
+SPI2_Init(void) { // Accel sensor right
+
+    CLOCK2d = PD_OUTPUT;
+    CLOCK2s = PF_UART;
+    TX2d = PD_OUTPUT;
+    TX2s = PF_UART;
+    RX2s = PF_UART;
+
+    smd0_u2mr  = 1;                                        // \ 
+    smd1_u2mr  = 0;                                        //  | Synchronous Serial Mode
+    smd2_u2mr  = 0;                                        // /
+
+    ckdir_u2mr = 0;                                        // 0=internal clock 
+    
+    stps_u2mr  = 0;                                        // 0=1 stop bit, 0 required
+    pry_u2mr   = 0;                                        // Parity, 0=odd, 0 required 
+    prye_u2mr  = 0;                                        // Parity Enable? 0=disable, 0 required 
+    iopol_u2mr = 0;                                        // IO Polarity, 0=not inverted, 0 required
+
+    clk0_u2c0 = 0;                                         // Clock source f1 for u4brg
+    clk1_u2c0 = 0;                                         // 
+    txept_u2c0 = 0;                                        // Transmit register empty flag 
+    crd_u2c0 = 1;                                          // CTS disabled when 1
+    nch_u2c0 = 1;                                          // 0=Output mode "open drain" for TXD and CLOCK pin 
+    ckpol_u2c0 = 1;                                        // CLK Polarity 
+    uform_u2c0 = 1;                                        // 1=MSB first
+
+    te_u2c1 = 1;                                           // 1=Transmission Enable
+    ti_u2c1 = 0;                                           // Must be 0 to send or receive
+    re_u2c1 = 1;                                           // Reception Enable when 1
+    ri_u2c1 = 0;                                           // Receive complete flag - U4RB is empty.
+    u2irs_u2c1 = 0;                                        // Interrupt  when transmission  is completed, U4TB is empty. 
+    u2rrm_u2c1 = 1;                                        // Continuous receive mode off
+    u2lch_u2c1 = 0;                                        // Logical inversion off 
+
+    u2smr = 0x00;                                          // Set 0 
+    u2smr2 = 0x00;                                         // Set 0 
+
+    sse_u2smr3 = 0;                                        // SS is disabled when 0
+    ckph_u2smr3 = 0;                                       // Non clock delayed 
+    dinc_u2smr3 = 0;                                       // Master mode when 0
+    nodc_u2smr3 = 0;                                       // Select a clock output  mode "push-pull" when 0 
+    err_u2smr3 = 0;                                        // Error flag, no error when 0 
+    dl0_u2smr3 = 0;                                        // Set 0 for no  delay 
+    dl1_u2smr3 = 0;                                        // Set 0 for no  delay 
+    dl2_u2smr3 = 0;                                        // Set 0 for no  delay 
+
+    u2smr4 = 0x00;                                         // Set 0. u4c0 must be set before this function
+
+    u2brg = 0x55;                                          // (unsigned char)(((f1_CLK_SPEED)/(2*BIT_RATE))-1);
+    
+    pu22=1; // pull up for CLK2 or p7_2
+}
 
 void
 SPI4_Init(void) { // Melexis 90316
@@ -35,28 +141,26 @@ SPI4_Init(void) { // Melexis 90316
      * CS
      */
     prc2=1;
-    pd9_4 = PDIR_OUTPUT;
+    pd9_4 = PD_OUTPUT;
     p9_4=1;
 
     /* 
      * CLK4 
      */
     prc2=1;
-    pd9_5 = PDIR_OUTPUT;
+    CLOCK4d = PD_OUTPUT;
 
     prc2=1;
-    p9_5s = PF_SPI;
+    CLOCK4s = PF_UART;
     /* 
      * TXD4 
      */
     prc2=1;
-    pd9_6 = PDIR_OUTPUT;
+    TX4d = PD_OUTPUT;
 
     prc2=1;
-    p9_6s = PF_SPI;
+    TX4s = PF_UART;
     
-//    pu27=1;
-
     smd0_u4mr  = 1;                                        // \ 
     smd1_u4mr  = 0;                                        //  | Synchronous Serial Mode
     smd2_u4mr  = 0;                                        // /
@@ -95,46 +199,25 @@ SPI4_Init(void) { // Melexis 90316
     dl0_u4smr3 = 0;                                        // Set 0 for no  delay 
     dl1_u4smr3 = 0;                                        // Set 0 for no  delay 
     dl2_u4smr3 = 0;                                        // Set 0 for no  delay 
-
     u4smr4 = 0x00;                                         // Set 0. u4c0 must be set before this function
 
-//    u4brg = 55 /* 435kHz */ ;                                             // (unsigned char)(((f1_CLK_SPEED)/(2*BIT_RATE))-1);
-    u4brg = 0x55;                                             // (unsigned char)(((f1_CLK_SPEED)/(2*BIT_RATE))-1);
-    
-    
+    u4brg = 0x55;                                          // (unsigned char)(((f1_CLK_SPEED)/(2*BIT_RATE))-1);    
     pu27=1;
 }
 
-
 void
 SPI6_Init(void) { // Gyro
-#if 1
-    /* 
-     * CS6
-     */
-//    prc2=1;
-    pd5_1 = PDIR_OUTPUT;
-    p5_1=1;
+    CS6d = PD_OUTPUT;
+    CS6=1; // CS is high, means disabled
 
-    /* 
-     * CLK6
-     */
-//    prc2=1;
-    pd4_5 = PDIR_OUTPUT;
+    CLOCK6d = PD_OUTPUT;
+    CLOCK6s = PF_UART;
 
-//    prc2=1;
-    p4_5s = PF_SPI;
-    /* 
-     * TXD6 
-     */
-//    prc2=1;
-    pd4_7 = PDIR_OUTPUT;
+    TX6d = PD_OUTPUT;
+    TX6s = PF_UART;
 
-//    prc2=1;
-    p4_7s = PF_SPI;
+    RX6s = PF_UART;
     
-//    pu27=1;
-
     smd0_u6mr  = 1;                                        // \ 
     smd1_u6mr  = 0;                                        //  | Synchronous Serial Mode
     smd2_u6mr  = 0;                                        // /
@@ -150,11 +233,11 @@ SPI6_Init(void) { // Gyro
     clk1_u6c0 = 0;                                         // 
     txept_u6c0 = 0;                                        // Transmit register empty flag 
     crd_u6c0 = 1;                                          // CTS disabled when 1
-    nch_u6c0 = 1;                                          // 0=Output mode "open drain" for TXD and CLOCK pin 
+    nch_u6c0 = 0;                                          // 0=Output mode "open drain" for TXD and CLOCK pin 
     ckpol_u6c0 = 1;                                        // CLK Polarity 
     uform_u6c0 = 1;                                        // 1=MSB first
 
-    te_u6c1 = 1;                                           // 1=Transmission Enable
+    te_u6c1 = 1;                                          // 1=Transmission Enable
     ti_u6c1 = 0;                                           // Must be 0 to send or receive
     re_u6c1 = 1;                                           // Reception Enable when 1
     ri_u6c1 = 0;                                           // Receive complete flag - U4RB is empty.
@@ -177,42 +260,22 @@ SPI6_Init(void) { // Gyro
     u6smr4 = 0x00;                                         // Set 0. u4c0 must be set before this function
 
 //    u4brg = 55 /* 435kHz */ ;                                             // (unsigned char)(((f1_CLK_SPEED)/(2*BIT_RATE))-1);
-    u6brg = 0x55;                                             // (unsigned char)(((f1_CLK_SPEED)/(2*BIT_RATE))-1);
+    u6brg = 0x10;                                             // (unsigned char)(((f1_CLK_SPEED)/(2*BIT_RATE))-1);
 
-//    pu27=1;
-#endif
+    pu11 = 1; // gyro RX interface needs pullup on RX6 or p4_6
 }
-
 
 void
 SPI7_Init(void) { // Melexis 90316
-#if 1
-    /* 
-     * CS7
-     */
-//    prc2=1;
-    pd5_3 = PDIR_OUTPUT;
-    p5_3=1;
+    CS7d = PD_OUTPUT;
+    CS7 = 1;// CS is high, means disabled
 
-    /* 
-     * CLK7 
-     */
-//    prc2=1;
-    pd5_5 = PDIR_OUTPUT;
+    CLOCK7d = PD_OUTPUT;
+    CLOCK7s = PF_UART;
 
-//    prc2=1;
-    p5_5s = PF_SPI;
-    /* 
-     * TXD7 
-     */
-//    prc2=1;
-    pd5_4 = PDIR_OUTPUT;
-
-//    prc2=1;
-    p5_4s = PF_SPI;
+    TX7d = PD_OUTPUT;
+    TX7s = PF_UART;
     
-//    pu27=1;
-
     smd0_u7mr  = 1;                                        // \ 
     smd1_u7mr  = 0;                                        //  | Synchronous Serial Mode
     smd2_u7mr  = 0;                                        // /
@@ -258,25 +321,20 @@ SPI7_Init(void) { // Melexis 90316
 //    u4brg = 55 /* 435kHz */ ;                                             // (unsigned char)(((f1_CLK_SPEED)/(2*BIT_RATE))-1);
     u7brg = 0x55;                                             // (unsigned char)(((f1_CLK_SPEED)/(2*BIT_RATE))-1);
 
-//    pu27=1;
-#endif
 }
-
-
 
 void
 SPI3_Init(void) // OLED
 {
-    /* 
-     * CLK3 
-     */
-    pd4_1 = PDIR_OUTPUT;
-    PF_SPI_CLK = PF_SPI;
-    /* 
-     * TXD3 
-     */
-    pd4_3 = PDIR_OUTPUT;
-    PF_SPI_DATA = PF_SPI;
+    OLED_DATACOMMANDd = PD_OUTPUT;
+    OLED_RESETd = PD_OUTPUT;
+  
+    CLOCK3d = PD_OUTPUT;
+    CLOCK3s = PF_UART;
+
+    TX3d = PD_OUTPUT;
+    TX3s = PF_UART;
+    
     smd0_u3mr = 1;                                        // \ 
     smd1_u3mr = 0;                                         // >    // Synchronous Serial Mode
     smd2_u3mr = 0;                                         // /

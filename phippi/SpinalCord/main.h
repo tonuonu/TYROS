@@ -22,8 +22,8 @@
 void main(void);
 
 extern volatile unsigned short ticks;
-void SPI_send_cmd(unsigned char c);
-void SPI_send_data(unsigned char c);
+void SPI3_send_cmd(unsigned char c);
+void SPI3_send_data(unsigned char c);
 void OLED_Init(void);
 void OLED_Fade_In(void);
 void OLED_Fade_Out(void);

@@ -31,47 +31,64 @@ extern int alarm;
 
 volatile unsigned short ticks;
 
-//#define TIMERB2COUNT	10
-#define SPI_DELAY (50)
-
 void
-gyro_send_data(unsigned char c) {
-    while (ti_u6c1 == 0)
+SPI0_send_data(unsigned char c) {
+    while (ti_u0c1 == 0) {
         NOP();
-    uDelay(SPI_DELAY);
-    p5_1 = 1;
-    uDelay(SPI_DELAY);
-    u6tb = c;
+    }
+    u0tb = c;
+    uDelay(60);
 }
 
-short unsigned
-gyro_receive(void) {
-  short unsigned r;
-  gyro_send_data(0xFF);
-  while (ri_u6c1 == 0)
-        NOP();
-  r=u6rb;
-  ri_u6c1=0;
-  return r;
+unsigned short 
+SPI0_receive(void) {
+    unsigned short r;
+    SPI0_send_data(0xFF);
+//    while (ri_u0c1 == 0) {
+        //NOP();
+//    }
+    r=u0rb;    
+    ri_u0c1=0;
+    return r;
 }
 
+void
+SPI2_send_data(unsigned char c) {
+    while (ti_u2c1 == 0) {
+        NOP();
+    }
+    u2tb = c;
+    uDelay(60);
+}
+
+unsigned short 
+SPI2_receive(void) {
+    unsigned short r;
+    SPI2_send_data(0xFF);
+//    while (ri_u2c1 == 0) {
+        //NOP();
+//    }
+    r=u2rb;    
+    ri_u2c1=0;
+    return r;
+}
 
 void
-SPI_send_data(unsigned char c) {
+SPI3_send_data(unsigned char c) {
     while (ti_u3c1 == 0)
         NOP();
     uDelay(SPI_DELAY);
-    p4_0 = 1;
+    OLED_DATACOMMAND = 1;
     uDelay(SPI_DELAY);
     u3tb = c;
 }
 
 void
-SPI_send_cmd(unsigned char c) {
+SPI3_send_cmd(unsigned char c) {
     while (ti_u3c1 == 0)
         NOP();
     uDelay(SPI_DELAY);
-    p4_0 = 0;
+    OLED_DATACOMMAND = 0;
     uDelay(SPI_DELAY);
     u3tb = c;
 }
@@ -86,16 +103,6 @@ SPI4_send(unsigned short c) {
 
 }
 
-void
-SPI7_send(unsigned short c) {
-  while (ti_u7c1 == 0)
-        NOP();
-  uDelay(SPI_DELAY);
-  ti_u7c1=0;
-  u7tb = c;
-
-}
-
 short unsigned
 SPI4_receive(void) {
   short unsigned r;
@@ -105,6 +112,37 @@ SPI4_receive(void) {
   r=u4rb;
   ri_u4c1=0;
   return r;
+}
+
+void
+SPI6_send(unsigned short c) {
+  while (ti_u6c1 == 0)
+        NOP();
+  uDelay(SPI_DELAY);
+  ti_u6c1=0;
+  u6tb = c;
+
+}
+
+short unsigned
+SPI6_receive(void) {
+  short unsigned r;
+  SPI6_send(0xFF);
+  while (ri_u6c1 == 0)
+        NOP();
+  r=u6rb;
+  ri_u6c1=0;
+  return r;
+}
+
+void
+SPI7_send(unsigned short c) {
+  while (ti_u7c1 == 0)
+        NOP();
+  uDelay(SPI_DELAY);
+  ti_u7c1=0;
+  u7tb = c;
+
 }
 
 void write(char *c) {
@@ -121,83 +159,63 @@ double twist[6]={0,0,0,0,0,0};
 int pwm[2]={0,0};
 int pwmtarget[2]={0,0};
 
-
 void
 main(void) {
-    int j;
-    HardwareSetup();
-    pu11=1;
-//    pu12=1;
-//    pu13=1;
-        
-    
-    LED1=0;
+    HardwareSetup();    
+    LED1=1;
 #if 1
-    OLED_Set_Display_Mode(0x02);                           // Entire Display On
+    // Mode:
+    //     0xA4 (0x00) => Entire Display Off, All Pixels Turn Off
+    //     0xA5 (0x01) => Entire Display On, All Pixels Turn On at GS Level 15
+    //     0xA6 (0x02) => Normal Display
+    //     0xA7 (0x03) => Inverse Display
+
+//    OLED_Set_Display_Mode(0x02);                           // Entire Display On
+    //     0xAE (0x00) => Display Off (Sleep Mode On)
+    //     0xAF (0x01) => Display On (Sleep Mode Off)
     OLED_Set_Display_On_Off(0x01);                         // Display On
-    OLED_Set_Display_Mode(0x00);                           // Entire Display Off
+//    OLED_Set_Display_Mode(0x00);                           // Entire Display Off
     OLED_Show_Logo();
-    OLED_Set_Display_Mode(0x02);                           // Entire Display Off
-    Delay(2);
-    OLED_Fade_Out();
-    OLED_Fill_RAM(0x00);
-    OLED_Fade_In();
+//    OLED_Set_Display_Mode(0x02);                           // Entire Display On
+//    Delay(2);
+//    OLED_Fade_Out();
+//    OLED_Fill_RAM(0x00);
+//    OLED_Fade_In();
     write("");
     write("Robot!");
     write("http://phippi.jes.ee/");
-    putchar('>');    
+    putchar('>'); 
     putchar(' ');
-
-                
+    PANDA=1;
 #endif
-    while (1) {      
+    while (1) {
         char buf[256];
         if (status.sek_flag==1) {
             status.sek_flag=0;
             LED1 ^= 1;
+//            OLED_On();    // ?
+//            OLED_Init();
+//            OLED_Set_Display_Mode(0x02);                           // Normal display
+//            OLED_Set_Display_On_Off(0x00);                         // Display On
+  //          OLED_Show_Logo();
+
         }
-                
+
         if(command[0]!=0) {
             char *tok;
-            if(strncmp(command,"gyro ",5)==0) {
-                short unsigned r;
+            if(strncmp(command,"gyro",4)==0) {
 
-                gyro_send_data(
-			(1 << 0) | // read mode on
-			(1 << 1) | // 
-			0x2c 
-   		);
-                r=gyro_receive();
-                sprintf(buf,"gyro received1 %x",r);
-                write(buf);              
-
-                gyro_send_data(
-			(1 << 0) | // read mode on
-			(1 << 1) | // 
-			0x28 
-   		);
-                r=gyro_receive();
-                sprintf(buf,"gyro received2 %x",r);
-                write(buf);              
-
-                gyro_send_data(
-			(1 << 0) | // read mode on
-			(1 << 1) | // 
-			0x2a 
-   		);
-                r=gyro_receive();
-                sprintf(buf,"gyro received3 %x",r);
-                write(buf);              
-
-
+            } else if(strncmp(command,"ad",2)==0) {
+                Read_AD();
+                sprintf(buf,"joy 0x%03x 0x%03x 0x%03x 0x%03x", AD00, AD01, AD02, AD03);
+                write(buf);
             } else if(strncmp(command,"twist ",6)==0) {
                 int tmp;
                 for(tmp=0,tok = strtok(command," "); tok && tmp<=6 ; tok=strtok(0," "),tmp++) {
                     if(tmp>0) {
-                        twist[tmp-1]=strtod(tok,NULL); 
+                        twist[tmp-1]=strtod(tok,NULL);
                     }
-                }
-                
+                }                
                 // Yaw
                 if(twist[5]>0.01) {
                     pwmtarget[0]= 100;
@@ -245,10 +263,10 @@ main(void) {
                 int tmp;
                 for(tmp=0,tok = strtok(command," "); tok && tmp<=2 ; tok=strtok(0," "),tmp++) {
                     if(tmp == 1) {
-                        p3_5=(int)strtod(tok,NULL); 
+                        PANDA=(int)strtod(tok,NULL); 
                     }
                 }
-                sprintf(buf,"panda %s",p3_5 ? "on":"off");
+                sprintf(buf,"panda %s",PANDA ? "on":"off");
                 write(buf);              
             } else if(strncmp(command,"charge ",7)==0) {
                 int tmp;
@@ -257,28 +275,32 @@ main(void) {
                         p1_2=(int)strtod(tok,NULL); 
                     }
                 }
-                sprintf(buf,"charge %s",p1_2 ? "on":"off");
+                sprintf(buf,"charge %s",CHARGE ? "on":"off");
                 write(buf);              
             } else if(strncmp(command,"joy",3)==0) {
                 sprintf(buf,"joy %s%s%s%s%s",
-                        p1_3 ? ""    :"up ",
-                        p1_4 ? ""  :"down ",
-                        p1_5 ? ""  :"left ",
-                        p1_6 ? "" :"right ",
-                        p1_7 ? "":"center" );
+                        JOY_UP ? ""    :"up ",
+                        JOY_DOWN ? ""  :"down ",
+                        JOY_LEFT ? ""  :"left ",
+                        JOY_RIGHT ? "" :"right ",
+                        JOY_CENTER ? "":"center" );
                 write(buf);                            
-            } else       
-              write("Unknown command:'");
+            } else {      
+                sprintf(buf,"Unknown command:'%s'",command);
+                write(buf);                            
+            }
             putchar('>');    
             putchar(' ');
             command[0]=0;
         }        
+        
+#if 0        
         // 300uS needed. On 48Mhz each cycle is ~21nS, so
         // 300 000nS/21=~1200
         for(j=0;j<7;j++)
             uDelay(255); 
 
-        p9_4=0;
+        CS4=0; // enable left Melexis
         // 300uS needed. On 48Mhz each cycle is ~21nS, so
         // 300 000nS/21=~1200
         for(j=0;j<2;j++)
@@ -296,18 +318,140 @@ main(void) {
 
         int x;
         for(x=0;x<4;x++) {
-#if 0
             unsigned short c; /* 16 bit value */
             pd9_6=0;
             c=SPI4_receive();
             sprintf(buf,"SPI4 %x",c);
             write(buf);
-#endif
             pd9_6=1;
-            for(j=0;j<2;j++)            
+            for(j=0;j<2;j++)
                 uDelay(255); 
         }
-              
-        p9_4=1;
+        CS4=1; // disable melexis   
+#endif        
+
+#if 0
+        unsigned short c,c1,c2,c3,c4; /* 16 bit value */
+        CS6=0; // enable gyro
+        uDelay(100);
+        /*
+         * 0x80 is most significant bit=1 and indicates we 
+         * want to read register, not write. 0x0F is "whoami"
+         * and should be responded by 1101 0011 or 211 in dec or 0xd3 in hex 
+         */
+        SPI6_send(0x0F | 0x80); 
+        uDelay(100);
+        c=SPI6_receive();
+        CS6=1; // disable gyro
+        sprintf(buf,"gyro %x",c);
+        write(buf);
+        uDelay(50);
+
+        CS6=0; // enable gyro
+        uDelay(100);
+        /*
+         * 0x80 is most significant bit=1 and indicates we 
+         * want to read register, not write. 0x20 is "turn on"
+         * and should be responded by 1101 0011 or 211 in dec or 0xd3 in hex 
+         */
+        SPI6_send(0x20 | 0x00); 
+        uDelay(100);
+        SPI6_send(1|2|4|8); 
+        CS6=1; // disable gyro
+        uDelay(100);
+        CS6=0; // enable gyro
+        uDelay(100);
+        /*
+         * 0x80 is most significant bit=1 and indicates we 
+         * want to read register, not write. 0x0F is "whoami"
+         * and should be responded by 1101 0011 or 211 in dec or 0xd3 in hex 
+         */
+        SPI6_send(0x26 | 0x80); 
+        uDelay(100);
+        c1=SPI6_receive();
+        CS6=1; // disable gyro
+        uDelay(100);
+        CS6=0; // enable gyro
+        uDelay(100);
+        /*
+         * 0x80 is most significant bit=1 and indicates we 
+         * want to read register, not write. 0x0F is "whoami"
+         * and should be responded by 1101 0011 or 211 in dec or 0xd3 in hex 
+         */
+        SPI6_send(0x29 | 0x80); 
+        uDelay(100);
+        c2=SPI6_receive();
+        CS6=1; // disable gyro
+        uDelay(100);
+        CS6=0; // enable gyro
+        uDelay(100);
+        /*
+         * 0x80 is most significant bit=1 and indicates we 
+         * want to read register, not write. 0x0F is "whoami"
+         * and should be responded by 1101 0011 or 211 in dec or 0xd3 in hex 
+         */
+        SPI6_send(0x2b | 0x80); 
+        uDelay(100);
+        c3=SPI6_receive();
+        CS6=1; // disable gyro
+        uDelay(100);        
+        CS6=0; // enable gyro
+        uDelay(100);
+        /*
+         * 0x80 is most significant bit=1 and indicates we 
+         * want to read register, not write. 0x0F is "whoami"
+         * and should be responded by 1101 0011 or 211 in dec or 0xd3 in hex 
+         */
+        SPI6_send(0x2d | 0x80); 
+        uDelay(100);
+        c4=SPI6_receive();
+        CS6=1; // disable gyro
+
+        sprintf(buf,"gyro temp %d x_h %d y_h %d z_h %d",(signed char)(c1 &0xff),(signed char)(c2&0xff),(signed char)(c3&0xff),(signed char)(c4&0xff));
+        write(buf);
+#if 0
+        sprintf(buf,"%s %s %s %s %s"
+                ,(c2 & (1 << 12)) ? "abt ":""  
+                ,(c2 & (1 << 13)) ? "oer ":""
+                ,(c2 & (1 << 14)) ? "fer ":""
+                ,(c2 & (1 << 15)) ? "per ":""
+                ,(c2 & (1 << 16)) ? "sum ":""
+                  );
+        write(buf);
+
+        sprintf(buf,"%s %s %s %s %s"
+                ,(c3 & (1 << 12)) ? "abt ":""  
+                ,(c3 & (1 << 13)) ? "oer ":""
+                ,(c3 & (1 << 14)) ? "fer ":""
+                ,(c3 & (1 << 15)) ? "per ":""
+                ,(c3 & (1 << 16)) ? "sum ":""
+                  );
+        write(buf);
+#endif
+#endif
+        
+#if 0
+//        uDelay(100);
+        /*
+         * 0x80 is most significant bit=1 and indicates we 
+         * want to read register, not write. 0x0b is "temperature"
+         */
+        SPI0_send_data( (0x0b >> 1) | 0x80); 
+//        uDelay(100);
+        unsigned short c=SPI0_receive();
+        sprintf(buf,"acce0 %x",c);
+        write(buf);
+        uDelay(100);
+        /*
+         * 0x80 is most significant bit=1 and indicates we 
+         * want to read register, not write. 0x0b is "temperature"
+         */
+        SPI2_send_data( (0x0b >> 1) | 0x80); 
+//        uDelay(100);
+        c=SPI2_receive();
+        sprintf(buf,"acce2 %x",c);
+        write(buf);
+#endif
+
     }
 }

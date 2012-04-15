@@ -29,56 +29,78 @@
 #include "main.h"
 #include "uart.h"
 
-#define TIMERB2COUNT	100
-#define TIMER4COUNT	100
-
-static void ConfigureOperatingFrequency(char mode);
-static void ConfigurePortPins(void);
 volatile struct statuses status;
 unsigned int base_freq;
 
+static void
+ConfigureOperatingFrequency(char mode) {
+    unsigned short i;
+
+    prr = 0xAA;
+    ccr = 0x1F;
+    prr = 0x00;
+    prc0 = 1;
+    pm3 = 0x40;                                        // peripheral clock 24MHz
+    prc0 = 0;
+    prc2 = 1;
+    *(unsigned short *) &plc0 = 0x0226;                // 48MHz, PLL = 96MHz
+    prc2 = 0;
+    base_freq = 24000000;
+
+    for (i = 0; i < 0x8000u; i++);                         /* Add delay
+                                                            * for PLL to
+                                                            * stabilise. */
+    /* 
+     * Disable the port pins 
+     */
+    pd8_7 = 0;
+    pd8_6 = 0;
+
+    /* 
+     * Disable the pull-up resistor 
+     */
+    pu25 = 0;
+
+    /* 
+     * Enable writing to CM0 
+     */
+    prc0 = 1;
+
+    /* 
+     * Start the 32KHz crystal 
+     */
+    cm04 = 1;
+
+    /* 
+     * Disable writing to CM0 
+     */
+    prc0 = 0;
+
+    /* 
+     * Enable writing to PM2 
+     */
+    prc1 = 1;
+    /* 
+     * Disable clock changes 
+     */
+    pm21 = 1;
+    pm26 = 1;                                              
+    /* 
+     * Disable writing to PM2 
+     */
+    prc1 = 0;
+    cst_tcspr = 0;
+    tcspr = 0x08;
+    cst_tcspr = 1;                                        
+}
+
 void 
 OLED_On(void) {
-    // Make ports safe
-    p4_0 = 0;                                              // DC (data/command)
-    p4_2 = 0;                                              // reset pin
-    p4_4 = 0;                                              // VCC pin
-    p4_5 = 0;                                              // VDD is reversed (0-on, 1-off), but switched ON first, so keep it like that  :)
-
-    // Port function is IO
-    p4_0s = 0;
-    p4_2s = 0;
-    p4_4s = 0;
-    p4_5s = 0;
-
-    // Ports are output
-    pd4_0 = 1;                                             // Reset pin
-    pd4_2 = 1;                                             // Reset pin
-    pd4_4 = 1;                                             // VCC
-    pd4_5 = 0;                                             // VDD
-
-    // Make sure VCC is Off
-    p4_4 = 0;
-    uDelay(10);
-
-    // Reset sequence
-    p4_2 = 1;
-    uDelay(100);
-    p4_2 = 0;
-    uDelay(100);
-    p4_2 = 1;
-    uDelay(100);
-
-    // Enable VCC
-    p4_4 = 1;
-    uDelay(100);
 }
 
 
-void
-PWM_Init(void)
-{
-
+static void 
+PWM_Init(void) {
     /* 
      * Removes Protection for INVC0 & INVC1 Registers 
      */
@@ -94,6 +116,7 @@ PWM_Init(void)
      */
     invc0 = 0x1C;
 
+    prc1 = 1;
     /* 
      * Three-Phase PWM Control Register1 - 00110000b b0 INV10 Timers A1,
      * A2 & A4 Trigger : Underflow of Timer B2 b1 INV11 Timers A1-1, A2-1 
@@ -194,339 +217,189 @@ PWM_Init(void)
     ta4 = 0;
 
     /* 
-     * Timer A1 register 
-     */
-    // ta1 = ((TIMERB2COUNT * 2) / 3);
-
-    /* 
-     * Timer A2 register 
-     */
-    // ta2 = ((TIMERB2COUNT * 1) / 3);
-
-    /* 
-     * Removes Protection for P3_6S,P3_2S & P3_4S Registers 
-     */
-    // prc30 = 1;
-    /* 
-     * Initialize port 3 for output 
-     */
-    pd3 = 0xFF;
-
-    /* 
-     * Port P3_2 Function Select Register - 00000010b b2:b0
-     * PSEL2:PSEL0 Three-phase motor control output b7:b3 - No
-     * register bits; 
-     */
-    p3_2s = 0x01;
-
-    /* 
-     * Port P3_,3 Function Select Register - 00000010b b2:b0
-     * PSEL2:PSEL0 Three-phase motor control output b7:b3 - No
-     * register bits; 
-     */
-    // p3_3s = 0x02;
-    /* 
-     * Port P3_4 Function Select Register - 00000010b b2:b0
-     * PSEL2:PSEL0 Three-phase motor control output b7:b3 - No
-     * register bits; 
-     */
-    p3_4s = 0x01;
-
-    /* 
-     * Port P3_5 Function Select Register - 00000010b b2:b0
-     * PSEL2:PSEL0 Three-phase motor control output b7:b3 - No
-     * register bits; 
-     */
-    // p3_5s = 0x02;
-    /* 
-     * Port P3_6 Function Select Register - 00000010b b2:b0
-     * PSEL2:PSEL0 Three-phase motor control output b7:b3 - No
-     * register bits 
-     */
-    p3_6s = 0x01;
-
-    /* 
-     * Port P3_7 Function Select Register - 00000010b b2:b0
-     * PSEL2:PSEL0 Three-phase motor control output b7:b3 - No
-     * register bits; 
-     */
-    // p3_7s = 0x02;
-    p3_7s = 0;
-    pd3_7 = 1;
-    p3_7 = 0;
-
-    /* 
-     * Protects P3_6S,P3_2S & P3_4S Registers 
-     */
-    // prc30 = 0;
-    /* 
      * Setting timer A4, timer A1, timer A2 and timer B2 start flag 
      */
     tabsr = 0x96;
+
+    /* Configure outputs */
+    
+    LEFT_INAd    = PD_OUTPUT;
+    LEFT_INBd    = PD_OUTPUT;
+    RIGHT_INAd   = PD_OUTPUT;
+    RIGHT_INBd   = PD_OUTPUT;
+
+    LEFT_INA    = 0;
+    LEFT_INB    = 0;
+    RIGHT_INA   = 0;
+    RIGHT_INB   = 0;
+
+    LEFT_DIAGAd  = PD_OUTPUT;
+    LEFT_DIAGBd  = PD_OUTPUT;
+    RIGHT_DIAGAd = PD_OUTPUT;
+    RIGHT_DIAGBd = PD_OUTPUT;
+
+    LEFT_DIAGA   = 0;
+    LEFT_DIAGB   = 0;
+    RIGHT_DIAGA  = 0;
+    RIGHT_DIAGB  = 0;
+
+    
+    LEFT_PWMd    = PD_OUTPUT;
+    LEFT_PWMs    = PF_TIMER;
+    RIGHT_PWMd   = PD_OUTPUT;
+    RIGHT_PWMs   = PF_TIMER;
+    LEFT_PWM     = 0;
+    RIGHT_PWM    = 0;
 
     // FIXME, timer3 start into right place
     TABSR_bit.TA3S = 1;
 }
 
+static void 
+Heartbeat_Init(void) {
+    // Init_TMRB5 1 mS timer
+    tb5mr = 0x80;                                          // timer mode,fc/8 = 1,0 MHz
+    tb5 = 4800;                                            // 1MHz/25 - 1; Fi = 40kHz
+    tb5ic = 1;                                             // level 1 interrupt
+    tb5s = 1;
+    ticks = 0;
+    LED1d  = PD_OUTPUT;
+}
+
+static void 
+Buzzer_Init(void) {
+    BUZZERs = PF_MOTOR;
+    BUZZERd = PD_OUTPUT; 
+}
+
+static void 
+Panda_Init(void) {
+    PANDAd = PD_OUTPUT; 
+    PANDA  = 0;
+}
+
+static void 
+Coilgun_Init(void) {
+    KICKd = PD_OUTPUT; 
+    pu22 = 1; // ball detect p7_3 pullup on
+}
+
+static void 
+CapacitorCharger_Init(void) {
+    CHARGEd = PD_OUTPUT; 
+}
+
+static void 
+Analog_Init(void) {
+
+    AN00s = PF_ANALOG;
+    AN01s = PF_ANALOG;
+    AN02s = PF_ANALOG;
+    AN03s = PF_ANALOG;
+
+    AN00d = PD_INPUT;
+    AN01d = PD_INPUT;
+    AN02d = PD_INPUT;
+    AN03d = PD_INPUT;
+
+    AN00 = 0;
+    AN01 = 0;
+    AN02 = 0;
+    AN03 = 0;
+    
+    ch0_ad0con0  = 0; // does not matter in single sweep mode       
+    ch1_ad0con0  = 0; // does not matter in single sweep mode           
+    ch2_ad0con0  = 0; // does not matter in single sweep mode
+    md0_ad0con0  = 0; // single sweep mode          
+    md1_ad0con0  = 1; // single sweep mode
+    trg_ad0con0  = 0; // software tells when to start, not HW            
+    adst_ad0con0 = 0; // we set this later to 1 when we start AD conversion to start
+    cks0_ad0con0 = 0; // divide by 8   
+    
+    bits_ad0con1 = 8; // 8 bit resolution
+    vcut_ad0con1 = 1; // Disable reference voltage to save power
+
+    smp_ad0con2  = 1; // with sample and hold
+    aps0_ad0con2 = 0; // an0_0 to an0_7
+    aps1_ad0con2 = 1; // an0_0 to an0_7
+    trg0_ad0con2 = 0; // does not matter
+
+    scan0_ad0con1 = 1; // read AN0_0 to AN0_3
+    scan1_ad0con1 = 0; // read AN0_0 to AN0_3
+    md2_ad0con1   = 0; // not repeat sweep mode         
+    cks1_ad0con1  = 0; // divide by 8
+    opa0_ad0con1  = 0; // External op amp not used
+    opa1_ad0con1  = 0; // External op amp not used
+
+    dus_ad0con3    = 0; // no DMA
+    mss_ad0con3    = 0; // not multi-port sweep mode
+    cks2_ad0con3   = 1; // divide by 8
+    msf0_ad0con3   = 0; // multi port sweep status flag. Disabled.
+    msf1_ad0con3   = 0; // multi port sweep status flag. Disabled.
+}
+
+// Reading all AD-s in single sweep mode (chapter 19.1.3 on HW manual)
 void
-HardwareSetup(void)
-{
+Read_AD(void) {
+    // Converts the analog voltage input to a set of pins into a digital code one-by-one.
+    // The pins are selected by setting bits SCAN1 and SCAN0 in the AD0CON1
+    // register and bits APS1 and APS0 in the AD0CON2 register  
+      
+    vcut_ad0con1 = 1; // Enable reference voltage
+    uDelay(10); // Wait 1uS. FIXME proper number
+    
+    // Start reading AD
+    adst_ad0con0 = 1;   
+    uDelay(100);
+    // Wait till complete
+    while(adst_ad0con0 == 1) {
+     NOP();
+    };
+//   vcut_ad0con1 = 0; // Disable reference voltage to save power
+    
+   return;
+}
+
+
+static void 
+Joy_Init(void) {
+//    JOY_LEFTd = PD_OUTPUT;
+//    JOY_RIGHTd = PD_OUTPUT;
+//    JOY_UPd = PD_OUTPUT;
+//    JOY_DOWNd = PD_OUTPUT;
+//    JOY_CENTERd = PD_OUTPUT;
+    pu02 = 1; // P1_0 to P1_3 Pull-up Control Bit
+    pu03 = 1; // P1_4 to P1_7 Pull-up Control Bit
+}
+
+void
+HardwareSetup(void) {
     /* 
      * Configures CPU clock 
      */
     DISABLE_IRQ;
     ConfigureOperatingFrequency(1);
+//    ConfigurePortPins();
 
-    // Init_TMRB5 1 mS timer
-    tb5mr = 0x80;                                          // timer mode,fc/8 = 1,0 MHz
-    tb5 = 9999;                                            // 1MHz/25 - 1; Fi = 40kHz
-    tb5ic = 1;                                             // level 1 interrupt
-    tb5s = 1;
-    ticks = 0;
-    
-    ConfigurePortPins();
-
-    SPI3_Init(); // OLED
-    SPI4_Init(); // Melexis sensor left
-    SPI6_Init(); // gyro
-    SPI7_Init(); // Melexis sensor right
+    Buzzer_Init();
+    Heartbeat_Init();
+    CapacitorCharger_Init();
+    Coilgun_Init();
+    Panda_Init();
+    Joy_Init();
+    SPI0_Init();  // Accel sensor left
+    SPI2_Init();  // Accel sensor right
+    SPI3_Init();  // OLED
+    SPI4_Init();  // Melexis sensor left
     uart5_init(); // Panda
-//    uart8_init(); // ?
-#if 1
-    OLED_On();
+    SPI6_Init();  // gyro
+    SPI7_Init();  // Melexis sensor right
+//    OLED_On();    // ?
     OLED_Init();
-#endif    
     ENABLE_IRQ;
+    Analog_Init();
     PWM_Init();
-
 }
 
-static void
-ConfigureOperatingFrequency(char mode)
-{
-    unsigned short i;
 
-    prr = 0xAA;
-    ccr = 0x1F;
-    prr = 0x00;
-    prc0 = 1;
-    pm3 = 0x40;                                        // peripheral clock 24MHz
-    prc0 = 0;
-    prc2 = 1;
-    *(unsigned short *) &plc0 = 0x0226;                // 48MHz, PLL = 96MHz
-    prc2 = 0;
-    base_freq = 24000000;
-
-    for (i = 0; i < 0x8000u; i++);                         /* Add delay
-                                                            * for PLL to
-                                                            * stabilise. */
-    /* 
-     * Disable the port pins 
-     */
-    pd8_7 = 0;
-    pd8_6 = 0;
-
-    /* 
-     * Disable the pull-up resistor 
-     */
-    pu25 = 0;
-
-    /* 
-     * Enable writing to CM0 
-     */
-    prc0 = 1;
-
-    /* 
-     * Start the 32KHz crystal 
-     */
-    cm04 = 1;
-
-    /* 
-     * Disable writing to CM0 
-     */
-    prc0 = 0;
-
-    /* 
-     * Enable writing to PM2 
-     */
-    prc1 = 1;
-    /* 
-     * Disable clock changes 
-     */
-    pm21 = 1;
-    pm26 = 1;                                              
-    /* 
-     * Disable writing to PM2 
-     */
-    prc1 = 0;
-    cst_tcspr = 0;
-    tcspr = 0x08;
-    cst_tcspr = 1;                                        
-}
-
-static void
-ConfigurePortPins(void)
-{
-    /* 
-     * All pins are input by default 
-     */
-    pur0 = 0;                            
-
-    pd0 = 0;
-    pd1 = 4; // charge is output                                
-    p0 = p1 = 0;
-    p0_0s = p0_1s = p0_2s = p0_3s = p0_4s = p0_5s = p0_6s = p0_7s = 0;
-    p1_0s = p1_1s = p1_3s = p1_4s = p1_5s = p1_6s = p1_7s = 0;
-
-    p1_2s = 0; // charge
-   
-    pu02=1;
-    pu03=1;
-
-    // port 2 is all about motor driving simple digital signals
-    // usually all 8 bits are outputs
-    p2 = 0x00;    
-    pd2 = 0xFF;                             
-    p2_0s = p2_1s = p2_2s = p2_3s = 0;
-    p2_4s = p2_5s = p2_6s = p2_7s = 0;
-
-    // port 3 contains some PWMs for motors and buzzer
-    p3 = 0;                                                 
-    pd3 = 0xAB;                                            
-    p3_0s = p3_1s = p3_3s = p3_5s = p3_7s = 0;
-    p3_2s = p3_4s = 0x01;// PWM ports
-    pur1 = 0x04;        
-    pd5 =  (1 << 7); 
-    p5_0s = p5_1s = p5_2s = p5_3s = p5_5s = p5_7s = 0;
-    p5_6s = p5_4s = 0x03;
-   
-    p5 = 0;                                                // 
-
-    // P6_4...P6_7 is E8a
-    pur2 = 0;       
-    pd6_0 = 0;
-    pd6_1 = 0;
-    pd6_2 = 0;
-    pd6_3 = 0;
-    p6_2s = 3;
-    p6_3s = 3;
-
-    pd7 = 0x90;                                            
-    p7 = 0;                                               
-    p7_0s = p7_1s = p7_3s = p7_5s = p7_6s = 3;             
-    p7_2s = p7_4s = p7_7s = 0;                             
-    pd8 = 2;                                               
-    p8 = 0;
-    p8_0s = 3;
-
-    p8_1s = 0;
-
-    p8_2s = 0;                                             
-    p8_3s = 0;                                             
-    pd8_4 = 0;                                             
-    p8_4s = 0;                                             
-    pu24 = 1;  
-    pd10 = 0;                                              
-    p10 = 0;
-    p10_1 = 0;
-    p10_0s = p10_1s = p10_2s = p10_3s = p10_4s = p10_5s = p10_6s = p10_7s = 0x80;
-// FIXME temportary hack
-//    p1_2=1; // charge on
-//    p3_5=1; // panda on
-
-}
-
-// 1000 Hz interrupt
-#pragma vector=TIMER_A3
-__interrupt void
-ms_int(void)
-{
-
-}
-
-#pragma vector=TIMER_B5
-__interrupt void
-s_int(void) {
-    // This interrupt gets called 48 times per second
-  
-    // We may want to do something once per second in main loop
-    // so we set flag to indicate when to do.
-    if(++ticks % 48 == 0) {
-      status.sek_flag=1;
-      // This turns on PWM on buzzer
-        ta4=(int)abs(64 -  p1_3*2 + p1_4*2 + p1_5*4 + p1_6*8 + p1_3*16 *TIMER4COUNT);
-    } else
-    if(ticks % 48 == 1  ) {
-        // Turn off buzzer
-        ta4=0;
-    }
-    
-    // Make sure pwm-s get closer to targets but not too fast. 
-    if(pwmtarget[0] < pwm[0]) {
-        pwm[0]--;
-    } else if(pwmtarget[0] > pwm[0]) { 
-        pwm[0]++;
-    }
-    
-    if(pwmtarget[1] < pwm[1]) {
-        pwm[0]--;
-    } else if(pwmtarget[1] > pwm[1]) {
-        pwm[1]++;
-    }
-
-    // Update MCU PWM timers for new values
-    ta1=(int)abs(pwm[0]*TIMERB2COUNT);
-    ta2=(int)abs(pwm[1]*TIMERB2COUNT);
-
-    // Make sure proper bits set on motor drivers to go forward or backward
-    if(pwm[0] > 0) {
-        p2_0=1; // right in a
-        p2_1=0; // right in b
-    } else {
-        p2_0=0; // right in a
-        p2_1=1; // right in b
-    }
-    
-    if(pwm[1] > 0) {
-        p2_2=1; // left in a
-        p2_3=0; // left in b
-    } else {
-        p2_2=0; // left in a
-        p2_3=1; // left in b
-    }
-
-    // Enable motors
-    p2_4=1; // right diag a (enable)
-    p2_5=1; // right diag b (enable)
-    p2_6=1; // left diag a (enable)
-    p2_7=1; // left diag b (enable)
-        
-    // Reduce PWM targets for next turn. This makes motors slow down in 
-    // ~2 seconds if no new commands are received.
-    if(pwmtarget[0] > 0) {
-        pwmtarget[0]--;
-    } else if(pwmtarget[0] < 0) {
-        pwmtarget[0]++;
-    }
-
-    if(pwmtarget[1] > 0) {
-        pwmtarget[1]--;
-    } else if(pwmtarget[1] < 0) { 
-        pwmtarget[1]++;
-    }
-    
-#if 0
-      p1_3 ? ""    :"up ",
-      p1_4 ? ""  :"down ",
-      p1_5 ? ""  :"left ",
-      p1_6 ? "" :"right ",
-      p1_7 ? "":"center" );
-#endif   
-   
-     if(ticks % 48 == 1  ) {
-         ta4=0;
-    }
-    
-    
-}
 

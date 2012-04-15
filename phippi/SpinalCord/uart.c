@@ -47,13 +47,15 @@ unsigned short rx5_ptr = 0;
 
 int putchar (int i ) {
     if( tx5_ptr == tx5_ptrr) { 
-        while(ti_u5c1 == 0)
+        while(ti_u5c1 == 0) {
             NOP();
+        }
         u5tb = (short) i;
     } else {
-       tx5_buff[tx5_ptr++ ]= (unsigned char)i;
-       if (tx5_ptr >= TX_BUFF_SIZE) 
-           tx5_ptr = 0;
+        tx5_buff[tx5_ptr++ ]= (unsigned char)i;
+        if (tx5_ptr >= TX_BUFF_SIZE) {
+            tx5_ptr = 0;
+        }
     }
     return i;
 }
@@ -68,37 +70,65 @@ __interrupt void _uart5_transmit(void)
     }
 }
 
+void 
+uart5_init(void) {
+//    u5brg = (f1_CLK_SPEED / 16 / 115200) - 1;	
+    u5brg = (f1_CLK_SPEED / 16 / 9600) - 1;	
 
-void uart5_init(void)
-{
-	u5brg = (f1_CLK_SPEED / 16 / 115200) - 1;	
-	u5mr = 0x05;		
-  	u5c0 = 0x10; 		
-	u5tb = u5rb;	
-  	u5tb = 0;			
-	s5ric = 0x02;	
-   	s5tic = 0x01;	
-	p7_6s = 0x03;
-	pd7_6 = 1;
-	pd8_0 = 0;
-	u5c1 = 0x05; 
+    smd0_u5mr  = 1;  // 8 bit character lenght
+    smd1_u5mr  = 0;  // 8 bit character lenght
+    smd2_u5mr  = 1;  // 8 bit character lenght
+    ckdir_u5mr = 0; // internal clock
+    stps_u5mr  = 0; // Stop bit length 0
+    prye_u5mr  = 0; // parity not enabled
+    pry_u5mr   = 0; // parity not enabled
+    iopol_u5mr = 0; // IO polarity is normal
+
+    clk0_u5c0  = 0; // clock source f1
+    clk1_u5c0  = 0; // clock source f1
+    txept_u5c0 = 0; // Transmit register empty flag
+    crd_u5c0   = 1; // CTS disabled
+    nch_u5c0   = 0; // Select an output mode of the TXDi pin??
+    ckpol_u5c0 = 0; // Select a transmit/receive clock polarity
+    uform_u5c0 = 0; // Select either LSB first or MSB first
+
+    te_u5c1    = 1; // Set the bit to 1 to enable data transmission/reception
+    ti_u5c1    = 0; // Transmit buffer empty flag
+    re_u5c1    = 1; // Set the bit to 1 to enable data reception
+    ri_u5c1    = 0; // Receive complete flag
+    u5irs_u5c1 = 0; // Select a source for the UARTi transmit interrupt
+    u5rrm_u5c1 = 0; // Set the bit to 1 to use continuous receive mode
+    u5lch_u5c1 = 0; // Set the bit to 1 to use logic inversion
+    
+    u5tb = u5rb;	
+    u5tb = 0;			
+        
+    s5ric = 0x02;   // Receive interrupt
+    s5tic = 0x01;   // Send interrupt
+
+    TX5s = PF_UART;
+    TX5d = PD_OUTPUT;
+    RX5s = PF_UART;
 }
 
-void uart8_init(void) {
-        u8brg = (f1_CLK_SPEED / 16 / 9600) - 1;	
-	u8mr = 0x05;		
-  	u8c0 = 0x10; 		
-	u8tb = u8rb;		
-  	u8tb = 0;			
-	s8ric = 0x03;			
+void 
+uart8_init(void) {
+        u8brg = (f1_CLK_SPEED / 16 / 9600) - 1;
+	u8mr = 0x05;
+  	u8c0 = 0x10;
+	u8tb = u8rb;
+  	u8tb = 0;
+	s8ric = 0x03;
 	p7_3s = 0x07;
 	pd7_3 = 1;
 	pd7_5 = 0;
         pu23 = 1;  // RX8 pullup
-	u8c1 = 0x05; 		
+	u8c1 = 0x05;
 }
+
 #if 0
-void uart7_init(void) {
+void 
+uart7_init(void) {
         u7brg = (f1_CLK_SPEED / 16 / 9600) - 1;
 	u7mr = 0x05;
   	u7c0 = 0x10;
@@ -112,24 +142,27 @@ void uart7_init(void) {
 	u7c1 = 0x05;
 }
 #endif
-void putchar5hexnr (unsigned char d) {
-    if (d> 9) 
+
+void 
+putchar5hexnr (unsigned char d) {
+    if (d> 9) {
         d+=7;
+    }
     putchar(d+'0');
 }
 
-void puthex ( unsigned char d) {
+void 
+puthex ( unsigned char d) {
     putchar5hexnr( d>>4 );
     putchar5hexnr(d&0x0F);
 }
 
 
 #pragma vector = UART5_RX
-__interrupt void _uart5_receive(void)
-{
-    if (rx5_ptr >= RX_BUFF_SIZE) 
+__interrupt void _uart5_receive(void) {
+    if (rx5_ptr >= RX_BUFF_SIZE) {
         rx5_ptr = RX_BUFF_SIZE-1;
-
+    }
     while(ri_u5c1 == 0) {
         /* Make sure that the receive is complete */
     }
@@ -156,28 +189,28 @@ __interrupt void _uart5_receive(void)
     }
 }
 
-void uart8_send ( unsigned char d) {
-    while(ti_u8c1 == 0) 
+void 
+uart8_send ( unsigned char d) {
+    while(ti_u8c1 == 0) {
         NOP();
+    }
     u8tb = (short)d;
 }
 
-void  uart7_send(unsigned char d) {
-    while(ti_u7c1 == 0) 
+void 
+uart7_send(unsigned char d) {
+    while(ti_u7c1 == 0) {
         NOP();
+    }
     u7tb = (short)d;
 }
 
-
 #if 1
 #pragma vector = UART4_RX
-__interrupt void _uart4_receive(void)
-{
-  
-  LED1=0; 
-  if (rx5_ptr >= RX_BUFF_SIZE) 
+__interrupt void _uart4_receive(void) {
+    if (rx5_ptr >= RX_BUFF_SIZE) {
         rx5_ptr = RX_BUFF_SIZE-1;
-
+    } 
     while(ri_u4c1 == 0) {
         /* Make sure that the receive is complete */
     }
