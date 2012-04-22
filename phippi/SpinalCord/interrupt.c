@@ -38,11 +38,34 @@ s_int(void) {
     if(ticks % 100 == 0) {
         status.sek_flag=1;
         // This turns on PWM on buzzer
-        ta4=1;
+        ta4=1;        
     } else if(ticks % 100 == 1  ) {
         // Turn off buzzer
         ta4=0;
     }
+
+    if(JOY_RIGHT == 0) {
+//      OLED_Set_Display_Mode(0x03);                           // Inverse display
+      PANDA = 0;
+    } else    
+    if(JOY_LEFT == 0) {
+//        OLED_Set_Display_Mode(0x02);                           // Normal display
+        PANDA = 1;
+    } 
+
+    if(JOY_UP == 0) {
+        pwmtarget[0]+=2;
+        pwmtarget[1]+=2;
+    } else    
+    if(JOY_DOWN == 0) {
+        pwmtarget[0]-=2;
+        pwmtarget[1]-=2;
+    } 
+    
+    if(pwmtarget[0]> 100) pwmtarget[0]= 100;
+    if(pwmtarget[1]> 100) pwmtarget[1]= 100;
+    if(pwmtarget[0]<-100) pwmtarget[0]=-100;
+    if(pwmtarget[1]<-100) pwmtarget[1]=-100;    
 #if 1
     // Make sure pwm-s get closer to targets but not too fast. 
     if(pwmtarget[0] < pwm[0]) {
@@ -63,7 +86,6 @@ s_int(void) {
     // Update MCU PWM timers for new values
     ta1=(int)abs(pwm[0]*TIMERB2COUNT/100);
     ta2=(int)abs(pwm[1]*TIMERB2COUNT/100);
-
     // Make sure proper bits set on motor drivers to go forward or backward
     if(pwm[0] == 0) {
         RIGHT_INA=0; // right in a
@@ -102,7 +124,7 @@ s_int(void) {
     // Reduce PWM targets for next turn. This makes motors slow down in 
     // ~2 seconds if no new commands are received.
     
-#if 0
+#if 1
     if(pwmtarget[0] > 0) {
         pwmtarget[0]--;
     } else if(pwmtarget[0] < 0) {

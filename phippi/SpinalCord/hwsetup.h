@@ -56,7 +56,6 @@ void HardwareSetup(void);
 #define LEFT_DIAGAd      pd2_6
 #define LEFT_DIAGBd      pd2_7
 
-
 // Serial 0, acceleration sensor 
 #define CLOCK0       p6_1
 #define CLOCK0d      pd6_1
@@ -176,10 +175,10 @@ void HardwareSetup(void);
 #define PANDAd      pd3_5
 
 // Joystick
-#define JOY_UP      p1_3
-#define JOY_DOWN    p1_4
-#define JOY_LEFT    p1_5
-#define JOY_RIGHT   p1_6
+#define JOY_RIGHT   p1_3
+#define JOY_LEFT    p1_4
+#define JOY_DOWN    p1_5
+#define JOY_UP      p1_6
 #define JOY_CENTER  p1_7
 
 #define JOY_UPd     pd1_3
@@ -217,8 +216,8 @@ void SPI3_Init(void);
 void SPI4_Init(void);
 void SPI6_Init(void);
 void SPI7_Init(void);
-void 
-OLED_On(void);
+void OLED_On(void);
+void SPI6_send(unsigned short);
 
 struct statuses {
     char sek_flag;

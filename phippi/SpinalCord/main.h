@@ -43,7 +43,7 @@ void OLED_Show_String(unsigned char a, char *Data_Pointer,
 void OLED_Draw_Rectangle(unsigned char Data, unsigned char a,
     unsigned char b, unsigned char c, unsigned char d, unsigned char e);
 void OLED_Set_Display_On_Off(unsigned char);
-
+short unsigned SPI6_receive(void) ;
 extern double twist[6];
 extern int pwm[2];
 extern int pwmtarget[2];
