@@ -218,7 +218,8 @@ void SPI6_Init(void);
 void SPI7_Init(void);
 void OLED_On(void);
 void SPI6_send(unsigned short);
-
+short unsigned SPI4_receive(void);
+void SPI4_send(unsigned short c);
 struct statuses {
     char sek_flag;
 };

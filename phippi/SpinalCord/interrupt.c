@@ -90,8 +90,8 @@ s_int(void) {
     if(pwm[0] == 0) {
         RIGHT_INA=0; // right in a
         RIGHT_INB=0; // right in b      
-//        RIGHT_DIAGA=0; // right diag a (disable)
-//        RIGHT_DIAGB=0; // right diag b (disable)
+        RIGHT_DIAGA=0; // right diag a (disable)
+        RIGHT_DIAGB=0; // right diag b (disable)
     } else if(pwm[0] > 0) {
         RIGHT_INA=1; // right in a
         RIGHT_INB=0; // right in b
@@ -107,8 +107,8 @@ s_int(void) {
     if(pwm[1] == 0) {
         LEFT_INA=0; // right in a
         LEFT_INB=0; // right in b      
-//        LEFT_DIAGA=0; // left diag a (disable)
-//        LEFT_DIAGB=0; // left diag b (disable)
+        LEFT_DIAGA=0; // left diag a (disable)
+        LEFT_DIAGB=0; // left diag b (disable)
     } else if(pwm[1] > 0) {
         LEFT_INA=1; // left in a
         LEFT_INB=0; // left in b

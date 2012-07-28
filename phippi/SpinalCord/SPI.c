@@ -177,7 +177,7 @@ SPI4_Init(void) { // Melexis 90316
     clk1_u4c0 = 0;                                         // 
     txept_u4c0 = 0;                                        // Transmit register empty flag 
     crd_u4c0 = 1;                                          // CTS disabled when 1
-    nch_u4c0 = 1;                                          // 0=Output mode "open drain" for TXD and CLOCK pin 
+    nch_u4c0 = 0;                                          // 0=Output mode "open drain" for TXD and CLOCK pin 
     ckpol_u4c0 = 1;                                        // CLK Polarity 
     uform_u4c0 = 1;                                        // 1=MSB first
 
@@ -449,6 +449,8 @@ short unsigned
 SPI4_receive(void) {
   short unsigned r;
   SPI4_send(0xFF);
+  uDelay(SPI_DELAY);  
+  uDelay(SPI_DELAY);  
   while (ri_u4c1 == 0) {
         NOP();
   }

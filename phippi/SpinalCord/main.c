@@ -95,7 +95,7 @@ main(void) {
     OLED_Fill_RAM(0x00);
     OLED_Fade_In();
     updateOLED1();    
-
+PANDA=1;
     while (1) {
         char buf[256];
         if (status.sek_flag==1) {
@@ -202,7 +202,8 @@ main(void) {
             command[0]=0;
         }        
         
-#if 0        
+#if 1    
+        int j;
         // 300uS needed. On 48Mhz each cycle is ~21nS, so
         // 300 000nS/21=~1200
         for(j=0;j<7;j++)
@@ -211,9 +212,9 @@ main(void) {
         CS4=0; // enable left Melexis
         // 300uS needed. On 48Mhz each cycle is ~21nS, so
         // 300 000nS/21=~1200
-        for(j=0;j<2;j++)
+        for(j=0;j<2;j++) {
             uDelay(255); 
-
+        }
         SPI4_send(0xAA);
         // 12uS needed. On 48Mhz each cycle is ~21nS, so
         // 2300nS/12=~220
@@ -224,16 +225,17 @@ main(void) {
         for(j=0;j<2;j++)
             uDelay(255); 
 
-        int x;
-        for(x=0;x<4;x++) {
+        int i;
+        for(i=0;i<4;i++) {
             unsigned short c; /* 16 bit value */
             pd9_6=0;
             c=SPI4_receive();
             sprintf(buf,"SPI4 %x",c);
             write(buf);
             pd9_6=1;
-            for(j=0;j<2;j++)
+            for(j=0;j<2;j++) {
                 uDelay(255); 
+            }
         }
         CS4=1; // disable melexis   
 #endif        
