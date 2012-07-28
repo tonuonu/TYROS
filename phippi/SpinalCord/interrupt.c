@@ -27,6 +27,8 @@
 #include "main.h"
 #include "uart.h"
 #include "hwsetup.h"
+#include "SPI.h"
+
 
 #pragma vector=TIMER_B5
 __interrupt void

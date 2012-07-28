@@ -1,5 +1,5 @@
 /*
- *  Copyright (c) 2011, Tõnu Samuel
+ *  Copyright (c) 2011, Tonu Samuel
  *  All rights reserved.
  *
  *  This file is part of TYROS.
@@ -19,7 +19,6 @@
  *
  */
 
-
 #include "ior32c111.h"
 #include <stdio.h>
 #include <string.h>
@@ -28,19 +27,10 @@
 #include "uart.h"
 #include "hwsetup.h"
 #include "gyro.h"
+#include "SPI.h"
 
 extern int alarm;
-
 volatile unsigned short ticks;
-
-
-void write(char *c) {
-   char *ptr=c;
-   while(*ptr)
-       putchar((int)*ptr++);
-   putchar(0x0a);
-   putchar(0x0d);
-}
 
 extern char command[TX_BUFF_SIZE];
 
@@ -85,17 +75,25 @@ main(void) {
     OLED_Set_Display_Mode(0x00);                           // Entire Display Off
     OLED_Show_Logo();
     OLED_Set_Display_Mode(0x02);                           // Entire Display On
-    Delay(2);
-    write("");
-    write("Robot!");
-    write("http://phippi.jes.ee/");
+    write(VT100RESET);
+    write(VT100RESETATTR);
+    write(VT100CURSORNULL);
+    write("+------------------------------------------------------------------------------+");
+    write(VT100CURSORPROMPT);
+    write("+------------------------------------------------------------------------------+");
+    write(VT100SCROLLSCREEN);
+    write(VT100CURSORHOME);
+    writeln("Robot!");
+    writeln("http://phippi.jes.ee/");
     putchar('>'); 
     putchar(' ');
+    write(VT100CURSORSAVE);
+    Delay(2);
     OLED_Fade_Out();
     OLED_Fill_RAM(0x00);
     OLED_Fade_In();
     updateOLED1();    
-PANDA=1;
+    PANDA=1;
     while (1) {
         char buf[256];
         if (status.sek_flag==1) {
@@ -108,11 +106,10 @@ PANDA=1;
         if(ticks % 10 == 0) {
             updateOLED();    
         }
+
         if(command[0]!=0) {
             char *tok;
-            if(strncmp(command,"gyro",4)==0) {
-
-            } else if(strncmp(command,"ad",2)==0) {
+            if(strncmp(command,"ad",2)==0) {
                 Read_AD();
                 sprintf(buf,"joy 0x%03x 0x%03x 0x%03x 0x%03x", AD00, AD01, AD02, AD03);
                 write(buf);
@@ -195,14 +192,15 @@ PANDA=1;
                 write(buf);                            
             } else {      
                 sprintf(buf,"Unknown command:'%s'",command);
-                write(buf);                            
+                writeln(buf);                            
             }
             putchar('>');    
             putchar(' ');
+            write(VT100CURSORSAVE);
             command[0]=0;
         }        
         
-#if 1    
+#if 0
         int j;
         // 300uS needed. On 48Mhz each cycle is ~21nS, so
         // 300 000nS/21=~1200
@@ -230,8 +228,8 @@ PANDA=1;
             unsigned short c; /* 16 bit value */
             pd9_6=0;
             c=SPI4_receive();
-            sprintf(buf,"SPI4 %x",c);
-            write(buf);
+//            sprintf(buf,"SPI4 %x",c);
+//            write(buf);
             pd9_6=1;
             for(j=0;j<2;j++) {
                 uDelay(255); 
@@ -241,26 +239,25 @@ PANDA=1;
 #endif        
 
 #if 1
-          
-        unsigned short c; /* 16 bit value */
+        unsigned short c,temp_raw,whoami; /* 16 bit value */
         signed char x=0,y=0,z=0;
-
         /*
          * 0x80 is most significant bit=1 and indicates we 
          * want to read register, not write. 0x0F is "whoami"
          * and should be responded by 1101 0011 or 211 in dec or 0xd3 in hex 
          */
-        c=gyro_read(WHOAMI);
-        if((unsigned char)c==211) {
+        whoami=gyro_read(WHOAMI);
+        if((unsigned char)whoami==211) {
             OLED_Show_String(  1,"Gyro OK" , 26, 5*8);
         } else {
-            sprintf(buf,"whoami %3d",(unsigned char) (c ));
+            sprintf(buf,"whoami %3d",(unsigned char) (whoami));
             OLED_Show_String(  1, buf, 26, 5*8);          
         }
         uDelay(50);
 
-        c=gyro_read(OUT_TEMP);
-        sprintf(buf,"temp %3d", c & 0xff );
+        temp_raw=gyro_read(OUT_TEMP);
+        signed char temp= temp_raw & 0xff;
+        sprintf(buf,"temp %3d", temp );
         OLED_Show_String(  1, buf, 0, 6*8);
         
         c=gyro_read(OUT_X_H);
@@ -278,32 +275,16 @@ PANDA=1;
         sprintf(buf,"Z %3d",y);
         OLED_Show_String(  1, buf, 50, 7*8);
 
+        write(VT100CURSORGYRO);        
 
+        sprintf(buf,"gyro temp:%3d x:%3d y:%3d z:%3d, %s",40-(signed char)temp,x,y,z,((unsigned char)whoami==211) ? "OK   " : "ERROR" );
+        writeln(buf);
 
-//        sprintf(buf,"gyro temp %d x_h %d y_h %d z_h %d",(signed char)(c1 &0xff),(signed char)(c2&0xff),(signed char)(c3&0xff),(signed char)(c4&0xff));
-//        write(buf);
-#if 0
-        sprintf(buf,"%s %s %s %s %s"
-                ,(c2 & (1 << 12)) ? "abt ":""  
-                ,(c2 & (1 << 13)) ? "oer ":""
-                ,(c2 & (1 << 14)) ? "fer ":""
-                ,(c2 & (1 << 15)) ? "per ":""
-                ,(c2 & (1 << 16)) ? "sum ":""
-                  );
-        write(buf);
-
-        sprintf(buf,"%s %s %s %s %s"
-                ,(c3 & (1 << 12)) ? "abt ":""  
-                ,(c3 & (1 << 13)) ? "oer ":""
-                ,(c3 & (1 << 14)) ? "fer ":""
-                ,(c3 & (1 << 15)) ? "per ":""
-                ,(c3 & (1 << 16)) ? "sum ":""
-                  );
-        write(buf);
-#endif
 #endif
         
-#if 0
+#if 1
+        write(VT100CURSORACC);
+
 //        uDelay(100);
         /*
          * 0x80 is most significant bit=1 and indicates we 
@@ -311,9 +292,18 @@ PANDA=1;
          */
         SPI0_send_data( (0x0b >> 1) | 0x80); 
 //        uDelay(100);
-        unsigned short c=SPI0_receive();
-        sprintf(buf,"acce0 %x",c);
+        unsigned short r=SPI0_receive();
+        sprintf(buf,"acce0 %x %s",r,(r & (1 << 13)) ?"ERROR":"OK   ");
         write(buf);
+        sprintf(buf,"%s %s %s %s %s"
+                ,(r & (1 << 12)) ? "abt ":""  
+                ,(r & (1 << 13)) ? "oer ":""
+                ,(r & (1 << 14)) ? "fer ":""
+                ,(r & (1 << 15)) ? "per ":""
+                ,(r & (1 << 16)) ? "sum ":""
+                  );
+        writeln(buf);
+        
         uDelay(100);
         /*
          * 0x80 is most significant bit=1 and indicates we 
@@ -321,10 +311,29 @@ PANDA=1;
          */
         SPI2_send_data( (0x0b >> 1) | 0x80); 
 //        uDelay(100);
-        c=SPI2_receive();
-        sprintf(buf,"acce2 %x",c);
+        r=SPI2_receive();
+        sprintf(buf,"acce0 %x %s",r,(r & (1 << 13)) ?"ERROR":"OK   ");
         write(buf);
+        sprintf(buf,"%s %s %s %s %s"
+                ,(r & (1 << 12)) ? "abt ":""  
+                ,(r & (1 << 13)) ? "oer ":""
+                ,(r & (1 << 14)) ? "fer ":""
+                ,(r & (1 << 15)) ? "per ":""
+                ,(r & (1 << 16)) ? "sum ":""
+                  );
+        writeln(buf);
 #endif
-
+#if 1
+        write(VT100CURSORAD);
+                Read_AD();
+                sprintf(buf,"AD 0x%03x 0x%03x 0x%03x 0x%03x", AD00, AD01, AD02, AD03);
+                write(buf);
+#endif
+                write(VT100CURSORPANDA);
+                write("Panda :");
+                write(PANDA ? "ON ":"OFF");
+                write(VT100CURSORCHARGER);
+                write("Charger :");
+                write(CHARGE ? "ON ":"OFF");
     }
 }

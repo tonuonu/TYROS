@@ -157,6 +157,18 @@ puthex ( unsigned char d) {
     putchar5hexnr(d&0x0F);
 }
 
+void write(char *c) {
+   char *ptr=c;
+   while(*ptr)
+       putchar((int)*ptr++);
+}
+
+void writeln(char *c) {
+   write(c);
+   putchar(0x0a);
+   putchar(0x0d);
+}    
+
 
 #pragma vector = UART5_RX
 __interrupt void _uart5_receive(void) {
@@ -174,8 +186,11 @@ __interrupt void _uart5_receive(void) {
         rx5_buff[rx5_ptr]=0;
         strcpy(command,rx5_buff);
         rx5_ptr=0;
+        write(VT100CURSORRESTORE);
         putchar(0x0a);
         putchar(0x0d);
+        write(VT100CURSORSAVE);
+
         break;
     case 127:
         rx5_ptr--;
@@ -184,7 +199,10 @@ __interrupt void _uart5_receive(void) {
     default:
        rx5_buff[rx5_ptr]= U5_in;
        rx5_ptr++;
+       write(VT100CURSORRESTORE);
        putchar(U5_in);
+       write(VT100CURSORSAVE);
+
        break;
     }
 }

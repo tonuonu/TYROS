@@ -29,6 +29,8 @@
 #include "main.h"
 #include "uart.h"
 #include "gyro.h"
+#include "SPI.h"
+
 
 volatile struct statuses status;
 unsigned int base_freq;

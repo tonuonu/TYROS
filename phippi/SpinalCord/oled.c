@@ -23,6 +23,7 @@
 #include "main.h"
 #include "hwsetup.h"
 #include "tnroman.h"
+#include "SPI.h"
 
 
 #define	OLED_Shift	0x1C

@@ -1,5 +1,5 @@
 /*
- *  Copyright (c) 2011, Tõnu Samuel
+ *  Copyright (c) 2011, Tonu Samuel
  *  All rights reserved.
  *
  *  This file is part of TYROS.
@@ -23,7 +23,7 @@
 #include <intrinsics.h>
 #include "hwsetup.h"
 #include "main.h"
-
+#include "SPI.h"
 
 void
 SPI0_Init(void) { // Accel sensor left

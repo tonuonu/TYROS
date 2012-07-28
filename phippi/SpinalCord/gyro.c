@@ -3,6 +3,7 @@
 #include "gyro.h"
 #include "hwsetup.h"
 #include "main.h"
+#include "SPI.h"
 
 signed char 
 gyro_read(unsigned char r) {
