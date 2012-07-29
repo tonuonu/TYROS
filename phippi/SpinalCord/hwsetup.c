@@ -30,6 +30,7 @@
 #include "uart.h"
 #include "gyro.h"
 #include "SPI.h"
+#include "mma7455l.h"
 
 
 volatile struct statuses status;
@@ -319,15 +320,15 @@ Analog_Init(void) {
     trg_ad0con0  = 0; // software tells when to start, not HW            
     adst_ad0con0 = 0; // we set this later to 1 when we start AD conversion to start
     cks0_ad0con0 = 0; // divide by 8   
+ ad0con0 = 0x89;                  /* Setting A/D0 control register0
+                                        Analog input pin is AN0
+                                        Repeat mode
+                                        AD frequency set fAD/2
+                                        */
+    
     
     bits_ad0con1 = 8; // 8 bit resolution
     vcut_ad0con1 = 1; // Disable reference voltage to save power
-
-    smp_ad0con2  = 1; // with sample and hold
-    aps0_ad0con2 = 0; // an0_0 to an0_7
-    aps1_ad0con2 = 1; // an0_0 to an0_7
-    trg0_ad0con2 = 0; // does not matter
-
     scan0_ad0con1 = 1; // read AN0_0 to AN0_3
     scan1_ad0con1 = 0; // read AN0_0 to AN0_3
     md2_ad0con1   = 0; // not repeat sweep mode         
@@ -335,11 +336,35 @@ Analog_Init(void) {
     opa0_ad0con1  = 0; // External op amp not used
     opa1_ad0con1  = 0; // External op amp not used
 
+   ad0con1 = 0x28;                  /* Setting A/D0 control register1
+                                        10bits-mode select
+                                        AD frequency set fAD/2
+                                        Vref connection
+                                        */
+    smp_ad0con2  = 1; // with sample and hold
+    aps0_ad0con2 = 0; // an0_0 to an0_7
+    aps1_ad0con2 = 1; // an0_0 to an0_7
+    trg0_ad0con2 = 0; // does not matter
+    ad0con2 = 0x05;                  /* Setting A/D0 control register2
+                                        With the sample and hold function and
+                                        AN0_0 to AN0_7 for Analog Input Port
+                                        */
+
+    
+
     dus_ad0con3    = 0; // no DMA
     mss_ad0con3    = 0; // not multi-port sweep mode
     cks2_ad0con3   = 1; // divide by 8
     msf0_ad0con3   = 0; // multi port sweep status flag. Disabled.
     msf1_ad0con3   = 0; // multi port sweep status flag. Disabled.
+        ad0con3 = 0x00;                  /* Setting A/D0 control register3
+                                        Disable DMAC operating mode
+                                        AD frequency set fAD/2
+                                        */
+            ad0con3 = 0x00;                  /* Setting A/D0 control register3
+                                        Disable DMAC operating mode
+                                        AD frequency set fAD/2
+                                        */
 }
 
 // Reading all AD-s in single sweep mode (chapter 19.1.3 on HW manual)
@@ -348,7 +373,7 @@ Read_AD(void) {
     // Converts the analog voltage input to a set of pins into a digital code one-by-one.
     // The pins are selected by setting bits SCAN1 and SCAN0 in the AD0CON1
     // register and bits APS1 and APS0 in the AD0CON2 register  
-      
+#if 0    
     vcut_ad0con1 = 1; // Enable reference voltage
     uDelay(10); // Wait 1uS. FIXME proper number
     
@@ -360,7 +385,11 @@ Read_AD(void) {
      NOP();
     };
 //   vcut_ad0con1 = 0; // Disable reference voltage to save power
-    
+#endif
+#if 0
+      
+          ad_data = 0x03ff & ad01;     /* Read conversion result  */
+#endif     
    return;
 }
 

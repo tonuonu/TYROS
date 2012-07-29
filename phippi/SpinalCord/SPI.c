@@ -24,10 +24,14 @@
 #include "hwsetup.h"
 #include "main.h"
 #include "SPI.h"
+#include "mma7455l.h"
 
 void
 SPI0_Init(void) { // Accel sensor left
 
+    CS0d = PD_OUTPUT;
+    CS0=1;
+    
     CLOCK0d = PD_OUTPUT;
     CLOCK0s = PF_UART;
     TX0d = PD_OUTPUT;
@@ -75,15 +79,25 @@ SPI0_Init(void) { // Accel sensor left
 
     u0smr4 = 0x00;                                         // Set 0. u4c0 must be set before this function
 
-    u0brg = 0x55;                                          // (unsigned char)(((f1_CLK_SPEED)/(2*BIT_RATE))-1);
+    u0brg = 0x25;                                          // (unsigned char)(((f1_CLK_SPEED)/(2*BIT_RATE))-1);
 
     pu20=1; // pullup for p6_1, p6_2, p6_3 or CLK0, RX0, TX0
+    
+    uDelay(200);
+    CS0=0; // enable acc
+    uDelay(200);
+    SPI0_send_data( (MMA7455L_REG_MCTL << 1) | WRITE_BIT); 
+    uDelay(200);
+    SPI0_send_data( (MMA7455L_GSELECT_2|MMA7455L_MODE_MEASUREMENT << 1) | WRITE_BIT); 
+    uDelay(200);
+    CS0=1; // disable acc
     
 }
 
 void
 SPI2_Init(void) { // Accel sensor right
-
+    CS2d = PD_OUTPUT;
+    CS2=1;
     CLOCK2d = PD_OUTPUT;
     CLOCK2s = PF_UART;
     TX2d = PD_OUTPUT;
@@ -134,6 +148,16 @@ SPI2_Init(void) { // Accel sensor right
     u2brg = 0x55;                                          // (unsigned char)(((f1_CLK_SPEED)/(2*BIT_RATE))-1);
     
     pu22=1; // pull up for CLK2 or p7_2
+    uDelay(200);
+    CS2=0; // enable acc
+    uDelay(200);
+    SPI2_send_data( (MMA7455L_REG_MCTL << 1) | WRITE_BIT); 
+    uDelay(200);
+    SPI2_send_data( (MMA7455L_GSELECT_2|MMA7455L_MODE_MEASUREMENT << 1) | WRITE_BIT); 
+    uDelay(200);
+    CS2=1; // enable acc
+    uDelay(200);
+    CS2=0; // disable acc
 }
 
 void
@@ -378,19 +402,24 @@ SPI0_send_data(unsigned char c) {
     while (ti_u0c1 == 0) {
         NOP();
     }
+    uDelay(200);
     u0tb = c;
-    uDelay(60);
+    uDelay(200);
 }
 
 unsigned short 
 SPI0_receive(void) {
     unsigned short r;
-    SPI0_send_data(0xFF);
-//    while (ri_u0c1 == 0) {
-        //NOP();
-//    }
+  //  SPI0_send_data(0xFF);
+  //  uDelay(200);
+    uDelay(200);
+    while (ri_u0c1 == 0) {
+        NOP();
+    }
     r=u0rb;    
     ri_u0c1=0;
+    uDelay(200);
+
     return r;
 }
 
@@ -399,17 +428,19 @@ SPI2_send_data(unsigned char c) {
     while (ti_u2c1 == 0) {
         NOP();
     }
+    uDelay(200);
     u2tb = c;
-    uDelay(60);
+    uDelay(200);
 }
 
 unsigned short 
 SPI2_receive(void) {
     unsigned short r;
     SPI2_send_data(0xFF);
-//    while (ri_u2c1 == 0) {
-        //NOP();
-//    }
+    uDelay(200);
+    while (ri_u2c1 == 0) {
+        NOP();
+    }
     r=u2rb;    
     ri_u2c1=0;
     return r;

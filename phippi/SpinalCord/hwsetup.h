@@ -57,6 +57,10 @@ void HardwareSetup(void);
 #define LEFT_DIAGBd      pd2_7
 
 // Serial 0, acceleration sensor 
+#define CS0d         pd6_0
+#define CS0          p6_0
+#define CS0s         p6_0s
+#define CLOCK0d      pd6_1
 #define CLOCK0       p6_1
 #define CLOCK0d      pd6_1
 #define CLOCK0s      p6_1s
@@ -68,6 +72,9 @@ void HardwareSetup(void);
 
 
 // Serial 2, acceleration sensor
+#define CS2d         pd7_7
+#define CS2          p7_7
+#define CS2s         p7_7s
 #define TX2          p7_0
 #define RX2          p7_1
 #define TX2s         p7_0s

@@ -28,6 +28,7 @@
 #include "hwsetup.h"
 #include "gyro.h"
 #include "SPI.h"
+#include "mma7455l.h"
 
 extern int alarm;
 volatile unsigned short ticks;
@@ -109,11 +110,7 @@ main(void) {
 
         if(command[0]!=0) {
             char *tok;
-            if(strncmp(command,"ad",2)==0) {
-                Read_AD();
-                sprintf(buf,"joy 0x%03x 0x%03x 0x%03x 0x%03x", AD00, AD01, AD02, AD03);
-                write(buf);
-            } else if(strncmp(command,"twist ",6)==0) {
+            if(strncmp(command,"twist ",6)==0) {
                 int tmp;
                 for(tmp=0,tok = strtok(command," "); tok && tmp<=6 ; tok=strtok(0," "),tmp++) {
                     if(tmp>0) {
@@ -239,18 +236,18 @@ main(void) {
 #endif        
 
 #if 1
-        unsigned short c,temp_raw,whoami; /* 16 bit value */
+        unsigned short c,temp_raw,gyrowhoami; /* 16 bit value */
         signed char x=0,y=0,z=0;
         /*
          * 0x80 is most significant bit=1 and indicates we 
          * want to read register, not write. 0x0F is "whoami"
          * and should be responded by 1101 0011 or 211 in dec or 0xd3 in hex 
          */
-        whoami=gyro_read(WHOAMI);
-        if((unsigned char)whoami==211) {
+        gyrowhoami=gyro_read(WHOAMI);
+        if((unsigned char)gyrowhoami==211) {
             OLED_Show_String(  1,"Gyro OK" , 26, 5*8);
         } else {
-            sprintf(buf,"whoami %3d",(unsigned char) (whoami));
+            sprintf(buf,"whoami %3d",(unsigned char) (gyrowhoami));
             OLED_Show_String(  1, buf, 26, 5*8);          
         }
         uDelay(50);
@@ -277,63 +274,114 @@ main(void) {
 
         write(VT100CURSORGYRO);        
 
-        sprintf(buf,"gyro temp:%3d x:%3d y:%3d z:%3d, %s",40-(signed char)temp,x,y,z,((unsigned char)whoami==211) ? "OK   " : "ERROR" );
+        sprintf(buf,"gyro temp:%3d x:%3d y:%3d z:%3d, %s",40-(signed char)temp,x,y,z,((unsigned char)gyrowhoami==211) ? "OK   " : "ERROR" );
         writeln(buf);
 
 #endif
-        
+      
+/* Acceleration sensor */
 #if 1
         write(VT100CURSORACC);
-
-//        uDelay(100);
-        /*
-         * 0x80 is most significant bit=1 and indicates we 
-         * want to read register, not write. 0x0b is "temperature"
-         */
-        SPI0_send_data( (0x0b >> 1) | 0x80); 
-//        uDelay(100);
-        unsigned short r=SPI0_receive();
-        sprintf(buf,"acce0 %x %s",r,(r & (1 << 13)) ?"ERROR":"OK   ");
+        CS0=0; // enable acc
+        uDelay(100);
+        SPI0_send_data( (MMA7455L_REG_WHOAMI << 1) | WRITE_BIT); 
+        uDelay(100);
+        unsigned short acc0whoami=SPI0_receive();
+        uDelay(100);
+        CS0=1; // disable acc
+        uDelay(100);
+        CS0=0; // enable acc
+        uDelay(100);
+        SPI0_send_data( (MMA7455L_REG_XOUT8 << 1) | WRITE_BIT); 
+        uDelay(100);
+        unsigned short acc0x=SPI0_receive();
+        uDelay(100);
+        CS0=1; // disable acc
+        uDelay(100);
+        CS0=0; // enable acc
+        uDelay(100);
+        SPI0_send_data( (MMA7455L_REG_YOUT8 << 1) | WRITE_BIT); 
+        uDelay(100);
+        unsigned short acc0y=SPI0_receive();
+        uDelay(100);
+        CS0=1; // disable acc
+        uDelay(100);
+        CS0=0; // enable acc
+        uDelay(100);
+        SPI0_send_data( (MMA7455L_REG_ZOUT8 >> 1) | WRITE_BIT); 
+        uDelay(100);
+        unsigned short acc0z=SPI0_receive();
+        uDelay(100);
+        CS0=1; // disable acc
+        sprintf(buf,"acce0 %x %s %3d %3d %3d ",acc0whoami & 0x3FF,(acc0whoami & (1 << 13)) ?"ERROR":"OK   ",acc0x & 0xff,acc0y& 0xff,acc0z& 0xff);
         write(buf);
         sprintf(buf,"%s %s %s %s %s"
-                ,(r & (1 << 12)) ? "abt ":""  
-                ,(r & (1 << 13)) ? "oer ":""
-                ,(r & (1 << 14)) ? "fer ":""
-                ,(r & (1 << 15)) ? "per ":""
-                ,(r & (1 << 16)) ? "sum ":""
+                ,(acc0whoami & (1 << 12)) ? "abt ":""  
+                ,(acc0whoami & (1 << 13)) ? "oer ":""
+                ,(acc0whoami & (1 << 14)) ? "fer ":""
+                ,(acc0whoami & (1 << 15)) ? "per ":""
+                ,(acc0whoami & (1 << 16)) ? "sum ":""
+                  );
+        writeln(buf);
+       /************************/
+        CS2=0; // enable acc
+        uDelay(100);
+        SPI2_send_data( (MMA7455L_REG_WHOAMI << 1) | WRITE_BIT); 
+        uDelay(100);
+        unsigned short acc2whoami=SPI2_receive();
+        uDelay(100);
+        CS2=1; // disable acc
+        uDelay(100);
+        uDelay(100);
+        CS2=0; // enable acc
+        uDelay(100);
+        SPI2_send_data( (MMA7455L_REG_XOUT8 << 1) | WRITE_BIT); 
+        uDelay(100);
+        unsigned short acc2x=SPI2_receive();
+        uDelay(100);
+        CS2=1; // disable acc
+        uDelay(100);
+        CS2=0; // enable acc
+        uDelay(100);
+        SPI2_send_data( (MMA7455L_REG_YOUT8 << 1) | WRITE_BIT); 
+        uDelay(100);
+        unsigned short acc2y=SPI2_receive();
+        uDelay(100);
+        CS2=1; // disable acc
+        uDelay(100);
+        CS2=0; // enable acc
+        uDelay(100);
+        SPI2_send_data( (MMA7455L_REG_ZOUT8 >> 1) | WRITE_BIT); 
+        uDelay(100);
+        unsigned short acc2z=SPI2_receive();
+        uDelay(100);
+        CS2=1; // disable acc
+        uDelay(100);
+        sprintf(buf,"acce2 %x %s %3d %3d %3d ",acc2whoami & 0x3FF,
+                (acc2whoami & (1 << 13)) ?"ERROR":"OK   ",acc2x & 0xff,acc2y& 0xff,acc2z& 0xff);
+        write(buf);
+        sprintf(buf,"%s %s %s %s %s"
+                ,(acc2whoami & (1 << 12)) ? "abt ":""  
+                ,(acc2whoami & (1 << 13)) ? "oer ":""
+                ,(acc2whoami & (1 << 14)) ? "fer ":""
+                ,(acc2whoami & (1 << 15)) ? "per ":""
+                ,(acc2whoami & (1 << 16)) ? "sum ":""
                   );
         writeln(buf);
         
-        uDelay(100);
-        /*
-         * 0x80 is most significant bit=1 and indicates we 
-         * want to read register, not write. 0x0b is "temperature"
-         */
-        SPI2_send_data( (0x0b >> 1) | 0x80); 
-//        uDelay(100);
-        r=SPI2_receive();
-        sprintf(buf,"acce0 %x %s",r,(r & (1 << 13)) ?"ERROR":"OK   ");
-        write(buf);
-        sprintf(buf,"%s %s %s %s %s"
-                ,(r & (1 << 12)) ? "abt ":""  
-                ,(r & (1 << 13)) ? "oer ":""
-                ,(r & (1 << 14)) ? "fer ":""
-                ,(r & (1 << 15)) ? "per ":""
-                ,(r & (1 << 16)) ? "sum ":""
-                  );
-        writeln(buf);
+
 #endif
 #if 1
         write(VT100CURSORAD);
-                Read_AD();
-                sprintf(buf,"AD 0x%03x 0x%03x 0x%03x 0x%03x", AD00, AD01, AD02, AD03);
-                write(buf);
+        Read_AD();
+        sprintf(buf,"AD 0x%03x 0x%03x 0x%03x 0x%03x", AD00 & 0x3FF, AD01& 0x3FF, AD02& 0x3FF, AD03& 0x3FF);
+        write(buf);
 #endif
-                write(VT100CURSORPANDA);
-                write("Panda :");
-                write(PANDA ? "ON ":"OFF");
-                write(VT100CURSORCHARGER);
-                write("Charger :");
-                write(CHARGE ? "ON ":"OFF");
+        write(VT100CURSORPANDA);
+        write("Panda :");
+        write(PANDA ? "ON ":"OFF");
+        write(VT100CURSORCHARGER);
+        write("Charger :");
+        write(CHARGE ? "ON ":"OFF");
     }
 }
