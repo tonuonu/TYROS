@@ -124,7 +124,9 @@ int main(int argc, char **argv) {
         iply= cvCreateImage(cvSize(IMAGE_WIDTH,IMAGE_HEIGHT), 8, 1);
         iplu= cvCreateImage(cvSize(IMAGE_WIDTH,IMAGE_HEIGHT), 8, 1);
         iplv= cvCreateImage(cvSize(IMAGE_WIDTH,IMAGE_HEIGHT), 8, 1);
-
+	cvZero(iply);
+	cvZero(iplu);
+	cvZero(iplv);
 #ifdef DEBUG
 	cvNamedWindow( "result Y", 0 );
 	cvNamedWindow( "result U", 0 );
@@ -148,17 +150,20 @@ int main(int argc, char **argv) {
                  * i represent absolute number of pixel, j is byte.
                  */
 #ifdef ROTATE90
-               for(i=0,j=0;i<(IMAGE_WIDTH*IMAGE_HEIGHT*2) ; i+=2,j+=1) {
+               for(i=0,j=0;i<(IMAGE_WIDTH*IMAGE_HEIGHT*2) ; i+=4,j+=2) {
                        int tmp1=((j%IMAGE_HEIGHT)*IMAGE_WIDTH+IMAGE_WIDTH-1);
-		       int tmp2=(j%(IMAGE_WIDTH*IMAGE_HEIGHT))/IMAGE_HEIGHT;
-                       image.data[tmp1-(int)(tmp2)] = ptr[i+Y1];
-                       image.data[tmp1-(int)(tmp2-1)] = ptr[i+Y2];
-                       iply->imageData[tmp1-(int)(tmp2)] = ptr[i+Y1];
+		       int tmp2=j/IMAGE_HEIGHT;
+                       image.data[tmp1-(int)(tmp2)]        = ptr[i+Y1];
+                       image.data[tmp1-(int)(tmp2-1)]      = ptr[i+Y2];
+
+                       iply->imageData[tmp1-(int)(tmp2)]   = ptr[i+Y1];
                        iply->imageData[tmp1-(int)(tmp2-1)] = ptr[i+Y2];
-                       iplu->imageData[tmp1-(int)(tmp2)] = ptr[i+U];
-                       iplu->imageData[tmp1-(int)(tmp2-1)] = ptr[i+U];
-                       iplv->imageData[tmp1-(int)(tmp2)] = ptr[i+V];
-                       iplv->imageData[tmp1-(int)(tmp2-1)] = ptr[i+V];
+
+                       iplu->imageData[tmp1-(int)(tmp2)]   = ptr[i+U];
+                       iplu->imageData[tmp1-(int)(tmp2-1)] = ptr[i+U-2];
+
+                       iplv->imageData[tmp1-(int)(tmp2)]   = ptr[i+V];
+                       iplv->imageData[tmp1-(int)(tmp2-1)] = ptr[i+V-2];
 		}
 #else
         	for(i=0,j=0;j<(IMAGE_WIDTH*IMAGE_HEIGHT*2) ; i+=2,j+=4) {
