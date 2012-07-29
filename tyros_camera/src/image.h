@@ -28,9 +28,16 @@ void *ProcessImages(void *thdptr) ;
 #define Y2 2
 #define V  3
 
-
+#define ROTATE90 1
+#ifdef ROTATE90
 #define IMAGE_WIDTH 240
 #define IMAGE_HEIGHT 320
+#else
+#define IMAGE_WIDTH 320
+#define IMAGE_HEIGHT 240
+#endif
+
+
 #define PI 3.14159265358979323846264338327950288419716939937
 #define CAMERA_HEIGHT 24.0
 #define BORDER_HEIGHT 7.0
