@@ -1,5 +1,5 @@
 /*
- *  Copyright (c) 2011, Tõnu Samuel
+ *  Copyright (c) 2011, Tonu Samuel
  *  All rights reserved.
  *
  *  This file is part of TYROS.
@@ -553,10 +553,6 @@ OLED_Init() {
 
     OLED_CSd          = PD_OUTPUT;
     
-    // Make sure VCC is Off
-//    OLED_ENABLE = 0;
-//    uDelay(10);
-
     // Enable VCC
     OLED_ENABLE = 1;
     uDelay(100);

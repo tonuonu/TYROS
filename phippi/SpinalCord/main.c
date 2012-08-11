@@ -70,6 +70,7 @@ void updateOLED () {
 
 void
 main(void) {
+
     HardwareSetup();    
     LED1=1;
     OLED_Set_Display_On_Off(0x01);                         // Display On
@@ -97,6 +98,7 @@ main(void) {
     updateOLED1();    
     PANDA=1;
     while (1) {
+        int errorflag=0;
         char buf[256];
         if (status.sek_flag==1) {
             status.sek_flag=0;
@@ -179,6 +181,15 @@ main(void) {
                     }
                 }
                 sprintf(buf,"charge %s",CHARGE ? "on":"off");
+                write(buf);              
+            } else if(strncmp(command,"kick ",5)==0) {
+                int tmp;
+                for(tmp=0,tok = strtok(command," "); tok && tmp<=2 ; tok=strtok(0," "),tmp++) {
+                    if(tmp == 1) {
+                        KICK=(int)strtod(tok,NULL);                    
+                    }
+                }
+                sprintf(buf,"kick %s",KICK ? "on":"off");
                 write(buf);              
             } else if(strncmp(command,"joy",3)==0) {
                 sprintf(buf,"joy %s%s%s%s%s",
@@ -275,7 +286,7 @@ main(void) {
 
         write(VT100CURSORGYRO);        
 
-        sprintf(buf,"gyro temp:%3d x:%3d y:%3d z:%3d, %s",40-(signed char)temp,x,y,z,((unsigned char)gyrowhoami==211) ? "OK   " : "ERROR" );
+        sprintf(buf,"gyro temp:%3d x:%3d y:%3d z:%3d, %s",46-(signed char)temp,x,y,z,((unsigned char)gyrowhoami==211) ? "OK   " : "ERROR" );
         writeln(buf);
 
 #endif
@@ -373,10 +384,24 @@ main(void) {
 
 #endif
 #if 1
+        int ad[4];
+        ad[0]=AD00 & 0x3FF;
+        ad[1]=AD01 & 0x3FF;
+        ad[2]=AD02 & 0x3FF;
+        ad[3]=AD03 & 0x3FF;
+        float bat=(float)ad[3]*(13.64/0x3FF);
+        
         write(VT100CURSORAD);
-        Read_AD();
-        sprintf(buf,"AD 0x%03x 0x%03x 0x%03x 0x%03x (battery %.2fV)", AD00 & 0x3FF, AD01& 0x3FF, AD02& 0x3FF, AD03& 0x3FF,(float)(AD03& 0x3FF)*(13.64/0x3FF) );
+        sprintf(buf,"(L motor %.1fA) ", (float)ad[0]/50.0 );
         write(buf);
+        sprintf(buf,"(R motor %.1fA) ", (float)ad[1]/50.0 );
+        write(buf);
+        sprintf(buf,"(Capacitor %.0fV) ", (float)ad[2]/2.27333333 ); // 0x3FF/450V
+        write(buf);
+        sprintf(buf,"(battery %.1fV) ", bat );
+        write(buf);
+        if(bat<7.0) 
+          errorflag=1;
 #endif
         write(VT100CURSORPANDA);
         write("Panda :");
@@ -390,5 +415,11 @@ main(void) {
         if(CHARGE_DONE==0) { // Charging is DONE when signal is low
           CHARGE=0; // Turn off CHARGE pin
         }
+        if(errorflag) {
+          ERRORLED=1; 
+        } else {
+          ERRORLED=0; 
+        } 
+        
     }
 }

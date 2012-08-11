@@ -343,47 +343,16 @@ Analog_Init(void) {
     cks2_ad0con3   = 1; // divide by 8
     msf0_ad0con3   = 0; // multi port sweep status flag. Disabled.
     msf1_ad0con3   = 0; // multi port sweep status flag. Disabled.
-        ad0con3 = 0x00;                  /* Setting A/D0 control register3
+//        ad0con3 = 0x00; 
+    /* Setting A/D0 control register3
                                         Disable DMAC operating mode
                                         AD frequency set fAD/2
                                         */
    ad0con4 = 0;     
 }
 
-// Reading all AD-s in single sweep mode (chapter 19.1.3 on HW manual)
-void
-Read_AD(void) {
-    // Converts the analog voltage input to a set of pins into a digital code one-by-one.
-    // The pins are selected by setting bits SCAN1 and SCAN0 in the AD0CON1
-    // register and bits APS1 and APS0 in the AD0CON2 register  
-#if 0    
-    vcut_ad0con1 = 1; // Enable reference voltage
-    uDelay(10); // Wait 1uS. FIXME proper number
-    
-    // Start reading AD
-    adst_ad0con0 = 1;   
-    uDelay(100);
-    // Wait till complete
-    while(adst_ad0con0 == 1) {
-     NOP();
-    };
-//   vcut_ad0con1 = 0; // Disable reference voltage to save power
-#endif
-#if 0
-      
-          ad_data = 0x03ff & ad01;     /* Read conversion result  */
-#endif     
-   return;
-}
-
-
 static void 
 Joy_Init(void) {
-//    JOY_LEFTd = PD_OUTPUT;
-//    JOY_RIGHTd = PD_OUTPUT;
-//    JOY_UPd = PD_OUTPUT;
-//    JOY_DOWNd = PD_OUTPUT;
-//    JOY_CENTERd = PD_OUTPUT;
     pu02 = 1; // P1_0 to P1_3 Pull-up Control Bit
     pu03 = 1; // P1_4 to P1_7 Pull-up Control Bit
 }
@@ -396,9 +365,10 @@ HardwareSetup(void) {
     DISABLE_IRQ;
     ConfigureOperatingFrequency(1);
 
-
     Buzzer_Init();
     Heartbeat_Init();
+    ERRORLEDd=PD_OUTPUT; // error LED
+    
     CapacitorCharger_Init();
     Coilgun_Init();
     Panda_Init();
@@ -411,7 +381,6 @@ HardwareSetup(void) {
     SPI6_Init();  // gyro
     gyro_Init();
     SPI7_Init();  // Melexis sensor right
-//    OLED_On();    // ?
     OLED_Init();
     ENABLE_IRQ;
     Analog_Init();

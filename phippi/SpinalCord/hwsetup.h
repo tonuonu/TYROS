@@ -31,6 +31,10 @@ void HardwareSetup(void);
 #define LED1         p3_3
 #define LED1d        pd3_3
 
+#define ERRORLEDd    pd5_2
+#define ERRORLED     p5_2
+
+
 #define LEFT_PWMd    pd3_2
 #define LEFT_PWMs    p3_2s
 #define LEFT_PWM     p3_2

@@ -54,7 +54,6 @@ void gyro_Init (void) {
 #define CTRL_REG1 0x20
 #endif
     gyro_write(CTRL_REG2, 16|32);
-    
     gyro_write(CTRL_REG1, 1|2|4|8);
         
 }
