@@ -412,6 +412,9 @@ main(void) {
         if(bat<7.0) 
           errorflag=1;
 #endif
+        write(VT100CURSORBALL);
+        write("Ball :");
+        write(BALL_DETECT ? "No ":"Yes");
         write(VT100CURSORPANDA);
         write("Panda :");
         write(PANDA ? "ON ":"OFF");

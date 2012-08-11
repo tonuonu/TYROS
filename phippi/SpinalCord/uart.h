@@ -60,6 +60,7 @@ extern unsigned char get_uart5(void);
 #define VT100CURSORHOME       "\x1b" "[15;0H"  // Sets the cursor position where subsequent text will begin
 #define VT100CURSORNULL       "\x1b" "[00;0H"  // Set cursor to nullpoint
 #define VT100ERASESCREEN      "\x1b" "[2J"     // Erases the screen with the background colour and moves the cursor to home.
+#define VT100CURSORBALL       "\x1b" "[06;1H"  // Set cursor to nullpoint
 #define VT100CURSORPANDA      "\x1b" "[07;1H"  // Set cursor to nullpoint
 #define VT100CURSORCHARGER    "\x1b" "[08;1H"  // Set cursor to nullpoint
 #define VT100CURSORAD         "\x1b" "[09;1H"  // Set cursor to nullpoint
