@@ -169,6 +169,8 @@ void HardwareSetup(void);
 #define CHARGE      p1_2
 #define CHARGEd     pd1_2
 
+#define CHARGE_DONE p3_7
+
 // uart 5 for pandaboard communications
 #define RX5         p8_0
 #define RX5d        pd8_0

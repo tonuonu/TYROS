@@ -79,6 +79,7 @@ main(void) {
     write(VT100RESET);
     write(VT100RESETATTR);
     write(VT100CURSORNULL);
+    write(VT100ERASESCREEN);
     write("+------------------------------------------------------------------------------+");
     write(VT100CURSORPROMPT);
     write("+------------------------------------------------------------------------------+");
@@ -374,7 +375,7 @@ main(void) {
 #if 1
         write(VT100CURSORAD);
         Read_AD();
-        sprintf(buf,"AD 0x%03x 0x%03x 0x%03x 0x%03x", AD00 & 0x3FF, AD01& 0x3FF, AD02& 0x3FF, AD03& 0x3FF);
+        sprintf(buf,"AD 0x%03x 0x%03x 0x%03x 0x%03x (battery %.2fV)", AD00 & 0x3FF, AD01& 0x3FF, AD02& 0x3FF, AD03& 0x3FF,(float)(AD03& 0x3FF)*(13.64/0x3FF) );
         write(buf);
 #endif
         write(VT100CURSORPANDA);
@@ -383,5 +384,11 @@ main(void) {
         write(VT100CURSORCHARGER);
         write("Charger :");
         write(CHARGE ? "ON ":"OFF");
+//        write(" Done : ");
+//        write(CHARGE_DONE ? "NO ":"YES");
+
+        if(CHARGE_DONE==0) { // Charging is DONE when signal is low
+          CHARGE=0; // Turn off CHARGE pin
+        }
     }
 }

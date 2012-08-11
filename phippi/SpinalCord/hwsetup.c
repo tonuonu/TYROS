@@ -312,44 +312,30 @@ Analog_Init(void) {
     AN02 = 0;
     AN03 = 0;
     
-    ch0_ad0con0  = 0; // does not matter in single sweep mode       
-    ch1_ad0con0  = 0; // does not matter in single sweep mode           
-    ch2_ad0con0  = 0; // does not matter in single sweep mode
-    md0_ad0con0  = 0; // single sweep mode          
-    md1_ad0con0  = 1; // single sweep mode
+    ch0_ad0con0  = 0; // does not matter in sweep mode       
+    ch1_ad0con0  = 0; // does not matter in sweep mode           
+    ch2_ad0con0  = 0; // does not matter in sweep mode
+    md0_ad0con0  = 1; // repeat sweep mode          
+    md1_ad0con0  = 1; // repeat sweep mode
     trg_ad0con0  = 0; // software tells when to start, not HW            
-    adst_ad0con0 = 0; // we set this later to 1 when we start AD conversion to start
+    adst_ad0con0 = 1; // we set this later to 1 when we start AD conversion to start
     cks0_ad0con0 = 0; // divide by 8   
- ad0con0 = 0x89;                  /* Setting A/D0 control register0
-                                        Analog input pin is AN0
-                                        Repeat mode
-                                        AD frequency set fAD/2
-                                        */
     
-    
-    bits_ad0con1 = 8; // 8 bit resolution
-    vcut_ad0con1 = 1; // Disable reference voltage to save power
-    scan0_ad0con1 = 1; // read AN0_0 to AN0_3
-    scan1_ad0con1 = 0; // read AN0_0 to AN0_3
-    md2_ad0con1   = 0; // not repeat sweep mode         
+    scan0_ad0con1 = 1; // read AN_0 to AN_3
+    scan1_ad0con1 = 1; // read AN_0 to AN_3   
+    bits_ad0con1  = 1; // 10 bit resolution
+    vcut_ad0con1  = 1; // Disable reference voltage to save power
+    md2_ad0con1   = 1; // repeat sweep mode         
     cks1_ad0con1  = 0; // divide by 8
     opa0_ad0con1  = 0; // External op amp not used
     opa1_ad0con1  = 0; // External op amp not used
 
-   ad0con1 = 0x28;                  /* Setting A/D0 control register1
-                                        10bits-mode select
-                                        AD frequency set fAD/2
-                                        Vref connection
-                                        */
-    smp_ad0con2  = 1; // with sample and hold
-    aps0_ad0con2 = 0; // an0_0 to an0_7
-    aps1_ad0con2 = 1; // an0_0 to an0_7
-    trg0_ad0con2 = 0; // does not matter
-    ad0con2 = 0x05;                  /* Setting A/D0 control register2
-                                        With the sample and hold function and
-                                        AN0_0 to AN0_7 for Analog Input Port
-                                        */
 
+    smp_ad0con2  = 1; // with sample and hold
+    aps0_ad0con2 = 0; // an_0 to an_7
+    aps1_ad0con2 = 0; // an_0 to an_7
+    trg0_ad0con2 = 0; // does not matter
+ 
     
 
     dus_ad0con3    = 0; // no DMA
@@ -361,10 +347,7 @@ Analog_Init(void) {
                                         Disable DMAC operating mode
                                         AD frequency set fAD/2
                                         */
-            ad0con3 = 0x00;                  /* Setting A/D0 control register3
-                                        Disable DMAC operating mode
-                                        AD frequency set fAD/2
-                                        */
+   ad0con4 = 0;     
 }
 
 // Reading all AD-s in single sweep mode (chapter 19.1.3 on HW manual)
@@ -412,7 +395,7 @@ HardwareSetup(void) {
      */
     DISABLE_IRQ;
     ConfigureOperatingFrequency(1);
-//    ConfigurePortPins();
+
 
     Buzzer_Init();
     Heartbeat_Init();
