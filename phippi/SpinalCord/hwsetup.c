@@ -368,12 +368,12 @@ HardwareSetup(void) {
     Buzzer_Init();
     Heartbeat_Init();
     ERRORLEDd=PD_OUTPUT; // error LED
-    
+    MELEXIS_ENd=PD_OUTPUT;
     CapacitorCharger_Init();
     Coilgun_Init();
     Panda_Init();
     Joy_Init();
-    SPI0_Init();  // Accel sensor left
+//    SPI0_Init();  // Accel sensor left
     SPI2_Init();  // Accel sensor right
     SPI3_Init();  // OLED
     SPI4_Init();  // Melexis sensor left

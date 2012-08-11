@@ -97,6 +97,7 @@ main(void) {
     OLED_Fade_In();
     updateOLED1();    
     PANDA=1;
+    MELEXIS_EN=0; // Low is ON
     while (1) {
         int errorflag=0;
         char buf[256];
@@ -146,7 +147,6 @@ main(void) {
                         pwmtarget[0]= -100;
                         pwmtarget[0]= -100;
                     }
-            
                 }                  
                 sprintf(buf,"new twist x=%f(m/s), y=%f(m/s), yaw=%f(deg)",twist[0],twist[1],twist[5]);
                 write(buf);
@@ -218,7 +218,12 @@ main(void) {
             command[0]=0;
         }        
         
-#if 0
+#if 1
+        write(VT100CURSORMELEXISL);
+        write("Melexis L :");
+//        write(VT100CURSORMELEXISR);
+//        write("Melexis R :");
+
         int j;
         // 300uS needed. On 48Mhz each cycle is ~21nS, so
         // 300 000nS/21=~1200
@@ -246,8 +251,8 @@ main(void) {
             unsigned short c; /* 16 bit value */
             pd9_6=0;
             c=SPI4_receive();
-//            sprintf(buf,"SPI4 %x",c);
-//            write(buf);
+            sprintf(buf,"SPI4 %x",c);
+            write(buf);
             pd9_6=1;
             for(j=0;j<2;j++) {
                 uDelay(255); 
@@ -303,56 +308,16 @@ main(void) {
 /* Acceleration sensor */
 #if 1
         write(VT100CURSORACC);
-        CS0=0; // enable acc
-        uDelay(100);
-        SPI0_send_data( (MMA7455L_REG_WHOAMI << 1) | WRITE_BIT); 
-        uDelay(100);
-        unsigned short acc0whoami=SPI0_receive();
-        uDelay(100);
-        CS0=1; // disable acc
-        uDelay(100);
-        CS0=0; // enable acc
-        uDelay(100);
-        SPI0_send_data( (MMA7455L_REG_XOUT8 << 1) | WRITE_BIT); 
-        uDelay(100);
-        unsigned short acc0x=SPI0_receive();
-        uDelay(100);
-        CS0=1; // disable acc
-        uDelay(100);
-        CS0=0; // enable acc
-        uDelay(100);
-        SPI0_send_data( (MMA7455L_REG_YOUT8 << 1) | WRITE_BIT); 
-        uDelay(100);
-        unsigned short acc0y=SPI0_receive();
-        uDelay(100);
-        CS0=1; // disable acc
-        uDelay(100);
-        CS0=0; // enable acc
-        uDelay(100);
-        SPI0_send_data( (MMA7455L_REG_ZOUT8 >> 1) | WRITE_BIT); 
-        uDelay(100);
-        unsigned short acc0z=SPI0_receive();
-        uDelay(100);
-        CS0=1; // disable acc
-        sprintf(buf,"acce0 %x %s %3d %3d %3d ",acc0whoami & 0x3FF,(acc0whoami & (1 << 13)) ?"ERROR":"OK   ",acc0x & 0xff,acc0y& 0xff,acc0z& 0xff);
-        write(buf);
-        sprintf(buf,"%s %s %s %s %s"
-                ,(acc0whoami & (1 << 12)) ? "abt ":""  
-                ,(acc0whoami & (1 << 13)) ? "oer ":""
-                ,(acc0whoami & (1 << 14)) ? "fer ":""
-                ,(acc0whoami & (1 << 15)) ? "per ":""
-                ,(acc0whoami & (1 << 16)) ? "sum ":""
-                  );
-        writeln(buf);
-       /************************/
         CS2=0; // enable acc
-        uDelay(100);
-        SPI2_send_data( (MMA7455L_REG_WHOAMI << 1) | WRITE_BIT); 
-        uDelay(100);
+        uDelay(1);
+        SPI2_send_data( (MMA7455L_REG_WHOAMI << 1)/* | WRITE_BIT*/); 
+//        SPI2_send_data( (0xfF >> 1) | WRITE_BIT); 
+        uDelay(10);
         unsigned short acc2whoami=SPI2_receive();
-        uDelay(100);
+        while (ri_u2c1 == 0) {  NOP();  } // wait till receive completes
+        uDelay(10);
         CS2=1; // disable acc
-        uDelay(100);
+#if 0
         uDelay(100);
         CS2=0; // enable acc
         uDelay(100);
@@ -388,9 +353,8 @@ main(void) {
                 ,(acc2whoami & (1 << 15)) ? "per ":""
                 ,(acc2whoami & (1 << 16)) ? "sum ":""
                   );
-        writeln(buf);
-        
-
+        writeln(buf);    
+#endif
 #endif
 #if 1
         int ad[4];
@@ -412,6 +376,12 @@ main(void) {
         if(bat<7.0) 
           errorflag=1;
 #endif
+
+        write(VT100CURSORMELEXISE);
+        write("5V LDO :");
+        write(MELEXIS_EN ? "OFF":"ON "); // Low is Enable
+   
+
         write(VT100CURSORBALL);
         write("Ball :");
         write(BALL_DETECT ? "No ":"Yes");
@@ -424,8 +394,6 @@ main(void) {
             write("AUTO");
         else
             write(CHARGE ? "ON ":"OFF");
-//        write(" Done : ");
-//        write(CHARGE_DONE ? "NO ":"YES");
 
         if(autocharge && capacitor<400.0)
           CHARGE=1;

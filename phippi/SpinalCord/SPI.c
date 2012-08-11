@@ -95,7 +95,9 @@ SPI0_Init(void) { // Accel sensor left
 }
 
 void
-SPI2_Init(void) { // Accel sensor right
+SPI2_Init(void) { // Accel sensor
+    pu22=1; // pull up for CLK2 or p7_2
+
     CS2d = PD_OUTPUT;
     CS2=1;
     CLOCK2d = PD_OUTPUT;
@@ -120,7 +122,7 @@ SPI2_Init(void) { // Accel sensor right
     txept_u2c0 = 0;                                        // Transmit register empty flag 
     crd_u2c0 = 1;                                          // CTS disabled when 1
     nch_u2c0 = 1;                                          // 0=Output mode "open drain" for TXD and CLOCK pin 
-    ckpol_u2c0 = 1;                                        // CLK Polarity 
+    ckpol_u2c0 = 0;                                        // CLK Polarity 
     uform_u2c0 = 1;                                        // 1=MSB first
 
     te_u2c1 = 1;                                           // 1=Transmission Enable
@@ -145,19 +147,19 @@ SPI2_Init(void) { // Accel sensor right
 
     u2smr4 = 0x00;                                         // Set 0. u4c0 must be set before this function
 
-    u2brg = 0x55;                                          // (unsigned char)(((f1_CLK_SPEED)/(2*BIT_RATE))-1);
+#define f1_CLK_SPEED 24000000
+// Max    u2brg =  (unsigned char)(((f1_CLK_SPEED)/(2*4000000))-1);
+    u2brg =  (unsigned char)(((f1_CLK_SPEED)/(2*200000))-1);
     
-    pu22=1; // pull up for CLK2 or p7_2
-    uDelay(200);
+    uDelay(20);
     CS2=0; // enable acc
-    uDelay(200);
-    SPI2_send_data( (MMA7455L_REG_MCTL << 1) | WRITE_BIT); 
-    uDelay(200);
-    SPI2_send_data( (MMA7455L_GSELECT_2|MMA7455L_MODE_MEASUREMENT << 1) | WRITE_BIT); 
-    uDelay(200);
-    CS2=1; // enable acc
-    uDelay(200);
-    CS2=0; // disable acc
+    uDelay(20);
+    SPI2_send_data( (MMA7455L_REG_MCTL >> 1) | WRITE_BIT); 
+    uDelay(20);
+    SPI2_send_data( (MMA7455L_GSELECT_2|MMA7455L_MODE_MEASUREMENT >> 1) | WRITE_BIT); 
+    uDelay(20);
+    CS2=1; // disable acc
+    uDelay(20);
 }
 
 void
@@ -282,10 +284,12 @@ SPI6_Init(void) { // Gyro
     dl1_u6smr3 = 0;                                        // Set 0 for no  delay 
     dl2_u6smr3 = 0;                                        // Set 0 for no  delay 
 
-    u6smr4 = 0x00;                                         // Set 0. u4c0 must be set before this function
+    u6smr4 = 0x00;       
+    // Set 0. u4c0 must be set before this function
+#define	f1_CLK_SPEED 24000000
 
 //    u4brg = 55 /* 435kHz */ ;                                             // (unsigned char)(((f1_CLK_SPEED)/(2*BIT_RATE))-1);
-    u6brg = 0x10;                                             // (unsigned char)(((f1_CLK_SPEED)/(2*BIT_RATE))-1);
+    u6brg = (unsigned char)(((f1_CLK_SPEED)/(2*5000000))-1);
 
     pu11 = 1; // gyro RX interface needs pullup on RX6 or p4_6
 }
@@ -425,19 +429,16 @@ SPI0_receive(void) {
 
 void
 SPI2_send_data(unsigned char c) {
+    u2tb = c;
     while (ti_u2c1 == 0) {
         NOP();
     }
-    uDelay(200);
-    u2tb = c;
-    uDelay(200);
 }
 
 unsigned short 
 SPI2_receive(void) {
-    unsigned short r;
+    unsigned short r=0;
     SPI2_send_data(0xFF);
-    uDelay(200);
     while (ri_u2c1 == 0) {
         NOP();
     }
