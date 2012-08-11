@@ -29,15 +29,14 @@
 #include <camera_info_manager/camera_info_manager.h>
 #include <image_transport/image_transport.h>
 
-#include "opencv2/imgproc/imgproc_c.h"
-#include "opencv2/highgui/highgui_c.h"
-#include "opencv2/legacy/compat.hpp"
-#include "opencv2/objdetect/objdetect.hpp"
-
+#include "opencv2/opencv.hpp"
+#include <cvblob.h>
 #include "libcam.h"
 #include "image.h"
+
 #define DEBUG 1
 
+using namespace cvb;
 CvRect box;
 bool drawing_box = false;
 bool setroi = false;
@@ -63,6 +62,10 @@ void my_mouse_callback(int event, int x, int y, int flags, void* param) {
             drawing_box = true;
             setroi= false;
             box = cvRect(x, y, 0, 0);
+	    if(x<=IMAGE_WIDTH && y<=IMAGE_HEIGHT) {
+	        CvScalar pixel=cvGet2D(image,y,x);
+	        printf("%3d %3d %3.0f %3.0f %3.0f\n",x,y,pixel.val[0],pixel.val[1],pixel.val[2]);
+            }
         }
         break;
         case CV_EVENT_LBUTTONUP: {
@@ -83,8 +86,11 @@ void my_mouse_callback(int event, int x, int y, int flags, void* param) {
     }
 }
 
-
 int main(int argc, char **argv) {
+        CvBlobs blobs;
+        CvTracks tracks_o;
+        CvTracks tracks_b;
+        CvTracks tracks_y;
 	int height, width, input;
 	std::string dev, frame_id, cinfo_url;
 	sensor_msgs::Image image;
@@ -125,18 +131,27 @@ int main(int argc, char **argv) {
 
         pub = n.advertise<tyros_camera::Objects>("vision_publisher", 5); /* Message queue length is 5 */
 
-	IplImage* imgy,*imgu,*imgv;
-        imgy= cvCreateImage(cvSize(IMAGE_WIDTH,IMAGE_HEIGHT), 8, 1);
-        imgu= cvCreateImage(cvSize(IMAGE_WIDTH,IMAGE_HEIGHT), 8, 1);
-        imgv= cvCreateImage(cvSize(IMAGE_WIDTH,IMAGE_HEIGHT), 8, 1);
-        IplImage* planes[] = { imgy, imgu};
-
+	IplImage* iply,*iplu,*iplv;
+        iply= cvCreateImage(cvSize(IMAGE_WIDTH,IMAGE_HEIGHT), 8, 1);
+        iplu= cvCreateImage(cvSize(IMAGE_WIDTH,IMAGE_HEIGHT), 8, 1);
+        iplv= cvCreateImage(cvSize(IMAGE_WIDTH,IMAGE_HEIGHT), 8, 1);
+	cvZero(iply);
+	cvZero(iplu);
+	cvZero(iplv);
+        IplImage* imgOrange = cvCreateImage(cvGetSize(iply), 8, 1);
+        IplImage* imgBlue   = cvCreateImage(cvGetSize(iply), 8, 1);
+        IplImage* imgYellow = cvCreateImage(cvGetSize(iply), 8, 1);
 #ifdef DEBUG
 	cvNamedWindow( "result Y", 0 );
 	cvNamedWindow( "result U", 0 );
 	cvNamedWindow( "result V", 0 );
-        cvStartWindowThread();
-	cvSetMouseCallback("result Y",my_mouse_callback,(void*) imgy);
+	cvNamedWindow( "result YUV", 0 );
+	cvNamedWindow( "orange", 0 );
+	cvNamedWindow( "blue", 0 );
+	cvNamedWindow( "yellow", 0 );
+        cvStartWindowThread(); 
+	IplImage*imgYUV= cvCreateImage(cvGetSize(iply), 8, 3);
+	cvSetMouseCallback("result YUV",my_mouse_callback,(void*) imgYUV);
 #endif
 	while (ros::ok()) {
 		unsigned char* ptr = cam.Update();
@@ -148,140 +163,93 @@ int main(int argc, char **argv) {
 		image.data.resize(image_size);
                 tyros_camera::Objects msg;
 
-		// For each input pixel we do have 2 bytes of data. But we read them in groups of four because of YUYV format
-        	for(i=0,j=0;i<(IMAGE_WIDTH*IMAGE_HEIGHT*2) ; i+=2,j+=1) {
-                	int tmp1=((j%IMAGE_HEIGHT)*IMAGE_WIDTH+IMAGE_WIDTH-1);
-                	image.data[
-				tmp1-(int)((j%(IMAGE_WIDTH*IMAGE_HEIGHT))/IMAGE_HEIGHT)
-                        	] = ptr[i+Y1];
-	                image.data[
-				tmp1-(int)((j%(IMAGE_WIDTH*IMAGE_HEIGHT))/IMAGE_HEIGHT-1)
-                        	] = ptr[i+Y2];
-#if 1
-		        imgy->imageData[
-                                tmp1-(int)((j%(IMAGE_WIDTH*IMAGE_HEIGHT))/IMAGE_HEIGHT)
-                                ] = ptr[i+Y1];
-                        imgy->imageData[
-                                tmp1-(int)((j%(IMAGE_WIDTH*IMAGE_HEIGHT))/IMAGE_HEIGHT-1)
-                                ] = ptr[i+Y2];
+		/* 
+                 * For each input pixel we do have 2 bytes of data. But we read them in 
+                 * groups of four because of YUYV format.
+                 * i represent absolute number of pixel, j is byte.
+                 */
+#ifdef ROTATE90
+               for(i=0,j=0;i<(IMAGE_WIDTH*IMAGE_HEIGHT*2) ; i+=4,j+=2) {
+                       int tmp1=((j%IMAGE_HEIGHT)*IMAGE_WIDTH+IMAGE_WIDTH-1);
+		       int tmp2=j/IMAGE_HEIGHT;
+                       image.data[tmp1-(int)(tmp2)]             = ptr[i+Y1];
+                       image.data[tmp1-(int)(tmp2-IMAGE_WIDTH)] = ptr[i+Y2];
+                       iply->imageData[tmp1-(int)(tmp2)]   = ptr[i+Y1];
+                       iply->imageData[tmp1-(int)(tmp2-IMAGE_WIDTH)] = ptr[i+Y2];
+                       iplu->imageData[tmp1-(int)(tmp2)]   = ptr[i+U-4];
+                       iplu->imageData[tmp1-(int)(tmp2-IMAGE_WIDTH)] = ptr[i+U];
+                       iplv->imageData[tmp1-(int)(tmp2)]   = ptr[i+V-4];
+                       iplv->imageData[tmp1-(int)(tmp2-IMAGE_WIDTH)] = ptr[i+V];
+		}
+#else
+        	for(i=0,j=0;j<(IMAGE_WIDTH*IMAGE_HEIGHT*2) ; i+=2,j+=4) {
+                	image.data     [i  ] = ptr[j+Y1];
+	                image.data     [i+1] = ptr[j+Y2];
+
+		        iply->imageData[i  ] = ptr[j+Y1];
+                        iply->imageData[i+1] = ptr[j+Y2];
+			/* U channel */
+		        iplu->imageData[i  ] = ptr[j+U];
+                        iplu->imageData[i+1] = ptr[j+U];
+                        /* V channel */
+		        iplv->imageData[i  ] = ptr[j+V];
+                        iplv->imageData[i+1] = ptr[j+V];
+		}
 #endif
-#if 1
-		        imgu->imageData[
-                                tmp1-(int)((j%(IMAGE_WIDTH*IMAGE_HEIGHT))/IMAGE_HEIGHT)
-                                ] = ptr[i+U];
-                        imgu->imageData[
-                                tmp1-(int)((j%(IMAGE_WIDTH*IMAGE_HEIGHT))/IMAGE_HEIGHT-1)
-                                ] = ptr[i+U];
-#endif
-#if 1
-		        imgv->imageData[
-                                tmp1-(int)((j%(IMAGE_WIDTH*IMAGE_HEIGHT))/IMAGE_HEIGHT)
-                                ] = ptr[i+V];
-                        imgv->imageData[
-                                tmp1-(int)((j%(IMAGE_WIDTH*IMAGE_HEIGHT))/IMAGE_HEIGHT-1)
-                                ] = ptr[i+V];
-#endif
+		//double minVal,maxVal;
+
+		cvMerge(iply,iplu ,iplv , NULL, imgYUV);
+                cvInRangeS(imgYUV, cvScalar( 55,  65, 152), cvScalar(203, 109, 199), imgOrange);
+                cvInRangeS(imgYUV, cvScalar( 16, 133,  95), cvScalar(100, 181, 126), imgBlue  );
+                cvInRangeS(imgYUV, cvScalar(101,  83, 123), cvScalar(155, 114, 142), imgYellow);
+                IplImage *labelImg=cvCreateImage(cvGetSize(imgYUV), IPL_DEPTH_LABEL, 1);
+
+                unsigned int result;
 
 
+
+// Orange
+		result=cvLabel(imgOrange, labelImg, blobs);
+                cvFilterByArea(blobs, 15, 1000000);
+                CvLabel label=cvLargestBlob(blobs);
+                if(label!=0) {
+			// Delete all blobs except the largest
+          		cvFilterByLabel(blobs, label);
+			if(blobs.begin()->second->maxy - blobs.begin()->second->miny < 50) { // Cut off too high objects
+	        		printf("largest orange blob at %.1f %.1f\n",blobs.begin()->second->centroid.x,blobs.begin()->second->centroid.y);
+				//blobs.begin()->second->label="orange";
+			}
+                 }
+                cvRenderBlobs(labelImg, blobs, imgYUV, imgYUV,CV_BLOB_RENDER_BOUNDING_BOX);
+                cvUpdateTracks(blobs, tracks_o, 200., 5);
+                cvRenderTracks(tracks_o, imgYUV, imgYUV, CV_TRACK_RENDER_ID|CV_TRACK_RENDER_BOUNDING_BOX);
+
+// Blue
+		result=cvLabel(imgBlue, labelImg, blobs);
+                cvFilterByArea(blobs, 15, 1000000);
+                label=cvLargestBlob(blobs);
+                if(label!=0) {
+			// Delete all blobs except the largest
+			cvFilterByLabel(blobs, label);
+			if(blobs.begin()->second->maxy - blobs.begin()->second->miny < 50) { // Cut off too high objects
+		            printf("largest blue blob at %.1f %.1f\n",blobs.begin()->second->centroid.x,blobs.begin()->second->centroid.y);
+			    //blobs.begin()->second->label="orange";
+			}
+                 }
+                cvRenderBlobs(labelImg, blobs, imgYUV, imgYUV,CV_BLOB_RENDER_BOUNDING_BOX);
+                cvUpdateTracks(blobs, tracks_b, 200., 5);
+                cvRenderTracks(tracks_b, imgYUV, imgYUV, CV_TRACK_RENDER_ID|CV_TRACK_RENDER_BOUNDING_BOX);
+
+
+
+
+		for (CvBlobs::const_iterator it=blobs.begin(); it!=blobs.end(); ++it) {
+			//printf("res %d minx %d,miny %d centroid %.1fx%.1f\n",result,it->second->minx,it->second->miny,it->second->centroid.x,it->second->centroid.y);
         	}
-		find_circles(imgy);
-	//	draw_circles(imgy);
 
-
-        // Build the histogram and compute its contents.
-        //
-        int h_bins = 30, s_bins = 32; 
-        CvHistogram* hist;
-        {
-          int    hist_size[] = { h_bins, s_bins };
-          float  h_ranges[]  = { 0, 180 };          // hue is [0,180]
-          float  s_ranges[]  = { 0, 255 }; 
-          float* ranges[]    = { h_ranges, s_ranges };
-          hist = cvCreateHist( 
-            2, 
-            hist_size, 
-            CV_HIST_ARRAY, 
-            ranges, 
-            1 
-          ); 
-        }
-	if(setroi) {
-		cvSetImageROI( imgy, cvRect (box.x,box.y,box.width,box.height));
-		cvSetImageROI( imgu, cvRect (box.x,box.y,box.width,box.height));
-	}
-        cvCalcHist( planes, hist, 0, 0 );
-
-        FILE *f=fopen("histogram.raw","w");
-        if(f==NULL) {
-            printf("error: %s\n",strerror(errno));
-	    exit(1);
-        }
-        if(fwrite(hist,sizeof(CvHistogram),1,f) != 1) {
-            printf("error: %s\n",strerror(errno));
-	    exit(1);
-        }
-        fclose(f);
-
-	if(setroi) {
-		cvResetImageROI( imgy);
-		cvResetImageROI( imgu);
-	}
-
-        // Create an image to use to visualize our histogram.
-        //
-        int scale = 10;
-        IplImage* hist_img = cvCreateImage(  
-          cvSize( h_bins * scale, s_bins * scale ), 
-          8, 
-          3
-        ); 
-        cvZero( hist_img );
-
-        // populate our visualization with little gray squares.
-        //
-        float max_value = 0;
-        cvGetMinMaxHistValue( hist, 0, &max_value, 0, 0 );
-
-        for( int h = 0; h < h_bins; h++ ) {
-            for( int s = 0; s < s_bins; s++ ) {
-                float bin_val = cvQueryHistValue_2D( hist, h, s );
-                int intensity = cvRound( bin_val * 255 / max_value );
-                cvRectangle( 
-                  hist_img, 
-                  cvPoint( h*scale, s*scale ),
-                  cvPoint( (h+1)*scale - 1, (s+1)*scale - 1),
-                  CV_RGB(intensity,intensity,intensity), 
-                  CV_FILLED
-                );
-            }
-        }
-
-//        cvNamedWindow( "Source", 1 );
-//        cvShowImage(   "Source", src );
-
-        cvNamedWindow( "H-S Histogram", 1 );
-        cvShowImage(   "H-S Histogram", hist_img );
-
-
-//0 Correlation, 1 ChiSqr, 2 Intersect, 3 Bhattacharyya
-        int type=1;
-/*
-#define patchx 61
-#define patchy 61
-                        int iwidth = imgy->width - patchx + 1;
-                        int iheight = imgy->height - patchy + 1;
-
-            IplImage *ftmp = cvCreateImage( cvSize(iwidth,iheight),32,1);
-*/
- //           printf("Doing cvCalcBackProjectPatch() with type =%d\n",type);
- //           cvCalcBackProjectPatch(planes[1],ftmp,cvSize(61,61),hist,type,1.0);
- //           printf("ftmp count = %d\n",cvCountNonZero(ftmp));
- IplImage * dst = cvCreateImage( cvGetSize(imgy),8,1);
-
-            cvCalcBackProject(planes,dst,hist);
-
-        cvNamedWindow( "back", 1 );
-        cvShowImage(   "back", dst);
+		/*cvMinMaxLoc( const CvArr* A, double* minVal, double* maxVal,
+                  CvPoint* minLoc, CvPoint* maxLoc, const CvArr* mask=0 ); */
+		find_circles(iply);
 
 #ifdef DEBUG
                 double hScale=0.7;
@@ -292,7 +260,7 @@ int main(int argc, char **argv) {
 #endif
                 for (i=0; circles_st[i].x_in_picture != -1; i++) {
 #ifdef DEBUG
-                    char buf[256];
+                    //char buf[256];
 #endif
                     tyros_camera::Object o;
 
@@ -302,18 +270,17 @@ int main(int argc, char **argv) {
                     o.certainity=i;
                     o.type="Ball";
                     msg.object.push_back(o);
-
 #ifdef DEBUG
 #if 0
                     printf("Circle[%d] x:%d y:%d r:%d\n", i, circles_st[i].x_in_picture, circles_st[i].y_in_picture, circles_st[i].r_in_picture);
                     printf("Circle[%d] real: x:%lf y:%lf r:%lf\n", i, circles_st[i].x_from_robot, circles_st[i].y_from_robot, circles_st[i].r_from_robot);
-//                  cvCircle(imgy[devnum], cvPoint(cvRound(circles[i].x_in_picture), cvRound(circles[i].y_in_picture)), 3, CV_RGB(0,255,0), -1, 8, 0);
-                    cvCircle(imgy, cvPoint(cvRound(circles_st[i].x_in_picture), cvRound(circles_st[i].y_in_picture)), cvRound(circles_st[i].r_in_picture), CV_RGB(0,255,0), 3, 8, 0);
+//                  cvCircle(iply[devnum], cvPoint(cvRound(circles[i].x_in_picture), cvRound(circles[i].y_in_picture)), 3, CV_RGB(0,255,0), -1, 8, 0);
+                    cvCircle(iply, cvPoint(cvRound(circles_st[i].x_in_picture), cvRound(circles_st[i].y_in_picture)), cvRound(circles_st[i].r_in_picture), CV_RGB(0,255,0), 3, 8, 0);
 
                     sprintf(buf, "%d x:%d y:%d r:%d", i, circles_st[i].x_in_picture, circles_st[i].y_in_picture, circles_st[i].r_in_picture);
-                    cvPutText (imgy,buf,cvPoint(circles_st[i].x_in_picture-110,circles_st[i].y_in_picture+circles_st[i].r_in_picture*2), &font, cvScalarAll(255));
+                    cvPutText (iply,buf,cvPoint(circles_st[i].x_in_picture-110,circles_st[i].y_in_picture+circles_st[i].r_in_picture*2), &font, cvScalarAll(255));
                     sprintf(buf, "%d x: %.1lf y: %.1lf r: %.1lf", i, circles_st[i].x_from_robot, circles_st[i].y_from_robot, circles_st[i].r_from_robot);
-                    cvPutText (imgy,buf,cvPoint(circles_st[i].x_in_picture-110,circles_st[i].y_in_picture+circles_st[i].r_in_picture*2+20), &font, cvScalarAll(255));
+                    cvPutText (iply,buf,cvPoint(circles_st[i].x_in_picture-110,circles_st[i].y_in_picture+circles_st[i].r_in_picture*2+20), &font, cvScalarAll(255));
 #endif 
 #endif
                 }
@@ -322,11 +289,16 @@ int main(int argc, char **argv) {
            //     msg.object.clear();
 #ifdef DEBUG
 	        if( drawing_box ) {
-			draw_box( imgy, box );
+			draw_box( iply, box );
 		}
-                cvShowImage( "result Y", imgy );
-                cvShowImage( "result U", imgu );
-                cvShowImage( "result V", imgv );
+                cvShowImage( "result Y", iply );
+                cvShowImage( "result U", iplu );
+                cvShowImage( "result V", iplv );
+                cvShowImage( "result YUV", imgYUV );
+                cvShowImage( "orange", imgOrange);
+                cvShowImage( "blue", imgBlue);
+                cvShowImage( "yellow", imgYellow);
+		cvWaitKey(10);
 #endif
 //		cam_info = cinfo.getCameraInfo();
   	        cam_info.header.frame_id = image.header.frame_id;
@@ -335,11 +307,12 @@ int main(int argc, char **argv) {
 		image_pub.publish(image, cam_info);
 
 		ros::spinOnce();
+		cvReleaseImage(&labelImg);
 	}
 #ifdef DEBUG
-        cvReleaseImage(&imgy);
-        cvReleaseImage(&imgu);
-        cvReleaseImage(&imgv);
+        cvReleaseImage(&iply);
+        cvReleaseImage(&iplu);
+        cvReleaseImage(&iplv);
 #endif
 	return 0;
 }
