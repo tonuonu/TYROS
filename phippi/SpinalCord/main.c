@@ -70,7 +70,7 @@ void updateOLED () {
 
 void
 main(void) {
-
+    int autocharge=0;
     HardwareSetup();    
     LED1=1;
     OLED_Set_Display_On_Off(0x01);                         // Display On
@@ -181,6 +181,15 @@ main(void) {
                     }
                 }
                 sprintf(buf,"charge %s",CHARGE ? "on":"off");
+                write(buf);              
+            } else if(strncmp(command,"autocharge ",11)==0) {
+                int tmp;
+                for(tmp=0,tok = strtok(command," "); tok && tmp<=2 ; tok=strtok(0," "),tmp++) {
+                    if(tmp == 1) {
+                        autocharge=(int)strtod(tok,NULL); 
+                    }
+                }
+                sprintf(buf,"autocharge %s",autocharge ? "on":"off");
                 write(buf);              
             } else if(strncmp(command,"kick ",5)==0) {
                 int tmp;
@@ -390,13 +399,13 @@ main(void) {
         ad[2]=AD02 & 0x3FF;
         ad[3]=AD03 & 0x3FF;
         float bat=(float)ad[3]*(13.64/0x3FF);
-        
+        float capacitor=(float)ad[2]/2.27333333 ; // 0x3FF/450V
         write(VT100CURSORAD);
         sprintf(buf,"(L motor %.1fA) ", (float)ad[0]/50.0 );
         write(buf);
         sprintf(buf,"(R motor %.1fA) ", (float)ad[1]/50.0 );
         write(buf);
-        sprintf(buf,"(Capacitor %.0fV) ", (float)ad[2]/2.27333333 ); // 0x3FF/450V
+        sprintf(buf,"(Capacitor %.0fV) ", capacitor);
         write(buf);
         sprintf(buf,"(battery %.1fV) ", bat );
         write(buf);
@@ -408,10 +417,15 @@ main(void) {
         write(PANDA ? "ON ":"OFF");
         write(VT100CURSORCHARGER);
         write("Charger :");
-        write(CHARGE ? "ON ":"OFF");
+        if(autocharge) 
+            write("AUTO");
+        else
+            write(CHARGE ? "ON ":"OFF");
 //        write(" Done : ");
 //        write(CHARGE_DONE ? "NO ":"YES");
 
+        if(autocharge && capacitor<400.0)
+          CHARGE=1;
         if(CHARGE_DONE==0) { // Charging is DONE when signal is low
           CHARGE=0; // Turn off CHARGE pin
         }
