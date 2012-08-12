@@ -47,7 +47,8 @@ short unsigned SPI6_receive(void) ;
 extern double twist[6];
 extern int pwm[2];
 extern int pwmtarget[2];
-extern int accok, accwhoami, accx, accy, accz;
+extern int accok, accwhoami; 
+extern signed char accx, accy, accz;
 extern int accwhoamistatus;
 /*
  * IAR-HEW compatibility 

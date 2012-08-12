@@ -67,9 +67,8 @@ __interrupt void _uart2_receive(void) {
   case 1: // WHOAMI answer received. Sending request to write REG_MCTL
       accwhoami=(int)c_RecBuff[uc_cnt];
       CS2=1;
-//      uDelay(50);
+      uDelay(5);
       CS2=0;
-//      uDelay(50);
       u2tb=(MMA7455L_REG_MCTL << 1) | WRITE_BIT; 
       break;
   case 2: // REG_MCTL written, writing _MODE_MEASUREMENT into it
@@ -77,35 +76,30 @@ __interrupt void _uart2_receive(void) {
       break;
   case 3: // _MODE_MEASUREMENT written. Trying to get XOUTL
       CS2=1;
-//      uDelay(50);
+      uDelay(5);
       CS2=0;
-//      uDelay(50);
       u2tb=MMA7455L_REG_XOUT8 << 1;
       break;
   case 5: // XOUTL sent, trying to read answer
       accx=(int)c_RecBuff[uc_cnt];
       CS2=1;
-//      uDelay(50);
+      uDelay(5);
       CS2=0;
-//      uDelay(50);
       u2tb=MMA7455L_REG_YOUT8 << 1;
       break;
   case 7: // YOUTL sent, trying to read answer
       accy=(int)c_RecBuff[uc_cnt];
       CS2=1;
-//      uDelay(50);
+      uDelay(5);
       CS2=0;
-//      uDelay(50);
       u2tb=MMA7455L_REG_ZOUT8 << 1;
       break;
   case 9: // ZOUTL sent, trying to read answer
       accz=(int)c_RecBuff[uc_cnt];
       CS2=1;
-//      uDelay(50);
+      uDelay(5);
       CS2=0;
-//      uDelay(50);
       u2tb=MMA7455L_REG_WHOAMI << 1;
-      ERRORLED=1;
       accwhoamistatus=-1;
       break;
   } 
