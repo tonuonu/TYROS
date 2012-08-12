@@ -308,53 +308,13 @@ main(void) {
 /* Acceleration sensor */
 #if 1
         write(VT100CURSORACC);
-        CS2=0; // enable acc
-        uDelay(1);
-        SPI2_send_data( (MMA7455L_REG_WHOAMI << 1)/* | WRITE_BIT*/); 
-//        SPI2_send_data( (0xfF >> 1) | WRITE_BIT); 
-        uDelay(10);
-        unsigned short acc2whoami=SPI2_receive();
-        while (ri_u2c1 == 0) {  NOP();  } // wait till receive completes
-        uDelay(10);
-        CS2=1; // disable acc
-#if 0
-        uDelay(100);
-        CS2=0; // enable acc
-        uDelay(100);
-        SPI2_send_data( (MMA7455L_REG_XOUT8 << 1) | WRITE_BIT); 
-        uDelay(100);
-        unsigned short acc2x=SPI2_receive();
-        uDelay(100);
-        CS2=1; // disable acc
-        uDelay(100);
-        CS2=0; // enable acc
-        uDelay(100);
-        SPI2_send_data( (MMA7455L_REG_YOUT8 << 1) | WRITE_BIT); 
-        uDelay(100);
-        unsigned short acc2y=SPI2_receive();
-        uDelay(100);
-        CS2=1; // disable acc
-        uDelay(100);
-        CS2=0; // enable acc
-        uDelay(100);
-        SPI2_send_data( (MMA7455L_REG_ZOUT8 >> 1) | WRITE_BIT); 
-        uDelay(100);
-        unsigned short acc2z=SPI2_receive();
-        uDelay(100);
-        CS2=1; // disable acc
-        uDelay(100);
-        sprintf(buf,"acce2 %x %s %3d %3d %3d ",acc2whoami & 0x3FF,
-                (acc2whoami & (1 << 13)) ?"ERROR":"OK   ",acc2x & 0xff,acc2y& 0xff,acc2z& 0xff);
-        write(buf);
-        sprintf(buf,"%s %s %s %s %s"
-                ,(acc2whoami & (1 << 12)) ? "abt ":""  
-                ,(acc2whoami & (1 << 13)) ? "oer ":""
-                ,(acc2whoami & (1 << 14)) ? "fer ":""
-                ,(acc2whoami & (1 << 15)) ? "per ":""
-                ,(acc2whoami & (1 << 16)) ? "sum ":""
-                  );
-        writeln(buf);    
-#endif
+        write("Acceleration: ");
+        if(accok) {
+            sprintf(buf,"Acceration x:%d y:%d z:%d",accx,accy,accz);
+            write(buf);
+        } else {
+            write("ERROR");
+        } 
 #endif
 #if 1
         int ad[4];

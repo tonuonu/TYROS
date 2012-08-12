@@ -1615,6 +1615,9 @@
     </settings>
   </configuration>
   <file>
+    <name>$PROJ_DIR$\acceleration.c</name>
+  </file>
+  <file>
     <name>$PROJ_DIR$\gyro.c</name>
   </file>
   <file>

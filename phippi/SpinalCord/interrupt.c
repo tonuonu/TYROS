@@ -28,6 +28,7 @@
 #include "uart.h"
 #include "hwsetup.h"
 #include "SPI.h"
+#include "mma7455l.h"
 
 
 #pragma vector=TIMER_B5
@@ -45,7 +46,11 @@ s_int(void) {
         // Turn off buzzer
         ta4=0;
     }
-
+    CS2=0;
+    accwhoami=0;
+    SPI2_send_data( (MMA7455L_REG_WHOAMI << 1) ); 
+  
+    
     if(JOY_RIGHT == 0) {
 //      OLED_Set_Display_Mode(0x03);                           // Inverse display
       PANDA = 0;

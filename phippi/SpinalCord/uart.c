@@ -44,6 +44,45 @@ char rx5_buff[RX_BUFF_SIZE];
 unsigned short rx5_ptr = 0;
 
 #define	f1_CLK_SPEED	base_freq
+/* Buffer to store the received data	*/
+char c_RecBuff[8];
+
+#pragma vector = UART2_TX
+__interrupt void _uart2_trans(void) {
+  /* Clear the 'transmission complete' flag.	*/
+  ir_s2tic = 0;
+  // making dummy write to start reading result back too
+  if(accwhoami==0)
+    u2tb=0x00;
+  if(accwhoami++==1)
+    CS2=1;
+}
+
+#pragma vector = UART2_RX
+__interrupt void _uart2_receive(void) {
+  /* Used to reference a specific location in the array while string the
+  received data.   */
+  static unsigned char uc_cnt=0;
+  /* Copy the received data to the global variable 'c_RecBuff'	*/
+  c_RecBuff[uc_cnt] = (char) u2rb ;
+
+  /* Dummy write to the receive register to reinitiate a receive operation.	*/
+//  u2rb = 0x00;
+CS2=~CS2;
+  /* Check if the buffer size is exceed. If it is then reset the 'uc_cnt'
+  variable.    */
+  if(uc_cnt++ >= sizeof(c_RecBuff))
+  {
+    /* Reinitialize the buffer reference.	*/
+    uc_cnt = 0;
+  }
+
+  /* Clear the 'transmission complete' flag.	*/
+  ir_s2ric = 0;
+  CS2=1;
+
+}
+
 
 int putchar (int i ) {
     if( tx5_ptr == tx5_ptrr) { 
