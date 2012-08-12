@@ -32,6 +32,3 @@
 #define L3G4200D_INT1_DURATION 0x38
 #endif
 
-signed char gyro_read(unsigned char r);
-void gyro_write(unsigned char r, unsigned char data);
-void gyro_Init (void);

@@ -22,8 +22,9 @@ void
 SPI2_Init(void) { // Accel sensor
     pu22=1; // pull up for CLK2 or p7_2
 #define f1_CLK_SPEED 24000000
-    u2brg =  (unsigned char)(((f1_CLK_SPEED)/(2*100000))-1);
-    // u2brg =  (unsigned char)(((f1_CLK_SPEED)/(2*400000))-1);
+//    u2brg =  (unsigned char)(((f1_CLK_SPEED)/(2*100000))-1);
+    // 8MHz max
+    u2brg =  (unsigned char)(((f1_CLK_SPEED)/(2*400000))-1);
 
     CS2d = PD_OUTPUT;
     CS2=1;
@@ -62,7 +63,7 @@ SPI2_Init(void) { // Accel sensor
     u2smr = 0x00;
     u2smr2 = 0x00;
 
-    sse_u2smr3 = 1;                                        // SS is disabled when 0
+    sse_u2smr3 = 0;                                        // SS is disabled when 0
     ckph_u2smr3 = 0;                                       // Non clock delayed 
     dinc_u2smr3 = 0;                                       // Master mode when 0
     nodc_u2smr3 = 0;                                       // Select a clock output  mode "push-pull" when 0 
@@ -71,12 +72,10 @@ SPI2_Init(void) { // Accel sensor
     dl1_u2smr3 = 0;                                        // Set 0 for no  delay 
     dl2_u2smr3 = 0;                                        // Set 0 for no  delay 
 
-    /* Unused in synchronous serial mode. Set to 0.	*/
     u2smr4 = 0x00;
 
-    /* Disable interrupts	*/
     DISABLE_IRQ
-    ilvl_s2ric =0x03;       
+    ilvl_s2ric =0x05;       
     ir_s2ric   =0;            
     ENABLE_IRQ
  
@@ -85,7 +84,7 @@ SPI2_Init(void) { // Accel sensor
 
 #pragma vector = UART2_RX
 __interrupt void _uart2_receive(void) {
-    ERRORLED=1;
+ 
 
   /* Used to reference a specific location in the array while string the
   received data.   */
@@ -103,37 +102,37 @@ __interrupt void _uart2_receive(void) {
   case 1: // WHOAMI answer received. Sending request to write REG_MCTL
       accwhoami=(int)acc_RecBuff[uc_cnt];
       CS2=1;
-//      uDelay(5);
+      uDelay(5);
       CS2=0;
       u2tb=(MMA7455L_REG_MCTL << 1) | WRITE_BIT; 
       break;
   case 2: // REG_MCTL written, writing _MODE_MEASUREMENT into it
-      u2tb=((MMA7455L_GSELECT_2 | MMA7455L_MODE_MEASUREMENT) << 1) /*| WRITE_BIT*/; 
+      u2tb=((MMA7455L_GSELECT_2 | MMA7455L_MODE_MEASUREMENT) << 1) | WRITE_BIT; 
       break;
   case 3: // _MODE_MEASUREMENT written. Trying to get XOUTL
       CS2=1;
-//      uDelay(5);
+      uDelay(5);
       CS2=0;
       u2tb=MMA7455L_REG_XOUT8 << 1;
       break;
   case 5: // XOUTL sent, trying to read answer
       accx=(int)acc_RecBuff[uc_cnt];
       CS2=1;
-//      uDelay(5);
+      uDelay(5);
       CS2=0;
       u2tb=MMA7455L_REG_YOUT8 << 1;
       break;
   case 7: // YOUTL sent, trying to read answer
       accy=(int)acc_RecBuff[uc_cnt];
       CS2=1;
-//      uDelay(5);
+      uDelay(5);
       CS2=0;
       u2tb=MMA7455L_REG_ZOUT8 << 1;
       break;
   case 9: // ZOUTL sent, trying to read answer
       accz=(int)acc_RecBuff[uc_cnt];
       CS2=1;
-//      uDelay(5);
+      uDelay(5);
       CS2=0;
       u2tb=MMA7455L_REG_WHOAMI << 1;
       accwhoamistatus=-1;
@@ -150,7 +149,6 @@ __interrupt void _uart2_receive(void) {
 
   /* Clear the 'reception complete' flag.	*/
   ir_s2ric = 0;
-  ERRORLED=0;
   
 }
 

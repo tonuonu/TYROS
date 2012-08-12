@@ -225,7 +225,7 @@ uart7_send(unsigned char d) {
     u7tb = (short)d;
 }
 
-#if 1
+#if 0
 #pragma vector = UART4_RX
 __interrupt void _uart4_receive(void) {
     if (rx5_ptr >= RX_BUFF_SIZE) {

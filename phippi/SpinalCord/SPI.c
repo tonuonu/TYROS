@@ -26,76 +26,6 @@
 #include "SPI.h"
 #include "mma7455l.h"
 
-void
-SPI4_Init(void) { // Melexis 90316
-    /* 
-     * CS
-     */
-    prc2=1;
-    pd9_4 = PD_OUTPUT;
-    p9_4=1;
-
-    /* 
-     * CLK4 
-     */
-    prc2=1;
-    CLOCK4d = PD_OUTPUT;
-
-    prc2=1;
-    CLOCK4s = PF_UART;
-    /* 
-     * TXD4 
-     */
-    prc2=1;
-    TX4d = PD_OUTPUT;
-
-    prc2=1;
-    TX4s = PF_UART;
-    
-    smd0_u4mr  = 1;                                        // \ 
-    smd1_u4mr  = 0;                                        //  | Synchronous Serial Mode
-    smd2_u4mr  = 0;                                        // /
-
-    ckdir_u4mr = 0;                                        // 0=internal clock 
-    
-    stps_u4mr  = 0;                                        // 0=1 stop bit, 0 required
-    pry_u4mr   = 0;                                        // Parity, 0=odd, 0 required 
-    prye_u4mr  = 0;                                        // Parity Enable? 0=disable, 0 required 
-    iopol_u4mr = 0;                                        // IO Polarity, 0=not inverted, 0 required
-
-    clk0_u4c0 = 0;                                         // Clock source f1 for u4brg
-    clk1_u4c0 = 0;                                         // 
-    txept_u4c0 = 0;                                        // Transmit register empty flag 
-    crd_u4c0 = 1;                                          // CTS disabled when 1
-    nch_u4c0 = 0;                                          // 0=Output mode "open drain" for TXD and CLOCK pin 
-    ckpol_u4c0 = 1;                                        // CLK Polarity 
-    uform_u4c0 = 1;                                        // 1=MSB first
-
-    te_u4c1 = 1;                                           // 1=Transmission Enable
-    ti_u4c1 = 0;                                           // Must be 0 to send or receive
-    re_u4c1 = 1;                                           // Reception Enable when 1
-    ri_u4c1 = 0;                                           // Receive complete flag - U4RB is empty.
-    u4irs_u4c1 = 0;                                        // Interrupt  when transmission  is completed, U4TB is empty. 
-    u4rrm_u4c1 = 1;                                        // Continuous receive mode off
-    u4lch_u4c1 = 0;                                        // Logical inversion off 
-
-    u4smr = 0x00;                                          // Set 0 
-    u4smr2 = 0x00;                                         // Set 0 
-
-    sse_u4smr3 = 0;                                        // SS is disabled when 0
-    ckph_u4smr3 = 0;                                       // Non clock delayed 
-    dinc_u4smr3 = 0;                                       // Master mode when 0
-    nodc_u4smr3 = 0;                                       // Select a clock output  mode "push-pull" when 0 
-    err_u4smr3 = 0;                                        // Error flag, no error when 0 
-    dl0_u4smr3 = 0;                                        // Set 0 for no  delay 
-    dl1_u4smr3 = 0;                                        // Set 0 for no  delay 
-    dl2_u4smr3 = 0;                                        // Set 0 for no  delay 
-    u4smr4 = 0x00;                                         // Set 0. u4c0 must be set before this function
-
-    u4brg = 0x55;                                          // (unsigned char)(((f1_CLK_SPEED)/(2*BIT_RATE))-1);    
-    pu27=1;
-}
-
 
 void
 SPI7_Init(void) { // Melexis 90316
@@ -267,29 +197,6 @@ SPI3_send_cmd(unsigned char c) {
     u3tb = c;
 }
 
-void
-SPI4_send(unsigned short c) {
-  while (ti_u4c1 == 0)
-        NOP();
-  uDelay(SPI_DELAY);
-  ti_u4c1=0;
-  u4tb = c;
-
-}
-
-short unsigned
-SPI4_receive(void) {
-  short unsigned r;
-  SPI4_send(0xFF);
-  uDelay(SPI_DELAY);  
-  uDelay(SPI_DELAY);  
-  while (ri_u4c1 == 0) {
-        NOP();
-  }
-  r=u4rb;
-  ri_u4c1=0;
-  return r;
-}
 
 void
 SPI6_send(unsigned short c) {

@@ -8,12 +8,13 @@
 /* Buffer to store the received data	*/
 char gyro_RecBuff[8];
 int gyrowhoami=0;
-signed char gyrox=0,gyroy=0,gyroz=0;
+signed char gyrox=0,gyroy=0,gyroz=0,gyrotemp=0;
 int gyrowhoamistatus=0;
 void
 SPI6_Init(void) { // Gyro
 #define	f1_CLK_SPEED 24000000
-    u6brg = (unsigned char)(((f1_CLK_SPEED)/(2*1000000))-1);
+    // 10MHz max clock
+    u6brg = (unsigned char)(((f1_CLK_SPEED)/(2*5000000))-1);
 
     CS6d = PD_OUTPUT;
     CS6=1; // CS is high, means disabled
@@ -44,7 +45,7 @@ SPI6_Init(void) { // Gyro
     ckpol_u6c0 = 0;                                        // CLK Polarity 0 rising edge, 1 falling edge
     uform_u6c0 = 1;                                        // 1=MSB first
 
-    te_u6c1 = 1;                                          // 1=Transmission Enable
+    te_u6c1 = 1;                                           // 1=Transmission Enable
     ti_u6c1 = 0;                                           // Must be 0 to send or receive
     re_u6c1 = 1;                                           // Reception Enable when 1
     ri_u6c1 = 0;                                           // Receive complete flag - U4RB is empty.
@@ -88,12 +89,12 @@ __interrupt void _uart6_receive(void) {
   case 6:
   case 8:
   case 10:
+  case 12:
       u6tb=0xFF;
       break;
   case 1: // WHOAMI answer received. Sending request to write ctrl_REG2
       gyrowhoami=(int)gyro_RecBuff[uc_cnt];
       CS6=1;
-//      uDelay(5);
       CS6=0;
       u6tb=(L3G4200D_CTRL_REG2 | 0x00) ;   
       break;
@@ -102,37 +103,39 @@ __interrupt void _uart6_receive(void) {
       break;
   case 3: 
       CS6=1;
-//      uDelay(5);
       CS6=0;
       u6tb=(L3G4200D_CTRL_REG1 | 0x00) ; 
       break;
   case 4: // REG1 written, Enabling X,Y,Z axes and normal mode
       u6tb=1|2|4|8; 
       break;
-  case 5: // written. Trying to get XOUTL
+      
+  case 5: // written. Trying to get TEMP
       CS6=1;
-//      uDelay(5);
+      CS6=0;
+      u6tb=L3G4200D_OUT_TEMP | 0x80;
+      break;
+  case 7: // TEMP answer received. Sending request to get XL
+      gyrotemp=(signed int)gyro_RecBuff[uc_cnt];
+      CS6=1;
       CS6=0;
       u6tb=L3G4200D_OUT_X_L | 0x80;
       break;
-  case 7: // XOUTL sent, trying to read answer
+  case 9: // XOUTL sent, trying to read answer
       gyrox=(int)gyro_RecBuff[uc_cnt];
       CS6=1;
-//      uDelay(5);
       CS6=0;
       u6tb=L3G4200D_OUT_Y_L | 0x80;
       break;
-  case 9: // YOUTL sent, trying to read answer
+  case 11: // YOUTL sent, trying to read answer
       gyroy=(int)gyro_RecBuff[uc_cnt];
       CS6=1;
-//      uDelay(5);
       CS6=0;
       u6tb=L3G4200D_OUT_Z_L | 0x80;
       break;
-  case 11: // ZOUTL sent, trying to read answer
+  case 13: // ZOUTL sent, trying to read answer
       gyroz=(int)gyro_RecBuff[uc_cnt];
       CS6=1;
-//      uDelay(5);
       CS6=0;
       u6tb=L3G4200D_WHOAMI | 0x80;
       gyrowhoamistatus=-1;

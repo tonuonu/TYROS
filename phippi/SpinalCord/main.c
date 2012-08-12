@@ -70,6 +70,7 @@ void updateOLED () {
 
 void
 main(void) {
+    int j;
     int autocharge=0;
     HardwareSetup();    
     LED1=1;
@@ -98,6 +99,12 @@ main(void) {
     updateOLED1();    
     PANDA=1;
     MELEXIS_EN=0; // Low is ON
+    // 300uS needed. On 48Mhz each cycle is ~21nS, so
+    // 300 000nS/21=~1200
+    for(j=0;j<2;j++) {
+        uDelay(255); 
+    }
+    u4tb=0xAA;
     CS2=0;
     accelerometer_send( MMA7455L_REG_WHOAMI << 1 ); 
     CS6=0;
@@ -225,44 +232,13 @@ main(void) {
 #if 1
         write(VT100CURSORMELEXISL);
         write("Melexis L :");
+        sprintf(buf,"(%2d) ",mlx1whoamistatus);
+        write(buf);
+        sprintf(buf,"%d %d",mlx1data1,mlx1data2);
+        write(buf);
 //        write(VT100CURSORMELEXISR);
 //        write("Melexis R :");
 
-        int j;
-        // 300uS needed. On 48Mhz each cycle is ~21nS, so
-        // 300 000nS/21=~1200
-        for(j=0;j<7;j++)
-            uDelay(255); 
-
-        CS4=0; // enable left Melexis
-        // 300uS needed. On 48Mhz each cycle is ~21nS, so
-        // 300 000nS/21=~1200
-        for(j=0;j<2;j++) {
-            uDelay(255); 
-        }
-        SPI4_send(0xAA);
-        // 12uS needed. On 48Mhz each cycle is ~21nS, so
-        // 2300nS/12=~220
-        for(j=0;j<2;j++)            
-            uDelay(255); 
-      
-        SPI4_send(0xFF);
-        for(j=0;j<2;j++)
-            uDelay(255); 
-
-        int i;
-        for(i=0;i<4;i++) {
-            unsigned short c; /* 16 bit value */
-            pd9_6=0;
-            c=SPI4_receive();
-            sprintf(buf,"SPI4 %x",c);
-            write(buf);
-            pd9_6=1;
-            for(j=0;j<2;j++) {
-                uDelay(255); 
-            }
-        }
-        CS4=1; // disable melexis   
 #endif        
 
       /* Gyroscope */
@@ -273,7 +249,7 @@ main(void) {
         write(buf);
 
 //        if(accok && accwhoami==85) {
-            sprintf(buf,"whoami %3d x:%4d y:%4d z:%4d",gyrowhoami,gyrox,gyroy,gyroz);
+            sprintf(buf,"whoami %3d temp %4d x:%4d y:%4d z:%4d",gyrowhoami,35-gyrotemp,gyrox,gyroy,gyroz);
             write(buf);
 //        } else {
 //            write("ERROR");

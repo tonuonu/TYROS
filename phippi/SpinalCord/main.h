@@ -53,9 +53,11 @@ extern int accwhoamistatus;
 
 
 extern int gyrowhoami;
-extern signed char gyrox,gyroy,gyroz;
+extern signed char gyrox,gyroy,gyroz,gyrotemp;
 extern int gyrowhoamistatus;
-
+extern char mlx1data1;
+extern char mlx1data2;
+extern int mlx1whoamistatus;
 /*
  * IAR-HEW compatibility 
  */

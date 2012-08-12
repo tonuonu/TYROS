@@ -1630,6 +1630,9 @@
     <name>$PROJ_DIR$\main.c</name>
   </file>
   <file>
+    <name>$PROJ_DIR$\melexis.c</name>
+  </file>
+  <file>
     <name>$PROJ_DIR$\oled.c</name>
   </file>
   <file>
