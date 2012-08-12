@@ -50,6 +50,12 @@ extern int pwmtarget[2];
 extern int accok, accwhoami; 
 extern signed char accx, accy, accz;
 extern int accwhoamistatus;
+
+
+extern int gyrowhoami;
+extern signed char gyrox,gyroy,gyroz;
+extern int gyrowhoamistatus;
+
 /*
  * IAR-HEW compatibility 
  */

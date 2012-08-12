@@ -99,9 +99,9 @@ main(void) {
     PANDA=1;
     MELEXIS_EN=0; // Low is ON
     CS2=0;
-    uDelay(50);
-    SPI2_send_data( MMA7455L_REG_WHOAMI << 1 ); 
-
+    accelerometer_send( MMA7455L_REG_WHOAMI << 1 ); 
+    CS6=0;
+    u6tb=L3G4200D_WHOAMI | 0x80;
     while (1) {
         int errorflag=0;
         char buf[256];
@@ -265,50 +265,20 @@ main(void) {
         CS4=1; // disable melexis   
 #endif        
 
+      /* Gyroscope */
 #if 1
-        unsigned short c,temp_raw,gyrowhoami; /* 16 bit value */
-        signed char x=0,y=0,z=0;
-        /*
-         * 0x80 is most significant bit=1 and indicates we 
-         * want to read register, not write. 0x0F is "whoami"
-         * and should be responded by 1101 0011 or 211 in dec or 0xd3 in hex 
-         */
-        gyrowhoami=gyro_read(WHOAMI);
-        if((unsigned char)gyrowhoami==211) {
-            OLED_Show_String(  1,"Gyro OK" , 26, 5*8);
-        } else {
-            sprintf(buf,"whoami %3d",(unsigned char) (gyrowhoami));
-            OLED_Show_String(  1, buf, 26, 5*8);          
-        }
-        uDelay(50);
+        write(VT100CURSORGYRO);
+        write("Gyro: ");
+        sprintf(buf,"(%2d) ",gyrowhoamistatus);
+        write(buf);
 
-        temp_raw=gyro_read(OUT_TEMP);
-        signed char temp= temp_raw & 0xff;
-        sprintf(buf,"temp %3d", temp );
-        OLED_Show_String(  1, buf, 0, 6*8);
-        
-        c=gyro_read(OUT_X_H);
-        x+=c & 0xff;
-        sprintf(buf,"X %3d",y);
-        OLED_Show_String(  1, buf, 0, 7*8);
-
-        c=gyro_read(OUT_Y_H);
-        y+=c & 0xff;
-        sprintf(buf,"Y %3d",y);
-        OLED_Show_String(  1, buf, 25, 7*8);
-
-        c=gyro_read(OUT_Z_H);
-        z+=c & 0xff;
-        sprintf(buf,"Z %3d",y);
-        OLED_Show_String(  1, buf, 50, 7*8);
-
-        write(VT100CURSORGYRO);        
-
-        sprintf(buf,"gyro temp:%3d x:%3d y:%3d z:%3d, %s",46-(signed char)temp,x,y,z,((unsigned char)gyrowhoami==211) ? "OK   " : "ERROR" );
-        writeln(buf);
-
+//        if(accok && accwhoami==85) {
+            sprintf(buf,"whoami %3d x:%4d y:%4d z:%4d",gyrowhoami,gyrox,gyroy,gyroz);
+            write(buf);
+//        } else {
+//            write("ERROR");
+//        } 
 #endif
-      
 /* Acceleration sensor */
 #if 1
         write(VT100CURSORACC);
@@ -368,9 +338,9 @@ main(void) {
           CHARGE=0; // Turn off CHARGE pin
         }
         if(errorflag) {
-          ERRORLED=1; 
+        //  ERRORLED=1; 
         } else {
-          ERRORLED=0; 
+        //  ERRORLED=0; 
         } 
         
     }

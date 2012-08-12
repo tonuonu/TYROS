@@ -379,7 +379,7 @@ HardwareSetup(void) {
     SPI4_Init();  // Melexis sensor left
     uart5_init(); // Panda
     SPI6_Init();  // gyro
-    gyro_Init();
+    //gyro_Init();
     SPI7_Init();  // Melexis sensor right
     OLED_Init();
     ENABLE_IRQ;

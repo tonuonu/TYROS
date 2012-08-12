@@ -5,83 +5,155 @@
 #include "main.h"
 #include "SPI.h"
 
-signed char 
-gyro_read(unsigned char r) {
-    unsigned char c;
-    CS6=0; // enable gyro
-    uDelay(100);
-    /*
-     * 0x80 is most significant bit=1 and indicates we 
-     * want to read register, not write. 
-     */
-    SPI6_send(r | 0x80); 
-    uDelay(100);
-    c=SPI6_receive() & 0xFF; // strip off anything over 8 bits
-    uDelay(100);
-    CS6=1; // disable gyro  
-    return c;
-}
-
+/* Buffer to store the received data	*/
+char gyro_RecBuff[8];
+int gyrowhoami=0;
+signed char gyrox=0,gyroy=0,gyroz=0;
+int gyrowhoamistatus=0;
 void
-gyro_write(unsigned char r, unsigned char data) {
-        CS6=0; // enable gyro
-        uDelay(100);
-        /*
-         * 0x80 is most significant bit=1 and indicates we 
-         * want to read register, not write. 0x20 is "turn on"
-         * and should be responded by 1101 0011 or 211 in dec or 0xd3 in hex 
-         */
-        SPI6_send(r | 0x00); 
-        uDelay(100);
-        SPI6_send(data); 
-        uDelay(100);
-        CS6=1; // disable gyro
-        uDelay(100);
+SPI6_Init(void) { // Gyro
+#define	f1_CLK_SPEED 24000000
+    u6brg = (unsigned char)(((f1_CLK_SPEED)/(2*1000000))-1);
+
+    CS6d = PD_OUTPUT;
+    CS6=1; // CS is high, means disabled
+
+    CLOCK6d = PD_OUTPUT;
+    CLOCK6s = PF_UART;
+
+    TX6d = PD_OUTPUT;
+    TX6s = PF_UART;
+
+    RX6s = PF_UART;
+
+    smd0_u6mr  = 1;                                        // \ 
+    smd1_u6mr  = 0;                                        //  | Synchronous Serial Mode
+    smd2_u6mr  = 0;                                        // /
+
+    ckdir_u6mr = 0;                                        // 0=internal clock 
+    stps_u6mr  = 0;                                        // 0=1 stop bit, 0 required
+    pry_u6mr   = 0;                                        // Parity, 0=odd, 0 required 
+    prye_u6mr  = 0;                                        // Parity Enable? 0=disable, 0 required 
+    iopol_u6mr = 0;                                        // IO Polarity, 0=not inverted, 0 required
+
+    clk0_u6c0 = 0;                                         // Clock source f1 for u4brg
+    clk1_u6c0 = 0;                                         // 
+    txept_u6c0 = 0;                                        // Transmit register empty flag 
+    crd_u6c0 = 1;                                          // CTS disabled when 1
+    nch_u6c0 = 0;                                          // 0=Output mode "open drain" for TXD and CLOCK pin 
+    ckpol_u6c0 = 0;                                        // CLK Polarity 0 rising edge, 1 falling edge
+    uform_u6c0 = 1;                                        // 1=MSB first
+
+    te_u6c1 = 1;                                          // 1=Transmission Enable
+    ti_u6c1 = 0;                                           // Must be 0 to send or receive
+    re_u6c1 = 1;                                           // Reception Enable when 1
+    ri_u6c1 = 0;                                           // Receive complete flag - U4RB is empty.
+    u6irs_u6c1 = 1;                                        // Interrupt  when transmission  is completed, U4TB is empty. 
+    u6rrm_u6c1 = 0;                                        // Continuous receive mode off
+    u6lch_u6c1 = 0;                                        // Logical inversion off 
+
+    u6smr = 0x00;                                          // Set 0 
+    u6smr2 = 0x00;                                         // Set 0 
+
+    sse_u6smr3 = 0;                                        // SS is disabled when 0
+    ckph_u6smr3 = 0;                                       // Non clock delayed 
+    dinc_u6smr3 = 0;                                       // Master mode when 0
+    nodc_u6smr3 = 0;                                       // Select a clock output mode "push-pull" when 0 
+    err_u6smr3 = 0;                                        // Error flag, no error when 0 
+    dl0_u6smr3 = 0;                                        // Set 0 for no  delay 
+    dl1_u6smr3 = 0;                                        // Set 0 for no  delay 
+    dl2_u6smr3 = 0;                                        // Set 0 for no  delay 
+
+    u6smr4 = 0x00;       
+    
+    DISABLE_IRQ
+    ilvl_s6ric =0x04;       
+    ir_s6ric   =0;            
+    ENABLE_IRQ
+    pu11 = 1; // gyro RX interface needs pullup on RX6 or p4_6
 }
 
 
-void gyro_Init (void) {
+#pragma vector = UART6_RX
+__interrupt void _uart6_receive(void) {
+
+  /* Used to reference a specific location in the array while string the
+  received data.   */
+  static unsigned char uc_cnt=0;
+  /* Copy the received data to the global variable 'gyro_RecBuff'	*/
+  gyro_RecBuff[uc_cnt] = (char) u6rb ;
+ 
+  switch(gyrowhoamistatus) {
+  case 0: // Request sent, sending dummy byte to get the answer
+  case 6:
+  case 8:
+  case 10:
+      u6tb=0xFF;
+      break;
+  case 1: // WHOAMI answer received. Sending request to write ctrl_REG2
+      gyrowhoami=(int)gyro_RecBuff[uc_cnt];
+      CS6=1;
+//      uDelay(5);
+      CS6=0;
+      u6tb=(L3G4200D_CTRL_REG2 | 0x00) ;   
+      break;
+  case 2: // REG2 written, writing  into it
+      u6tb=16|32; 
+      break;
+  case 3: 
+      CS6=1;
+//      uDelay(5);
+      CS6=0;
+      u6tb=(L3G4200D_CTRL_REG1 | 0x00) ; 
+      break;
+  case 4: // REG1 written, Enabling X,Y,Z axes and normal mode
+      u6tb=1|2|4|8; 
+      break;
+  case 5: // written. Trying to get XOUTL
+      CS6=1;
+//      uDelay(5);
+      CS6=0;
+      u6tb=L3G4200D_OUT_X_L | 0x80;
+      break;
+  case 7: // XOUTL sent, trying to read answer
+      gyrox=(int)gyro_RecBuff[uc_cnt];
+      CS6=1;
+//      uDelay(5);
+      CS6=0;
+      u6tb=L3G4200D_OUT_Y_L | 0x80;
+      break;
+  case 9: // YOUTL sent, trying to read answer
+      gyroy=(int)gyro_RecBuff[uc_cnt];
+      CS6=1;
+//      uDelay(5);
+      CS6=0;
+      u6tb=L3G4200D_OUT_Z_L | 0x80;
+      break;
+  case 11: // ZOUTL sent, trying to read answer
+      gyroz=(int)gyro_RecBuff[uc_cnt];
+      CS6=1;
+//      uDelay(5);
+      CS6=0;
+      u6tb=L3G4200D_WHOAMI | 0x80;
+      gyrowhoamistatus=-1;
+      break;
+  } 
+  gyrowhoamistatus++;
+
+  /* Check if the buffer size is exceed. If it is then reset the 'uc_cnt'
+  variable.    */
+  if(uc_cnt++ >= sizeof(gyro_RecBuff)) {
+    /* Reinitialize the buffer reference.	*/
+    uc_cnt = 0;
+  }
+
+  /* Clear the 'reception complete' flag.	*/
+  ir_s6ric = 0;
+  
+}
+
+
 #if 0
-#define CTRL_REG2 0x21
-#define CTRL_REG3 0x22
-#define CTRL_REG4 0x23
-#define CTRL_REG6 ?
-#define Reference 0x25
-#define INT1_THS  0x
-#define INT1_DUR  0x38
-#define INT1_CFG  0x30
-#define CTRL_REG5 0x24
-#define CTRL_REG1 0x20
-#endif
-    gyro_write(CTRL_REG2, 16|32);
-    gyro_write(CTRL_REG1, 1|2|4|8);
-        
-}
-
-#if 0
-
-// Turns on the L3G4200D's gyro and places it in normal mode.
-void enableDefault(void)
-{
-	// 0x0F = 0b00001111
-	// Normal power mode, all axes enabled
-	writeReg(CTRL_REG1, 0x0F);
-}
-
-// Reads a gyro register
-char readReg(char reg)
-{
-	char value;
-	
-//	Wire.beginTransmission(GYR_ADDRESS);
-//	Wire.write(reg);
-//	Wire.endTransmission();
-//	Wire.requestFrom(GYR_ADDRESS, 1);
-//	value = Wire.read();
-//	Wire.endTransmission();
-	
-	return value;
-}
 
 // Reads the 3 gyro channels and stores them in vector g
 void read()

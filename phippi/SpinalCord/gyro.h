@@ -1,6 +1,6 @@
-#if 0
+#if 1
 // register addresses
-
+#define L3G4200D_WHOAMI        0x0F
 
 #define L3G4200D_CTRL_REG1     0x20
 #define L3G4200D_CTRL_REG2     0x21
@@ -31,24 +31,6 @@
 #define L3G4200D_INT1_THS_ZL   0x37
 #define L3G4200D_INT1_DURATION 0x38
 #endif
-#define WHOAMI    0x0F
-#define CTRL_REG2 0x21
-#define CTRL_REG3 0x22
-#define CTRL_REG4 0x23
-//#define CTRL_REG6 ?
-#define Reference 0x25
-//#define INT1_THS  0x
-#define INT1_DUR  0x38
-#define INT1_CFG  0x30
-#define CTRL_REG5 0x24
-#define CTRL_REG1 0x20
-#define OUT_X_L       0x28
-#define OUT_X_H       0x29
-#define OUT_Y_L       0x2A
-#define OUT_Y_H       0x2B
-#define OUT_Z_L       0x2C
-#define OUT_Z_H       0x2D
-#define OUT_TEMP      0x26
 
 signed char gyro_read(unsigned char r);
 void gyro_write(unsigned char r, unsigned char data);

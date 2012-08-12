@@ -46,7 +46,9 @@ unsigned short
 SPI0_receive(void);
 
 void
-SPI2_send_data(unsigned char c);
+accelerometer_send(unsigned char c);
+void
+gyro_send(unsigned char c);
 
 unsigned short 
 SPI2_receive(void);
