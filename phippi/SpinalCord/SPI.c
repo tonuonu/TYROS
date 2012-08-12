@@ -138,7 +138,7 @@ SPI2_Init(void) { // Accel sensor
     ti_u2c1 = 0;                                           // Must be 0 to send or receive
     re_u2c1 = 1;                                           // Reception Enable when 1
     ri_u2c1 = 0;                                           // Receive complete flag - U4RB is empty.
-    u2irs_u2c1 = 1;                                        // Interrupt  when transmission  is completed. 
+    u2irs_u2c1 = 1;                                        // Interrupt  when transmission is completed. 
     u2rrm_u2c1 = 0;                                        // Continuous receive mode off
     u2lch_u2c1 = 0;                                        // Logical inversion off 
 
@@ -171,9 +171,10 @@ SPI2_Init(void) { // Accel sensor
     b5      - Reserved      - 0
     b7:b6   - Reserved      - 0         */
 
-    ilvl_s2tic =0x03;
+    ilvl_s2tic =0x05;
     ir_s2tic   =0;
-
+    ilvl_s2ric =0x03;       
+    ir_s2ric   =0;            
   /* Enable interrupts	*/
     ENABLE_IRQ
     

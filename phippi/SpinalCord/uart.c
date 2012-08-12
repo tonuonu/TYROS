@@ -47,28 +47,33 @@ unsigned short rx5_ptr = 0;
 /* Buffer to store the received data	*/
 char c_RecBuff[8];
 
+ int accwhoamistatus=0;
+
 #pragma vector = UART2_TX
 __interrupt void _uart2_trans(void) {
   /* Clear the 'transmission complete' flag.	*/
   ir_s2tic = 0;
   // making dummy write to start reading result back too
-  if(accwhoami==0)
-    u2tb=0x00;
-  if(accwhoami++==1)
-    CS2=1;
+  if(accwhoamistatus==0)
+      u2tb=0xFF;
+  if(accwhoamistatus==1) {
+      CS2=1;
+  } else
+     accwhoamistatus++;
 }
 
 #pragma vector = UART2_RX
 __interrupt void _uart2_receive(void) {
+  ERRORLED=1;
   /* Used to reference a specific location in the array while string the
   received data.   */
   static unsigned char uc_cnt=0;
   /* Copy the received data to the global variable 'c_RecBuff'	*/
   c_RecBuff[uc_cnt] = (char) u2rb ;
-
+  accwhoami=(int)c_RecBuff[uc_cnt];
+  accok=1;
   /* Dummy write to the receive register to reinitiate a receive operation.	*/
 //  u2rb = 0x00;
-CS2=~CS2;
   /* Check if the buffer size is exceed. If it is then reset the 'uc_cnt'
   variable.    */
   if(uc_cnt++ >= sizeof(c_RecBuff))
@@ -77,10 +82,10 @@ CS2=~CS2;
     uc_cnt = 0;
   }
 
-  /* Clear the 'transmission complete' flag.	*/
+  /* Clear the 'reception complete' flag.	*/
   ir_s2ric = 0;
-  CS2=1;
-
+//  CS2=1;
+  
 }
 
 

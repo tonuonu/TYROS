@@ -47,7 +47,7 @@ s_int(void) {
         ta4=0;
     }
     CS2=0;
-    accwhoami=0;
+    accwhoamistatus=0;
     SPI2_send_data( (MMA7455L_REG_WHOAMI << 1) ); 
   
     

@@ -48,6 +48,7 @@ extern double twist[6];
 extern int pwm[2];
 extern int pwmtarget[2];
 extern int accok, accwhoami, accx, accy, accz;
+extern int accwhoamistatus;
 /*
  * IAR-HEW compatibility 
  */

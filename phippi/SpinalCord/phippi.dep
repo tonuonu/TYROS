@@ -8,7 +8,7 @@
     <outputs>
       <file>$PROJ_DIR$\acceleration.c</file>
       <file>$TOOLKIT_DIR$\inc\stdlib.h</file>
-      <file>$PROJ_DIR$\tnroman.h</file>
+      <file>$PROJ_DIR$\phippi.h</file>
       <file>$PROJ_DIR$\hwsetup.c</file>
       <file>$PROJ_DIR$\gyro.c</file>
       <file>$PROJ_DIR$\interrupt.c</file>
@@ -16,10 +16,10 @@
       <file>$PROJ_DIR$\oled.c</file>
       <file>$PROJ_DIR$\SPI.c</file>
       <file>$PROJ_DIR$\uart.c</file>
-      <file>$PROJ_DIR$\Debug\Obj\uart.r53</file>
+      <file>$PROJ_DIR$\tnroman.h</file>
       <file>$TOOLKIT_DIR$\inc\intrinsics.h</file>
       <file>$PROJ_DIR$\Debug\Obj\main.r53</file>
-      <file>$PROJ_DIR$\phippi.h</file>
+      <file>$PROJ_DIR$\Debug\Obj\uart.r53</file>
       <file>$TOOLKIT_DIR$\inc\ycheck.h</file>
       <file>$TOOLKIT_DIR$\lib\dlr32cfsfn.h</file>
       <file>$PROJ_DIR$\hwsetup.h</file>
@@ -45,12 +45,12 @@
       <file>$PROJ_DIR$\Debug\Obj\SPI.pbi</file>
       <file>$PROJ_DIR$\Debug\Obj\main.pbi</file>
       <file>$PROJ_DIR$\Debug\Obj\oled.pbi</file>
-      <file>$PROJ_DIR$\Debug\Obj\phippi.pbd</file>
-      <file>$PROJ_DIR$\Debug\Exe\phippi.d53</file>
       <file>$PROJ_DIR$\SPI.h</file>
       <file>$PROJ_DIR$\Debug\Obj\hwsetup.pbi</file>
       <file>$PROJ_DIR$\Debug\Obj\gyro.r53</file>
       <file>$PROJ_DIR$\gyro.h</file>
+      <file>$PROJ_DIR$\Debug\Obj\phippi.pbd</file>
+      <file>$PROJ_DIR$\Debug\Exe\phippi.d53</file>
       <file>$TOOLKIT_DIR$\inc\stdio.h</file>
       <file>$TOOLKIT_DIR$\inc\ior32c111.h</file>
       <file>$PROJ_DIR$\Debug\Obj\SPI.r53</file>
@@ -59,7 +59,6 @@
       <file>$TOOLKIT_DIR$\lib\dlr32cfsfn.r53</file>
       <file>$PROJ_DIR$\Debug\Obj\acceleration.pbi</file>
       <file>$PROJ_DIR$\Debug\Obj\acceleration.r53</file>
-      <file>$PROJ_DIR$\..\..\..\..\Documents\acceleration.c</file>
     </outputs>
     <file>
       <name>$PROJ_DIR$\acceleration.c</name>
@@ -79,7 +78,7 @@
       <outputs>
         <tool>
           <name>BICOMP</name>
-          <file> 42</file>
+          <file> 40</file>
         </tool>
         <tool>
           <name>ICCR32C</name>
@@ -89,11 +88,11 @@
       <inputs>
         <tool>
           <name>BICOMP</name>
-          <file> 46 16 45 14 24 21 28 19 31 30 17 22 1 34 33 32 44 41 48</file>
+          <file> 46 16 45 14 24 21 28 19 31 30 17 22 1 34 33 32 42 39 48</file>
         </tool>
         <tool>
           <name>ICCR32C</name>
-          <file> 46 16 45 14 24 21 15 28 19 31 30 17 22 1 34 33 32 44 41 48</file>
+          <file> 46 16 45 14 24 21 15 28 19 31 30 17 22 1 34 33 32 42 39 48</file>
         </tool>
       </inputs>
     </file>
@@ -106,17 +105,13 @@
         </tool>
         <tool>
           <name>ICCR32C</name>
-          <file> 43</file>
+          <file> 41</file>
         </tool>
       </outputs>
       <inputs>
         <tool>
-          <name>BICOMP</name>
-          <file> 46 11 44 16 33 41</file>
-        </tool>
-        <tool>
           <name>ICCR32C</name>
-          <file> 46 11 44 16 33 41</file>
+          <file> 46 11 42 16 33 39</file>
         </tool>
       </inputs>
     </file>
@@ -127,19 +122,15 @@
           <name>BICOMP</name>
           <file> 23</file>
         </tool>
-        <tool>
-          <name>ICCR32C</name>
-          <file> 18</file>
-        </tool>
       </outputs>
       <inputs>
         <tool>
           <name>BICOMP</name>
-          <file> 46 45 14 24 21 28 19 31 30 17 1 33 32 16 41 48</file>
+          <file> 46 45 14 24 21 28 19 31 30 17 1 33 32 16 39 48</file>
         </tool>
         <tool>
           <name>ICCR32C</name>
-          <file> 46 45 14 24 21 15 28 19 31 30 17 1 33 32 16 41 48</file>
+          <file> 46 45 14 24 21 15 28 19 31 30 17 1 33 32 16 39 48</file>
         </tool>
       </inputs>
     </file>
@@ -158,11 +149,11 @@
       <inputs>
         <tool>
           <name>BICOMP</name>
-          <file> 46 45 14 24 21 28 19 31 30 17 1 33 32 16 44 41 48</file>
+          <file> 46 45 14 24 21 28 19 31 30 17 1 33 32 16 42 39 48</file>
         </tool>
         <tool>
           <name>ICCR32C</name>
-          <file> 46 45 14 24 21 15 28 19 31 30 17 1 33 32 16 44 41 48</file>
+          <file> 46 45 14 24 21 15 28 19 31 30 17 1 33 32 16 42 39 48</file>
         </tool>
       </inputs>
     </file>
@@ -181,11 +172,11 @@
       <inputs>
         <tool>
           <name>BICOMP</name>
-          <file> 46 33 16 2 41 13</file>
+          <file> 46 33 16 10 39 2</file>
         </tool>
         <tool>
           <name>ICCR32C</name>
-          <file> 46 33 16 2 41 13</file>
+          <file> 46 33 16 10 39 2</file>
         </tool>
       </inputs>
     </file>
@@ -204,11 +195,11 @@
       <inputs>
         <tool>
           <name>BICOMP</name>
-          <file> 46 11 16 33 41 48</file>
+          <file> 46 11 16 33 39 48</file>
         </tool>
         <tool>
           <name>ICCR32C</name>
-          <file> 46 11 16 33 41 48</file>
+          <file> 46 11 16 33 39 48</file>
         </tool>
       </inputs>
     </file>
@@ -221,7 +212,7 @@
         </tool>
         <tool>
           <name>ICCR32C</name>
-          <file> 10</file>
+          <file> 13</file>
         </tool>
       </outputs>
       <inputs>
@@ -240,7 +231,7 @@
       <outputs>
         <tool>
           <name>XLINK</name>
-          <file> 40</file>
+          <file> 44</file>
         </tool>
       </outputs>
     </file>
@@ -249,7 +240,7 @@
       <inputs>
         <tool>
           <name>BILINK</name>
-          <file> 36 51 35 42 23 37 38 20</file>
+          <file> 36 51 35 40 23 37 38 20</file>
         </tool>
       </inputs>
     </file>
@@ -258,36 +249,23 @@
       <inputs>
         <tool>
           <name>XLINK</name>
-          <file> 27 49 47 52 43 29 18 12 25 10 50</file>
+          <file> 27 49 47 52 41 29 18 12 25 13 50</file>
         </tool>
       </inputs>
-    </file>
-    <file>
-      <name>$PROJ_DIR$\..\..\..\..\Documents\acceleration.c</name>
-      <outputs>
-        <tool>
-          <name>BICOMP</name>
-          <file> 51</file>
-        </tool>
-        <tool>
-          <name>ICCR32C</name>
-          <file> 52</file>
-        </tool>
-      </outputs>
     </file>
   </configuration>
   <configuration>
     <name>Release</name>
     <outputs>
       <file>$TOOLKIT_DIR$\inc\stdlib.h</file>
-      <file>$PROJ_DIR$\tnroman.h</file>
+      <file>$PROJ_DIR$\phippi.h</file>
       <file>$PROJ_DIR$\hwsetup.c</file>
       <file>$PROJ_DIR$\main.c</file>
       <file>$PROJ_DIR$\oled.c</file>
       <file>$PROJ_DIR$\SPI.c</file>
       <file>$PROJ_DIR$\uart.c</file>
+      <file>$PROJ_DIR$\tnroman.h</file>
       <file>$TOOLKIT_DIR$\inc\intrinsics.h</file>
-      <file>$PROJ_DIR$\phippi.h</file>
       <file>$TOOLKIT_DIR$\inc\ycheck.h</file>
       <file>$TOOLKIT_DIR$\lib\dlr32cfsfn.h</file>
       <file>$PROJ_DIR$\hwsetup.h</file>
@@ -308,11 +286,11 @@
       <file>$TOOLKIT_DIR$\inc\ior32c111.h</file>
       <file>$TOOLKIT_DIR$\config\fpu_compliant.xcl</file>
       <file>$TOOLKIT_DIR$\lib\dlr32cfsfn.r53</file>
+      <file>$PROJ_DIR$\Release\Obj\phippi.pbd</file>
       <file>$PROJ_DIR$\Release\Obj\hwsetup.pbi</file>
       <file>$PROJ_DIR$\Release\Obj\hwsetup.r53</file>
-      <file>$PROJ_DIR$\Release\Obj\oled.pbi</file>
       <file>$PROJ_DIR$\Release\Exe\phippi.a53</file>
-      <file>$PROJ_DIR$\Release\Obj\phippi.pbd</file>
+      <file>$PROJ_DIR$\Release\Obj\oled.pbi</file>
       <file>$PROJ_DIR$\Release\Obj\uart.pbi</file>
       <file>$PROJ_DIR$\Release\Obj\main.r53</file>
       <file>$PROJ_DIR$\Release\Obj\SPI.r53</file>
@@ -326,11 +304,11 @@
       <outputs>
         <tool>
           <name>BICOMP</name>
-          <file> 29</file>
+          <file> 30</file>
         </tool>
         <tool>
           <name>ICCR32C</name>
-          <file> 30</file>
+          <file> 31</file>
         </tool>
       </outputs>
       <inputs>
@@ -372,7 +350,7 @@
       <outputs>
         <tool>
           <name>BICOMP</name>
-          <file> 31</file>
+          <file> 33</file>
         </tool>
         <tool>
           <name>ICCR32C</name>
@@ -382,11 +360,11 @@
       <inputs>
         <tool>
           <name>BICOMP</name>
-          <file> 26 23 1 8</file>
+          <file> 26 23 7 1</file>
         </tool>
         <tool>
           <name>ICCR32C</name>
-          <file> 26 23 1 8</file>
+          <file> 26 23 7 1</file>
         </tool>
       </inputs>
     </file>
@@ -405,11 +383,11 @@
       <inputs>
         <tool>
           <name>BICOMP</name>
-          <file> 26 7 11</file>
+          <file> 26 8 11</file>
         </tool>
         <tool>
           <name>ICCR32C</name>
-          <file> 26 7 11</file>
+          <file> 26 8 11</file>
         </tool>
       </inputs>
     </file>
@@ -428,11 +406,11 @@
       <inputs>
         <tool>
           <name>BICOMP</name>
-          <file> 26 7 22 11 25 9 16 14 19 13 21 20 12 17 23</file>
+          <file> 26 8 22 11 25 9 16 14 19 13 21 20 12 17 23</file>
         </tool>
         <tool>
           <name>ICCR32C</name>
-          <file> 26 7 22 11 25 9 16 14 10 19 13 21 20 12 17 23</file>
+          <file> 26 8 22 11 25 9 16 14 10 19 13 21 20 12 17 23</file>
         </tool>
       </inputs>
     </file>
@@ -446,20 +424,20 @@
       </outputs>
     </file>
     <file>
-      <name>$PROJ_DIR$\Release\Exe\phippi.a53</name>
-      <inputs>
-        <tool>
-          <name>XLINK</name>
-          <file> 18 27 36 30 35 38 37 28</file>
-        </tool>
-      </inputs>
-    </file>
-    <file>
       <name>$PROJ_DIR$\Release\Obj\phippi.pbd</name>
       <inputs>
         <tool>
           <name>BILINK</name>
-          <file> 40 29 39 31 34</file>
+          <file> 40 30 39 33 34</file>
+        </tool>
+      </inputs>
+    </file>
+    <file>
+      <name>$PROJ_DIR$\Release\Exe\phippi.a53</name>
+      <inputs>
+        <tool>
+          <name>XLINK</name>
+          <file> 18 27 36 31 35 38 37 28</file>
         </tool>
       </inputs>
     </file>

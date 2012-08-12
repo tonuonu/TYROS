@@ -310,7 +310,7 @@ main(void) {
         write(VT100CURSORACC);
         write("Acceleration: ");
         if(accok) {
-            sprintf(buf,"Acceration x:%d y:%d z:%d",accx,accy,accz);
+          sprintf(buf,"Acceration whoami:%d x:%d y:%d z:%d",accwhoami,accx,accy,accz);
             write(buf);
         } else {
             write("ERROR");
