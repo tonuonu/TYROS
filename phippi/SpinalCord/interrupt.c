@@ -46,8 +46,8 @@ s_int(void) {
         // Turn off buzzer
         ta4=0;
     }
-    CS2=0;
     accwhoamistatus=0;
+    CS2=0;
     SPI2_send_data( (MMA7455L_REG_WHOAMI << 1) ); 
   
     

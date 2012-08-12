@@ -27,85 +27,11 @@
 #include "mma7455l.h"
 
 void
-SPI0_Init(void) { // Accel sensor left
-
-    CS0d = PD_OUTPUT;
-    CS0=1;
-    
-    CLOCK0d = PD_OUTPUT;
-    CLOCK0s = PF_UART;
-    TX0d = PD_OUTPUT;
-    TX0s = PF_UART;
-    RX0s = PF_UART;
-
-    smd0_u0mr  = 1;                                        // \ 
-    smd1_u0mr  = 0;                                        //  | Synchronous Serial Mode
-    smd2_u0mr  = 0;                                        // /
-
-    ckdir_u0mr = 0;                                        // 0=internal clock 
-    
-    stps_u0mr  = 0;                                        // 0=1 stop bit, 0 required
-    pry_u0mr   = 0;                                        // Parity, 0=odd, 0 required 
-    prye_u0mr  = 0;                                        // Parity Enable? 0=disable, 0 required 
-    iopol_u0mr = 0;                                        // IO Polarity, 0=not inverted, 0 required
-
-    clk0_u0c0 = 0;                                         // Clock source f1 for u4brg
-    clk1_u0c0 = 0;                                         // 
-    txept_u0c0 = 0;                                        // Transmit register empty flag 
-    crd_u0c0 = 1;                                          // CTS disabled when 1
-    nch_u0c0 = 1;                                          // 0=Output mode "open drain" for TXD and CLOCK pin 
-    ckpol_u0c0 = 1;                                        // CLK Polarity 
-    uform_u0c0 = 1;                                        // 1=MSB first
-
-    te_u0c1 = 1;                                           // 1=Transmission Enable
-    ti_u0c1 = 0;                                           // Must be 0 to send or receive
-    re_u0c1 = 1;                                           // Reception Enable when 1
-    ri_u0c1 = 0;                                           // Receive complete flag - U4RB is empty.
-    u0irs_u0c1 = 0;                                        // Interrupt  when transmission  is completed, U4TB is empty. 
-    u0rrm_u0c1 = 1;                                        // Continuous receive mode off
-    u0lch_u0c1 = 0;                                        // Logical inversion off 
-
-    u0smr = 0x00;                                          // Set 0 
-    u0smr2 = 0x00;                                         // Set 0 
-
-    sse_u0smr3 = 0;                                        // SS is disabled when 0
-    ckph_u0smr3 = 0;                                       // Non clock delayed 
-    dinc_u0smr3 = 0;                                       // Master mode when 0
-    nodc_u0smr3 = 0;                                       // Select a clock output  mode "push-pull" when 0 
-    err_u0smr3 = 0;                                        // Error flag, no error when 0 
-    dl0_u0smr3 = 0;                                        // Set 0 for no  delay 
-    dl1_u0smr3 = 0;                                        // Set 0 for no  delay 
-    dl2_u0smr3 = 0;                                        // Set 0 for no  delay 
-
-    u0smr4 = 0x00;                                         // Set 0. u4c0 must be set before this function
-
-    u0brg = 0x25;                                          // (unsigned char)(((f1_CLK_SPEED)/(2*BIT_RATE))-1);
-
-    pu20=1; // pullup for p6_1, p6_2, p6_3 or CLK0, RX0, TX0
-    
-    uDelay(200);
-    CS0=0; // enable acc
-    uDelay(200);
-    SPI0_send_data( (MMA7455L_REG_MCTL << 1) | WRITE_BIT); 
-    uDelay(200);
-    SPI0_send_data( (MMA7455L_GSELECT_2|MMA7455L_MODE_MEASUREMENT << 1) | WRITE_BIT); 
-    uDelay(200);
-    CS0=1; // disable acc
-    
-}
-#if 0
-void SPI_Master_init(void)
-{
-
-
-}
-#endif
-void
 SPI2_Init(void) { // Accel sensor
     pu22=1; // pull up for CLK2 or p7_2
 #define f1_CLK_SPEED 24000000
-// Max    u2brg =  (unsigned char)(((f1_CLK_SPEED)/(2*4000000))-1);
-    u2brg =  (unsigned char)(((f1_CLK_SPEED)/(2*200000))-1);
+    u2brg =  (unsigned char)(((f1_CLK_SPEED)/(2*100000))-1);
+    // u2brg =  (unsigned char)(((f1_CLK_SPEED)/(2*400000))-1);
 
     CS2d = PD_OUTPUT;
     CS2=1;
@@ -171,9 +97,9 @@ SPI2_Init(void) { // Accel sensor
     b5      - Reserved      - 0
     b7:b6   - Reserved      - 0         */
 
-    ilvl_s2tic =0x05;
+    ilvl_s2tic =0x03;
     ir_s2tic   =0;
-    ilvl_s2ric =0x03;       
+    ilvl_s2ric =0x05;       
     ir_s2ric   =0;            
   /* Enable interrupts	*/
     ENABLE_IRQ
@@ -459,9 +385,6 @@ SPI0_receive(void) {
 void
 SPI2_send_data(unsigned char c) {
     u2tb = c;
-  /*  while (ti_u2c1 == 0) {
-        NOP();
-    }*/
 }
 
 unsigned short 

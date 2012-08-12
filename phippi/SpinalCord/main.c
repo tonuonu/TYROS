@@ -309,8 +309,8 @@ main(void) {
 #if 1
         write(VT100CURSORACC);
         write("Acceleration: ");
-        if(accok) {
-          sprintf(buf,"Acceration whoami:%d x:%d y:%d z:%d",accwhoami,accx,accy,accz);
+        if(accok && accwhoami==85) {
+            sprintf(buf," x:%4d y:%4d z:%4d",accx,accy,accz);
             write(buf);
         } else {
             write("ERROR");
