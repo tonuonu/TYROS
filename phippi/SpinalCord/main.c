@@ -98,6 +98,10 @@ main(void) {
     updateOLED1();    
     PANDA=1;
     MELEXIS_EN=0; // Low is ON
+    CS2=0;
+    uDelay(50);
+    SPI2_send_data( MMA7455L_REG_WHOAMI << 1 ); 
+
     while (1) {
         int errorflag=0;
         char buf[256];
@@ -309,12 +313,15 @@ main(void) {
 #if 1
         write(VT100CURSORACC);
         write("Acceleration: ");
-        if(accok && accwhoami==85) {
-            sprintf(buf," x:%4d y:%4d z:%4d",accx,accy,accz);
+        sprintf(buf,"(%2d) ",accwhoamistatus);
+        write(buf);
+
+//        if(accok && accwhoami==85) {
+            sprintf(buf,"whoami %2d x:%4d y:%4d z:%4d",accwhoami,accx,accy,accz);
             write(buf);
-        } else {
-            write("ERROR");
-        } 
+//        } else {
+//            write("ERROR");
+//        } 
 #endif
 #if 1
         int ad[4];

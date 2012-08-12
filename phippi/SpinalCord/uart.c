@@ -27,6 +27,7 @@
 #include <string.h>
 #include <iso646.h>
 #include "main.h"
+#include "mma7455l.h"
 
 #define base_freq (24000000)
 /* Used to store the received data */
@@ -47,21 +48,6 @@ unsigned short rx5_ptr = 0;
 /* Buffer to store the received data	*/
 char c_RecBuff[8];
 
-int accwhoamistatus=0;
-
-#pragma vector = UART2_TX
-__interrupt void _uart2_trans(void) {
-  /* Clear the 'transmission complete' flag.	*/
-  ir_s2tic = 0;
-  // making dummy write to start reading result back too
-  if(accwhoamistatus==0)
-      u2tb=0xFF;
-  if(accwhoamistatus==1) {
-      CS2=1;
-  } else {
-     accwhoamistatus++;
-  }
-}
 
 #pragma vector = UART2_RX
 __interrupt void _uart2_receive(void) {
@@ -70,11 +56,62 @@ __interrupt void _uart2_receive(void) {
   static unsigned char uc_cnt=0;
   /* Copy the received data to the global variable 'c_RecBuff'	*/
   c_RecBuff[uc_cnt] = (char) u2rb ;
+ 
+  switch(accwhoamistatus) {
+  case 0: // Request sent, sending dummy byte to get the answer
+  case 4:
+  case 6:
+  case 8:
+      u2tb=0xFF;
+      break;
+  case 1: // WHOAMI answer received. Sending request to write REG_MCTL
+      accwhoami=(int)c_RecBuff[uc_cnt];
+      CS2=1;
+//      uDelay(50);
+      CS2=0;
+//      uDelay(50);
+      u2tb=(MMA7455L_REG_MCTL << 1) | WRITE_BIT; 
+      break;
+  case 2: // REG_MCTL written, writing _MODE_MEASUREMENT into it
+      u2tb=((MMA7455L_GSELECT_2 | MMA7455L_MODE_MEASUREMENT) << 1) /*| WRITE_BIT*/; 
+      break;
+  case 3: // _MODE_MEASUREMENT written. Trying to get XOUTL
+      CS2=1;
+//      uDelay(50);
+      CS2=0;
+//      uDelay(50);
+      u2tb=MMA7455L_REG_XOUT8 << 1;
+      break;
+  case 5: // XOUTL sent, trying to read answer
+      accx=(int)c_RecBuff[uc_cnt];
+      CS2=1;
+//      uDelay(50);
+      CS2=0;
+//      uDelay(50);
+      u2tb=MMA7455L_REG_YOUT8 << 1;
+      break;
+  case 7: // YOUTL sent, trying to read answer
+      accy=(int)c_RecBuff[uc_cnt];
+      CS2=1;
+//      uDelay(50);
+      CS2=0;
+//      uDelay(50);
+      u2tb=MMA7455L_REG_ZOUT8 << 1;
+      break;
+  case 9: // ZOUTL sent, trying to read answer
+      accz=(int)c_RecBuff[uc_cnt];
+      CS2=1;
+//      uDelay(50);
+      CS2=0;
+//      uDelay(50);
+      u2tb=MMA7455L_REG_WHOAMI << 1;
+      ERRORLED=1;
+      accwhoamistatus=-1;
+      break;
+  } 
+  accwhoamistatus++;
+
   
-  if(accwhoamistatus==1) {
-    accwhoami=(int)c_RecBuff[uc_cnt];
-    accok=1;
-  }
   /* Dummy write to the receive register to reinitiate a receive operation.	*/
 //  u2rb = 0x00;
   /* Check if the buffer size is exceed. If it is then reset the 'uc_cnt'

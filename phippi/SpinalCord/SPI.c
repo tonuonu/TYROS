@@ -97,8 +97,8 @@ SPI2_Init(void) { // Accel sensor
     b5      - Reserved      - 0
     b7:b6   - Reserved      - 0         */
 
-    ilvl_s2tic =0x03;
-    ir_s2tic   =0;
+//    ilvl_s2tic =0x03;
+//    ir_s2tic   =0;
     ilvl_s2ric =0x05;       
     ir_s2ric   =0;            
   /* Enable interrupts	*/
