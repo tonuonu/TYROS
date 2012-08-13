@@ -1,5 +1,5 @@
 /*
- *  Copyright (c) 2011, Tõnu Samuel
+ *  Copyright (c) 2011, Tonu Samuel
  *  All rights reserved.
  *
  *  This file is part of TYROS.
