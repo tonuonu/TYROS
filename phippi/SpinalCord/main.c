@@ -109,6 +109,9 @@ main(void) {
     accelerometer_read_reg( MMA7455L_REG_WHOAMI ); 
     CS6=0;
     u6tb=L3G4200D_WHOAMI | 0x80;
+//    wdc7=0; // Wait ~20ms before reset
+//    cm06=1; // Make Watchdog RESET, not just call inteerupt
+//    wdts=1; // Start Watchdog
     while (1) {
         int errorflag=0;
         char buf[256];
@@ -175,6 +178,10 @@ main(void) {
                 if(pwmtarget[1]<-100) pwmtarget[1]=-100;
                 sprintf(buf,"manual pwm left=%d%%, right=%d%%",pwmtarget[0],pwmtarget[1]);               
                 write(buf);
+            } else if(strncmp(command,"reset",5)==0) {
+                sprintf(buf,"RESETTING BOARD");
+                write(buf);              
+                asm("jmp 0xfffffffc");            
             } else if(strncmp(command,"panda ",6)==0) {
                 int tmp;
                 for(tmp=0,tok = strtok(command," "); tok && tmp<=2 ; tok=strtok(0," "),tmp++) {

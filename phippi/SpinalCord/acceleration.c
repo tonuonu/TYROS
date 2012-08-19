@@ -38,7 +38,6 @@ int accwhoamistatus=0;
  * During startup we read 100 values from sensor for all X,Y,Z acces to 
  * calculate and negate error, gravitation etc. 
  */
-signed char caldata[3][100];
 int acccalcnt=0;
 int avgx=0,avgy=0,avgz=0;
 
@@ -50,9 +49,9 @@ void
 SPI2_Init(void) { // Accel sensor
     pu22=1; // pull up for CLK2 or p7_2
 #define f1_CLK_SPEED 24000000
-//    u2brg =  (unsigned char)(((f1_CLK_SPEED)/(2*100000))-1);
+    u2brg =  (unsigned char)(((f1_CLK_SPEED)/(2*100000))-1);
     // 8MHz max
-    u2brg =  (unsigned char)(((f1_CLK_SPEED)/(2*400000))-1);
+//    u2brg =  (unsigned char)(((f1_CLK_SPEED)/(2*400000))-1);
 
     CS2d = PD_OUTPUT;
     CS2=1;
@@ -137,7 +136,7 @@ __interrupt void _uart2_receive(void) {
   case 1: // WHOAMI answer received. Sending request to write REG_MCTL
       accwhoami=(int) b;
       CS2=1;
-//      uDelay(5);
+      uDelay(5);
       CS2=0;
       accelerometer_write_reg(MMA7455L_REG_MCTL);
       break;
@@ -146,7 +145,7 @@ __interrupt void _uart2_receive(void) {
       break;
   case 3: // _MODE_MEASUREMENT written. Trying to get XOUTL
       CS2=1;
-//      uDelay(5);
+      uDelay(5);
       CS2=0;
       accelerometer_read_reg(MMA7455L_REG_XOUT8);
       break;
@@ -157,7 +156,7 @@ __interrupt void _uart2_receive(void) {
           accx=(signed char) b-avgx;
       }
       CS2=1;
-//      uDelay(5);
+      uDelay(5);
       CS2=0;
       u2tb=MMA7455L_REG_YOUT8 << 1;
       break;
@@ -168,7 +167,7 @@ __interrupt void _uart2_receive(void) {
           accy=(signed char) b-avgy;
       }
       CS2=1;
-//      uDelay(5);
+      uDelay(5);
       CS2=0;
       u2tb=MMA7455L_REG_ZOUT8 << 1;
       break;
@@ -180,14 +179,14 @@ __interrupt void _uart2_receive(void) {
           accz=(signed char) b-avgz;
       }
       CS2=1;
-//      uDelay(5);
+      uDelay(5);
       CS2=0;
       u2tb=MMA7455L_REG_TOUT << 1;
       break;
   case 11: // MMA7455L_REG_TOUT sent, trying to read answer
       acctout=(signed char) b-avgz;
       CS2=1;
-//      uDelay(5);
+      uDelay(5);
       CS2=0;
       u2tb=MMA7455L_REG_WHOAMI << 1;
       accwhoamistatus=-1;

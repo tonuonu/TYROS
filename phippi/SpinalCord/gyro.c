@@ -98,9 +98,7 @@ SPI6_Init(void) { // Gyro
 
 #pragma vector = UART6_RX
 __interrupt void _uart6_receive(void) {
-
   signed char b=u6rb & 0xFF;
- 
   switch(gyrowhoamistatus) {
   case 1: // WHOAMI answer received. Sending request to write ctrl_REG2
       gyrowhoami=(unsigned char)b;
@@ -110,7 +108,7 @@ uDelay(5);
       u6tb=(L3G4200D_CTRL_REG2 | 0x00) ;   
       break;
   case 2: // REG2 written, writing  into it
-      u6tb=16|32; 
+      u6tb=0;//16|32; 
       break;
   case 3: 
       CS6=1;
@@ -146,14 +144,14 @@ uDelay(5);
       };
       break;
   case 11: // OUT_X_L answer received. Sending request to get XL
-      gyrotemp=(signed int)b;
+      gyrox=(int)b;
       CS6=1;
 uDelay(5);      
       CS6=0;
       u6tb=L3G4200D_OUT_X_H | 0x80;
       break;
   case 13: // OUT_X_H sent, trying to read answer
-      gyrox=(int)b;
+//      gyrox=(int)b;
       CS6=1;
 uDelay(5);      
       CS6=0;
@@ -167,7 +165,7 @@ uDelay(5);
       u6tb=L3G4200D_OUT_Y_H | 0x80;
       break;
   case 17: // OUT_Y_H sent, trying to read answer
-      gyroy=(int)b;
+//      gyroy=(int)b;
       CS6=1;
 uDelay(5);      
       CS6=0;
@@ -181,7 +179,7 @@ uDelay(5);
       u6tb=L3G4200D_OUT_Z_H | 0x80;
       break;
   case 21: // OUT_Z_H sent, trying to read answer
-      gyroz=(int)b;
+//      gyroz=(int)b;
       CS6=1;
 uDelay(5);      
       CS6=0;
