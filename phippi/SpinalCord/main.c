@@ -249,7 +249,7 @@ main(void) {
         write(buf);
 
 //        if(accok && accwhoami==85) {
-            sprintf(buf,"whoami %3d temp %4d x:%4d y:%4d z:%4d",gyrowhoami,35-gyrotemp,gyrox,gyroy,gyroz);
+            sprintf(buf,"whoami %3u temp %4d x:%4d y:%4d z:%4d",gyrowhoami,35-gyrotemp,gyrox,gyroy,gyroz);
             write(buf);
 //        } else {
 //            write("ERROR");
@@ -266,7 +266,7 @@ main(void) {
         if(acccalcnt<100) {
             sprintf(buf,"whoami %2d CALIBRATING",accwhoami);
         } else {
-            sprintf(buf,"whoami %2d x:%4d y:%4d z:%4d",accwhoami,accx,accy,accz);
+            sprintf(buf,"whoami %2d x:%4d y:%4d z:%4d temp:%4d",accwhoami,accx,accy,accz,acctout);
         }
             write(buf);
 //        } else {

@@ -26,16 +26,16 @@
 #include "main.h"
 #include "SPI.h"
 
-/* Buffer to store the received data	*/
-char gyro_RecBuff[8];
-int gyrowhoami=0;
+unsigned char gyrowhoami=0;
 signed char gyrox=0,gyroy=0,gyroz=0,gyrotemp=0;
 int gyrowhoamistatus=0;
+
 void
 SPI6_Init(void) { // Gyro
 #define	f1_CLK_SPEED 24000000
     // 10MHz max clock
-    u6brg = (unsigned char)(((f1_CLK_SPEED)/(2*5000000))-1);
+//    u6brg = (unsigned char)(((f1_CLK_SPEED)/(2*5000000))-1);
+    u6brg = (unsigned char)(((f1_CLK_SPEED)/(2*1000000))-1);
 
     CS6d = PD_OUTPUT;
     CS6=1; // CS is high, means disabled
@@ -99,23 +99,13 @@ SPI6_Init(void) { // Gyro
 #pragma vector = UART6_RX
 __interrupt void _uart6_receive(void) {
 
-  /* Used to reference a specific location in the array while string the
-  received data.   */
-  static unsigned char uc_cnt=0;
-  /* Copy the received data to the global variable 'gyro_RecBuff'	*/
-  gyro_RecBuff[uc_cnt] = (char) u6rb ;
+  signed char b=u6rb & 0xFF;
  
   switch(gyrowhoamistatus) {
-  case 0: // Request sent, sending dummy byte to get the answer
-  case 6:
-  case 8:
-  case 10:
-  case 12:
-      u6tb=0xFF;
-      break;
   case 1: // WHOAMI answer received. Sending request to write ctrl_REG2
-      gyrowhoami=(int)gyro_RecBuff[uc_cnt];
+      gyrowhoami=(unsigned char)b;
       CS6=1;
+uDelay(5);      
       CS6=0;
       u6tb=(L3G4200D_CTRL_REG2 | 0x00) ;   
       break;
@@ -124,52 +114,86 @@ __interrupt void _uart6_receive(void) {
       break;
   case 3: 
       CS6=1;
+uDelay(5);      
       CS6=0;
       u6tb=(L3G4200D_CTRL_REG1 | 0x00) ; 
       break;
   case 4: // REG1 written, Enabling X,Y,Z axes and normal mode
       u6tb=1|2|4|8; 
       break;
-      
   case 5: // written. Trying to get TEMP
       CS6=1;
+uDelay(5);      
       CS6=0;
       u6tb=L3G4200D_OUT_TEMP | 0x80;
       break;
-  case 7: // TEMP answer received. Sending request to get XL
-      gyrotemp=(signed int)gyro_RecBuff[uc_cnt];
+  case 7: // TEMP answer received. Sending request to get STATUS_REG
+      gyrotemp=(signed int)b;
       CS6=1;
+uDelay(5);      
       CS6=0;
-      u6tb=L3G4200D_OUT_X_L | 0x80;
+      u6tb=L3G4200D_STATUS_REG | 0x80;
       break;
-  case 9: // XOUTL sent, trying to read answer
-      gyrox=(int)gyro_RecBuff[uc_cnt];
+  case 9: // statusreg answer received. See if there is a new data in gyro available
       CS6=1;
+uDelay(5);      
+      CS6=0;
+      if(b & (1<<3)) { // no data for gyro yet, go to beginning
+          u6tb=L3G4200D_WHOAMI | 0x80;
+          gyrowhoamistatus=-1;
+      } else { // new data is ready to load
+          u6tb=L3G4200D_OUT_X_L | 0x80;
+      };
+      break;
+  case 11: // OUT_X_L answer received. Sending request to get XL
+      gyrotemp=(signed int)b;
+      CS6=1;
+uDelay(5);      
+      CS6=0;
+      u6tb=L3G4200D_OUT_X_H | 0x80;
+      break;
+  case 13: // OUT_X_H sent, trying to read answer
+      gyrox=(int)b;
+      CS6=1;
+uDelay(5);      
       CS6=0;
       u6tb=L3G4200D_OUT_Y_L | 0x80;
       break;
-  case 11: // YOUTL sent, trying to read answer
-      gyroy=(int)gyro_RecBuff[uc_cnt];
+  case 15: // OUT_Y_L sent, trying to read answer
+      gyroy=(int)b;
       CS6=1;
+uDelay(5);      
+      CS6=0;
+      u6tb=L3G4200D_OUT_Y_H | 0x80;
+      break;
+  case 17: // OUT_Y_H sent, trying to read answer
+      gyroy=(int)b;
+      CS6=1;
+uDelay(5);      
       CS6=0;
       u6tb=L3G4200D_OUT_Z_L | 0x80;
       break;
-  case 13: // ZOUTL sent, trying to read answer
-      gyroz=(int)gyro_RecBuff[uc_cnt];
+  case 19: // OUT_Z_L sent, trying to read answer
+      gyroy=(int)b;
       CS6=1;
+uDelay(5);      
+      CS6=0;
+      u6tb=L3G4200D_OUT_Z_H | 0x80;
+      break;
+  case 21: // OUT_Z_H sent, trying to read answer
+      gyroz=(int)b;
+      CS6=1;
+uDelay(5);      
       CS6=0;
       u6tb=L3G4200D_WHOAMI | 0x80;
       gyrowhoamistatus=-1;
       break;
+  default: // Request sent, sending dummy byte to get the answer
+      u6tb=0xFF;
+      break;
   } 
   gyrowhoamistatus++;
 
-  /* Check if the buffer size is exceed. If it is then reset the 'uc_cnt'
-  variable.    */
-  if(uc_cnt++ >= sizeof(gyro_RecBuff)) {
-    /* Reinitialize the buffer reference.	*/
-    uc_cnt = 0;
-  }
 
   /* Clear the 'reception complete' flag.	*/
   ir_s6ric = 0;

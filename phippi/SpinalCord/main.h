@@ -48,11 +48,10 @@ extern double twist[6];
 extern int pwm[2];
 extern int pwmtarget[2];
 extern int accok, accwhoami; 
-extern signed char accx, accy, accz;
 extern int accwhoamistatus;
 
 
-extern int gyrowhoami;
+extern unsigned char gyrowhoami;
 extern signed char gyrox,gyroy,gyroz,gyrotemp;
 extern int gyrowhoamistatus;
 extern char mlx1data1;

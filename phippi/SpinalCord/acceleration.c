@@ -32,7 +32,7 @@
 
 int accok=0;
 int accwhoami=0;
-signed char accx=0,accy=0,accz=0;
+signed char accx=0,accy=0,accz=0,acctout=0;
 int accwhoamistatus=0;
 /* 
  * During startup we read 100 values from sensor for all X,Y,Z acces to 
@@ -131,6 +131,7 @@ __interrupt void _uart2_receive(void) {
   case 4:
   case 6:
   case 8:
+  case 10:
       u2tb=0xFF;
       break;
   case 1: // WHOAMI answer received. Sending request to write REG_MCTL
@@ -178,6 +179,13 @@ __interrupt void _uart2_receive(void) {
       } else {
           accz=(signed char) b-avgz;
       }
+      CS2=1;
+//      uDelay(5);
+      CS2=0;
+      u2tb=MMA7455L_REG_TOUT << 1;
+      break;
+  case 11: // MMA7455L_REG_TOUT sent, trying to read answer
+      acctout=(signed char) b-avgz;
       CS2=1;
 //      uDelay(5);
       CS2=0;

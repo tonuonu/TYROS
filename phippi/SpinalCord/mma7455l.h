@@ -19,6 +19,7 @@
  *
  */
 extern int acccalcnt;
+extern  signed char accx,accy,accz,acctout;
 
 #define MMA7455L_WHOAMI_MAGIC 0x55
 
