@@ -160,10 +160,6 @@ SPI0_receive(void) {
     return r;
 }
 
-void
-accelerometer_send(unsigned char c) {
-    u2tb = c;
-}
 /*
 unsigned short 
 accelerometer_receive(void) {

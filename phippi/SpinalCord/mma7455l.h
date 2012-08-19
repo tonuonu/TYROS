@@ -1,3 +1,6 @@
+
+extern int acccalcnt;
+
 #define MMA7455L_WHOAMI_MAGIC 0x55
 
 enum mma7455l_reg {
@@ -55,4 +58,4 @@ enum mma7455l_gselect {
     MMA7455L_GSELECT_4 = 0x8,
     MMA7455L_GSELECT_MASK = 0xC,
 };
-#define WRITE_BIT (1 << 7)
+#define MMA7455L_WRITE_BIT 0x80

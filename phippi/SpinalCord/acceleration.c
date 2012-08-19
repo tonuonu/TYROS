@@ -13,9 +13,16 @@ int accok=0;
 int accwhoami=0;
 signed char accx=0,accy=0,accz=0;
 int accwhoamistatus=0;
+/* 
+ * During startup we read 100 values from sensor for all X,Y,Z acces to 
+ * calculate and negate error, gravitation etc. 
+ */
+signed char caldata[3][100];
+int acccalcnt=0;
+int avgx=0,avgy=0,avgz=0;
 
 /* Buffer to store the received data	*/
-char acc_RecBuff[8];
+//char acc_RecBuff[8];
 
 
 void
@@ -81,17 +88,23 @@ SPI2_Init(void) { // Accel sensor
  
 }
 
+void
+accelerometer_read_reg(unsigned char c) {
+    u2tb = c << 1;
+}
+void
+accelerometer_write_reg(unsigned char c) {
+    u2tb = (c << 1) |  MMA7455L_WRITE_BIT;
+}
 
 #pragma vector = UART2_RX
 __interrupt void _uart2_receive(void) {
- 
-
-  /* Used to reference a specific location in the array while string the
-  received data.   */
-  static unsigned char uc_cnt=0;
-  /* Copy the received data to the global variable 'acc_RecBuff'	*/
-  acc_RecBuff[uc_cnt] = (char) u2rb ;
- 
+/* 
+    This is done in main() to start whole process:
+    CS2=0;
+    accelerometer_read_reg( MMA7455L_REG_WHOAMI); 
+*/  
+  signed char b=u2rb & 0xFF;
   switch(accwhoamistatus) {
   case 0: // Request sent, sending dummy byte to get the answer
   case 4:
@@ -100,39 +113,52 @@ __interrupt void _uart2_receive(void) {
       u2tb=0xFF;
       break;
   case 1: // WHOAMI answer received. Sending request to write REG_MCTL
-      accwhoami=(int)acc_RecBuff[uc_cnt];
+      accwhoami=(int) b;
       CS2=1;
-      uDelay(5);
+//      uDelay(5);
       CS2=0;
-      u2tb=(MMA7455L_REG_MCTL << 1) | WRITE_BIT; 
+      accelerometer_write_reg(MMA7455L_REG_MCTL);
       break;
-  case 2: // REG_MCTL written, writing _MODE_MEASUREMENT into it
-      u2tb=((MMA7455L_GSELECT_2 | MMA7455L_MODE_MEASUREMENT) << 1) | WRITE_BIT; 
+  case 2: // REG_MCTL written, writing MODE_MEASUREMENT into it
+      u2tb=(MMA7455L_GSELECT_2 | MMA7455L_MODE_MEASUREMENT); 
       break;
   case 3: // _MODE_MEASUREMENT written. Trying to get XOUTL
       CS2=1;
-      uDelay(5);
+//      uDelay(5);
       CS2=0;
-      u2tb=MMA7455L_REG_XOUT8 << 1;
+      accelerometer_read_reg(MMA7455L_REG_XOUT8);
       break;
   case 5: // XOUTL sent, trying to read answer
-      accx=(int)acc_RecBuff[uc_cnt];
+      if(acccalcnt<100) {
+          avgx+=(int)b;
+      } else {
+          accx=(signed char) b-avgx;
+      }
       CS2=1;
-      uDelay(5);
+//      uDelay(5);
       CS2=0;
       u2tb=MMA7455L_REG_YOUT8 << 1;
       break;
   case 7: // YOUTL sent, trying to read answer
-      accy=(int)acc_RecBuff[uc_cnt];
+      if(acccalcnt<100) {
+          avgy+=(int)b;
+      } else {
+          accy=(signed char) b-avgy;
+      }
       CS2=1;
-      uDelay(5);
+//      uDelay(5);
       CS2=0;
       u2tb=MMA7455L_REG_ZOUT8 << 1;
       break;
   case 9: // ZOUTL sent, trying to read answer
-      accz=(int)acc_RecBuff[uc_cnt];
+      if(acccalcnt<100) {
+          avgz+=(int)b;
+          acccalcnt++;
+      } else {
+          accz=(signed char) b-avgz;
+      }
       CS2=1;
-      uDelay(5);
+//      uDelay(5);
       CS2=0;
       u2tb=MMA7455L_REG_WHOAMI << 1;
       accwhoamistatus=-1;
@@ -140,13 +166,12 @@ __interrupt void _uart2_receive(void) {
   } 
   accwhoamistatus++;
 
-  /* Check if the buffer size is exceed. If it is then reset the 'uc_cnt'
-  variable.    */
-  if(uc_cnt++ >= sizeof(acc_RecBuff)) {
-    /* Reinitialize the buffer reference.	*/
-    uc_cnt = 0;
+  if(acccalcnt==100) {
+      avgx/=100;
+      avgy/=100;
+      avgz/=100;      
+      acccalcnt++; // Now becomes 101 and indicates "Calibration done"
   }
-
   /* Clear the 'reception complete' flag.	*/
   ir_s2ric = 0;
   

@@ -106,7 +106,7 @@ main(void) {
     }
     u4tb=0xAA;
     CS2=0;
-    accelerometer_send( MMA7455L_REG_WHOAMI << 1 ); 
+    accelerometer_read_reg( MMA7455L_REG_WHOAMI ); 
     CS6=0;
     u6tb=L3G4200D_WHOAMI | 0x80;
     while (1) {
@@ -263,7 +263,11 @@ main(void) {
         write(buf);
 
 //        if(accok && accwhoami==85) {
+        if(acccalcnt<100) {
+            sprintf(buf,"whoami %2d CALIBRATING",accwhoami);
+        } else {
             sprintf(buf,"whoami %2d x:%4d y:%4d z:%4d",accwhoami,accx,accy,accz);
+        }
             write(buf);
 //        } else {
 //            write("ERROR");
