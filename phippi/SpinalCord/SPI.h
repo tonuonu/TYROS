@@ -19,13 +19,8 @@
  *
  */
 
-
-
 void
-SPI0_Init(void); // Accel sensor left
-
-void
-SPI2_Init(void); // Accel sensor right
+SPI2_Init(void); // Accel sensor
 
 void
 SPI4_Init(void);
@@ -38,12 +33,6 @@ SPI7_Init(void) ;
 
 void
 SPI3_Init(void); // OLED
-
-void
-SPI0_send_data(unsigned char c);
-
-unsigned short 
-SPI0_receive(void);
 
 void
 accelerometer_read_reg(unsigned char c);

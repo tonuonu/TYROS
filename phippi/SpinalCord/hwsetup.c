@@ -373,11 +373,11 @@ HardwareSetup(void) {
     Coilgun_Init();
     Panda_Init();
     Joy_Init();
-//    SPI0_Init();  // Accel sensor left
-    SPI2_Init();  // Accel sensor right
+    uart0_init(); // Panda
+    SPI2_Init();  // Accel sensor
     SPI3_Init();  // OLED
     SPI4_Init();  // Melexis sensor left
-    uart5_init(); // Panda
+    // 5 is old and now unused serial 
     SPI6_Init();  // gyro
     //gyro_Init();
     SPI7_Init();  // Melexis sensor right

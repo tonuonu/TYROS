@@ -22,6 +22,7 @@
 void main(void);
 
 extern volatile unsigned short ticks;
+void uart0_init(void);
 void SPI3_send_cmd(unsigned char c);
 void SPI3_send_data(unsigned char c);
 void OLED_Init(void);

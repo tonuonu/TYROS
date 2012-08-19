@@ -60,7 +60,7 @@ void HardwareSetup(void);
 #define LEFT_DIAGAd      pd2_6
 #define LEFT_DIAGBd      pd2_7
 
-// Serial 0, acceleration sensor 
+// Serial 0, USB interface to panda
 #define CS0d         pd6_0
 #define CS0          p6_0
 #define CS0s         p6_0s
@@ -73,7 +73,6 @@ void HardwareSetup(void);
 #define TX0          p6_3
 #define TX0s         p6_3s
 #define TX0d         pd6_3
-
 
 // Serial 2, acceleration sensor
 #define CS2d         pd7_7
@@ -128,13 +127,16 @@ void HardwareSetup(void);
 #define RX4         p9_7
 #define RX4s        p9_7s
 
-// Serial 5, panda interface
+// Serial 5, old panda interface, unused
 #define TX5         p7_6
 #define TX5s        p7_6s
 #define TX5d        pd7_6
-
 #define RX5         p8_0
+#define RX5d        pd8_0
 #define RX5s        p8_0s
+#define TX5         p7_6
+#define TX5d        pd7_6
+#define TX5s        p7_6s
 
 // Serial 6, gyroscope
 #define CLOCK6      p4_5
@@ -178,14 +180,6 @@ void HardwareSetup(void);
 
 #define CHARGE_DONE p3_7
 
-// uart 5 for pandaboard communications
-#define RX5         p8_0
-#define RX5d        pd8_0
-#define RX5s        p8_0s
-#define TX5         p7_6
-#define TX5d        pd7_6
-#define TX5s        p7_6s
-
 // 5v power supply for Pandaboard
 #define PANDA       p3_5
 #define PANDAd      pd3_5
@@ -226,7 +220,6 @@ void HardwareSetup(void);
 
 #define SPI_DELAY (50)
 
-void SPI0_Init(void);
 void SPI2_Init(void);
 void SPI3_Init(void);
 void SPI4_Init(void);
