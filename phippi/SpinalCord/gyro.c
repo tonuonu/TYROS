@@ -246,6 +246,7 @@ __interrupt void _uart6_receive(void) {
       }
       gyro_read_reg(L3G4200D_WHOAMI);
       gyrowhoamistatus=-1;
+      gyrocalcnt++;
       break;
   default: // Request sent, sending dummy byte to get the answer
       uDelay(5);      
@@ -253,16 +254,7 @@ __interrupt void _uart6_receive(void) {
       break;
   } 
   gyrowhoamistatus++;
-  if(gyrocalcnt==CALIBRATIONSAMPLES) {
-      minx=minx*10/3;
-      miny=miny*10/3;
-      minz=minz*10/3;
-      maxx=maxx*10/3;
-      maxy=maxy*10/3;
-      maxz=maxz*10/3;
-  } else if(gyrocalcnt<CALIBRATIONSAMPLES) {
-      gyrocalcnt++;
-  }
+
   /* Clear the 'reception complete' flag.	*/
   ir_s6ric = 0;
 }
