@@ -53,7 +53,8 @@ extern int accwhoamistatus;
 
 
 extern unsigned char gyrowhoami;
-extern signed char gyrox,gyroy,gyroz,gyrotemp;
+extern signed int gyrox,gyroy,gyroz;
+extern signed char gyrotemp;
 extern int gyrowhoamistatus;
 extern char mlx1data1;
 extern char mlx1data2;

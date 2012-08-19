@@ -52,3 +52,32 @@
 #define L3G4200D_INT1_THS_ZL   0x37
 #define L3G4200D_INT1_DURATION 0x38
 
+#define L3G4200D_REG3_I2_DRDY    (1 << 3)
+#define L3G4200D_REG3_PP_OD      (1 << 4)
+#define L3G4200D_REG3_H_LACTIVE  (1 << 5)
+#define L3G4200D_REG3_I1_INT     (1 << 7)
+
+#define L3G4200D_REG2_HPCF0  (1 << 0)
+#define L3G4200D_REG2_HPCF1  (1 << 1)
+#define L3G4200D_REG2_HPCF2  (1 << 2)
+#define L3G4200D_REG2_HPCF3  (1 << 3)
+#define L3G4200D_REG2_HPM0   (1 << 4)
+#define L3G4200D_REG2_HPM1   (1 << 5)
+
+#define L3G4200D_REG1_XEN    (1 << 0)
+#define L3G4200D_REG1_YEN    (1 << 1)
+#define L3G4200D_REG1_ZEN    (1 << 2)
+#define L3G4200D_REG1_PD     (1 << 3)
+#define L3G4200D_REG1_BW0    (1 << 4)
+#define L3G4200D_REG1_BW1    (1 << 5)
+#define L3G4200D_REG1_DR0    (1 << 6)
+#define L3G4200D_REG1_DR1    (1 << 7)
+
+#define L3G4200D_REG_INT1_CFG_ANDOR  (1 << 7)
+#define L3G4200D_REG_INT1_CFG_LIR    (1 << 6)
+#define L3G4200D_REG_INT1_CFG_ZHIE   (1 << 5)
+#define L3G4200D_REG_INT1_CFG_ZLIE   (1 << 4)
+#define L3G4200D_REG_INT1_CFG_YHIE   (1 << 3)
+#define L3G4200D_REG_INT1_CFG_YLIE   (1 << 2)
+#define L3G4200D_REG_INT1_CFG_XHIE   (1 << 1)
+#define L3G4200D_REG_INT1_CFG_XLIE   (1 << 0)

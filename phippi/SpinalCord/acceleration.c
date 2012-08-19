@@ -39,11 +39,7 @@ int accwhoamistatus=0;
  * calculate and negate error, gravitation etc. 
  */
 int acccalcnt=0;
-int avgx=0,avgy=0,avgz=0;
-
-/* Buffer to store the received data	*/
-//char acc_RecBuff[8];
-
+static int avgx=0,avgy=0,avgz=0;
 
 void
 SPI2_Init(void) { // Accel sensor

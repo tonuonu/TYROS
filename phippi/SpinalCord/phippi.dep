@@ -100,6 +100,10 @@
       </outputs>
       <inputs>
         <tool>
+          <name>BICOMP</name>
+          <file> 54 17 36 11 23 22 41 20 44 43 18 21 1 47 46 45 25 48 29</file>
+        </tool>
+        <tool>
           <name>ICCR32C</name>
           <file> 54 17 36 11 23 22 16 41 20 44 43 18 21 1 47 46 45 25 48 29</file>
         </tool>
@@ -142,6 +146,10 @@
       </outputs>
       <inputs>
         <tool>
+          <name>BICOMP</name>
+          <file> 54 36 11 23 22 41 20 44 43 18 1 46 45 17 48 29</file>
+        </tool>
+        <tool>
           <name>ICCR32C</name>
           <file> 54 36 11 23 22 16 41 20 44 43 18 1 46 45 17 48 29</file>
         </tool>
@@ -160,6 +168,10 @@
         </tool>
       </outputs>
       <inputs>
+        <tool>
+          <name>BICOMP</name>
+          <file> 54 36 11 23 22 41 20 44 43 18 1 46 45 17 25 48 29</file>
+        </tool>
         <tool>
           <name>ICCR32C</name>
           <file> 54 36 11 23 22 16 41 20 44 43 18 1 46 45 17 25 48 29</file>
@@ -180,6 +192,10 @@
       </outputs>
       <inputs>
         <tool>
+          <name>BICOMP</name>
+          <file> 54 14 17 46 48 29</file>
+        </tool>
+        <tool>
           <name>ICCR32C</name>
           <file> 54 14 17 46 48 29</file>
         </tool>
@@ -198,6 +214,10 @@
         </tool>
       </outputs>
       <inputs>
+        <tool>
+          <name>BICOMP</name>
+          <file> 54 46 17 2 48 15</file>
+        </tool>
         <tool>
           <name>ICCR32C</name>
           <file> 54 46 17 2 48 15</file>
@@ -218,6 +238,10 @@
       </outputs>
       <inputs>
         <tool>
+          <name>BICOMP</name>
+          <file> 54 14 17 46 48 29</file>
+        </tool>
+        <tool>
           <name>ICCR32C</name>
           <file> 54 14 17 46 48 29</file>
         </tool>
@@ -237,6 +261,10 @@
       </outputs>
       <inputs>
         <tool>
+          <name>BICOMP</name>
+          <file> 54 14 45 17 36 11 23 22 41 20 44 43 18 27 46 29</file>
+        </tool>
+        <tool>
           <name>ICCR32C</name>
           <file> 54 14 45 17 36 11 23 22 16 41 20 44 43 18 27 46 29</file>
         </tool>
@@ -250,6 +278,15 @@
           <file> 32</file>
         </tool>
       </outputs>
+    </file>
+    <file>
+      <name>$PROJ_DIR$\Debug\Obj\phippi.pbd</name>
+      <inputs>
+        <tool>
+          <name>BILINK</name>
+          <file> 30 38 55 49 24 33 50 52 35</file>
+        </tool>
+      </inputs>
     </file>
     <file>
       <name>$PROJ_DIR$\Debug\Exe\phippi.d53</name>

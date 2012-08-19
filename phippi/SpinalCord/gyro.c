@@ -27,11 +27,21 @@
 #include "SPI.h"
 
 unsigned char gyrowhoami=0;
-signed char gyrox=0,gyroy=0,gyroz=0,gyrotemp=0;
+signed int gyrox=0,gyroy=0,gyroz=0;
+signed char gyrotemp=0;
 int gyrowhoamistatus=0;
+/* 
+ * During startup we read CALIBRATIONSAMPLES values from sensor for all X,Y,Z acces to 
+ * calculate and negate error. 
+ */
+int gyrocalcnt=0;
+static int maxx=0,maxy=0,maxz=0;
+static int minx=0,miny=0,minz=0;
+static int tmp;
 
+#define CALIBRATIONSAMPLES 500
 void
-SPI6_Init(void) { // Gyro
+SPI6_Init(void) {
 #define	f1_CLK_SPEED 24000000
     // 10MHz max clock
 //    u6brg = (unsigned char)(((f1_CLK_SPEED)/(2*5000000))-1);
@@ -95,107 +105,166 @@ SPI6_Init(void) { // Gyro
     pu11 = 1; // gyro RX interface needs pullup on RX6 or p4_6
 }
 
+void 
+gyro_read_reg(unsigned char b) {
+      CS6=1;
+      uDelay(5);      
+      CS6=0;
+      u6tb=b | 0x80;
+}
+void 
+gyro_write_reg(unsigned char b) {
+      CS6=1;
+      uDelay(5);      
+      CS6=0;
+      u6tb=b ;
+}
+void 
+gyro_write_data(unsigned char b) {
+      u6tb=b ;
+}
 
 #pragma vector = UART6_RX
 __interrupt void _uart6_receive(void) {
-  signed char b=u6rb & 0xFF;
+  signed char b=(signed char)u6rb & 0xFF;
   switch(gyrowhoamistatus) {
   case 1: // WHOAMI answer received. Sending request to write ctrl_REG2
       gyrowhoami=(unsigned char)b;
-      CS6=1;
-uDelay(5);      
-      CS6=0;
-      u6tb=(L3G4200D_CTRL_REG2 | 0x00) ;   
+      gyro_write_reg(L3G4200D_CTRL_REG2) ;   
       break;
   case 2: // REG2 written, writing  into it
-      u6tb=0;//16|32; 
+      gyro_write_data(
+                      L3G4200D_REG2_HPM1| // Normal mode?
+                      L3G4200D_REG2_HPCF0|
+                      L3G4200D_REG2_HPCF3 // Pass anything higher than 0.1Hz
+                      );
       break;
-  case 3: 
-      CS6=1;
-uDelay(5);      
-      CS6=0;
-      u6tb=(L3G4200D_CTRL_REG1 | 0x00) ; 
+  case 3: // Sending request to write ctrl_REG3
+      gyro_write_reg(L3G4200D_CTRL_REG3);
       break;
-  case 4: // REG1 written, Enabling X,Y,Z axes and normal mode
-      u6tb=1|2|4|8; 
+  case 4: // REG3 written, writing  into it
+      gyro_write_data(
+           L3G4200D_REG3_I2_DRDY|   // Making sure INT2 will be called when data is ready
+           L3G4200D_REG3_H_LACTIVE| // Low is Active, not high
+           L3G4200D_REG3_PP_OD);     // Open drain
       break;
-  case 5: // written. Trying to get TEMP
-      CS6=1;
-uDelay(5);      
-      CS6=0;
-      u6tb=L3G4200D_OUT_TEMP | 0x80;
+  case 5: // Sending request to write ctrl_INT1_CFG
+      gyro_write_reg(L3G4200D_INT1_CFG);
       break;
-  case 7: // TEMP answer received. Sending request to get STATUS_REG
+  case 6: // REG3 written, writing  into it
+      gyro_write_data(
+                      L3G4200D_REG_INT1_CFG_XHIE| // Generate interrupt if threshold is exceeded on X
+                      L3G4200D_REG_INT1_CFG_YHIE| // Generate interrupt if threshold is exceeded on Y
+                      L3G4200D_REG_INT1_CFG_ZHIE  // Generate interrupt if threshold is exceeded on Z
+                      );
+      break;
+  case 7:
+      gyro_write_reg(L3G4200D_CTRL_REG1); 
+      break;
+  case 8: // REG1 written, Enabling X,Y,Z axes and normal mode
+      gyro_write_data(L3G4200D_REG1_XEN|
+           L3G4200D_REG1_YEN|
+           L3G4200D_REG1_ZEN|
+           L3G4200D_REG1_PD |
+           L3G4200D_REG1_BW0| // Low pass cut off 110Hz, 
+           L3G4200D_REG1_BW1|
+           L3G4200D_REG1_DR0| // Data rate 800Hz
+           L3G4200D_REG1_DR1
+             ); 
+      break;
+  case 9: // written. Trying to get TEMP
+      gyro_read_reg(L3G4200D_OUT_TEMP);
+      break;
+  case 11: // TEMP answer received. Sending request to get STATUS_REG
       gyrotemp=(signed int)b;
-      CS6=1;
-uDelay(5);      
-      CS6=0;
-      u6tb=L3G4200D_STATUS_REG | 0x80;
+      gyro_read_reg(L3G4200D_STATUS_REG);
       break;
-  case 9: // statusreg answer received. See if there is a new data in gyro available
-      CS6=1;
-uDelay(5);      
-      CS6=0;
-      if(b & (1<<3)) { // no data for gyro yet, go to beginning
-          u6tb=L3G4200D_WHOAMI | 0x80;
+  case 13: // statusreg answer received. See if there is a new data in gyro available
+/*      if(b & (1<<3)) { // no data for gyro yet, go to beginning
+          gyro_read_reg(L3G4200D_WHOAMI);
           gyrowhoamistatus=-1;
-      } else { // new data is ready to load
-          u6tb=L3G4200D_OUT_X_L | 0x80;
-      };
+          ERRORLED=0;
+      } else { // new data is ready to load*/
+          gyro_read_reg(L3G4200D_OUT_X_L);
+/*          ERRORLED=1;
+      };*/
       break;
-  case 11: // OUT_X_L answer received. Sending request to get XL
-      gyrox=(int)b;
-      CS6=1;
-uDelay(5);      
-      CS6=0;
-      u6tb=L3G4200D_OUT_X_H | 0x80;
+  case 15: // OUT_X_L answer received
+      tmp=(unsigned int)b;
+      gyro_read_reg(L3G4200D_OUT_X_H);
       break;
-  case 13: // OUT_X_H sent, trying to read answer
-//      gyrox=(int)b;
-      CS6=1;
-uDelay(5);      
-      CS6=0;
-      u6tb=L3G4200D_OUT_Y_L | 0x80;
+  case 17: // OUT_X_H answer received
+      tmp += ((signed char)b * 0x100);
+      if(gyrocalcnt<CALIBRATIONSAMPLES) {
+          if(tmp>maxx)
+              maxx=tmp;
+          if(tmp<minx)
+              minx=tmp;
+          gyrox=0;
+      } else if(tmp<minx || tmp>maxx){
+          gyrox=tmp;
+      } else {
+          gyrox=0;
+      }
+      gyro_read_reg(L3G4200D_OUT_Y_L);
       break;
-  case 15: // OUT_Y_L sent, trying to read answer
-      gyroy=(int)b;
-      CS6=1;
-uDelay(5);      
-      CS6=0;
-      u6tb=L3G4200D_OUT_Y_H | 0x80;
+  case 19: // OUT_Y_L answer received
+      tmp=(unsigned int)b;
+      gyro_read_reg(L3G4200D_OUT_Y_H);
       break;
-  case 17: // OUT_Y_H sent, trying to read answer
-//      gyroy=(int)b;
-      CS6=1;
-uDelay(5);      
-      CS6=0;
-      u6tb=L3G4200D_OUT_Z_L | 0x80;
+  case 21: // OUT_Y_H answer received
+      tmp += ((signed char)b * 0x100);
+      if(gyrocalcnt<CALIBRATIONSAMPLES) {
+          if(tmp>maxy)
+              maxy=tmp;
+          if(tmp<miny)
+              miny=tmp;
+          gyroy=0;
+      } else if(tmp<miny || tmp>maxy){
+          gyroy=tmp;
+      } else {
+          gyroy=0;
+      }
+      gyro_read_reg(L3G4200D_OUT_Z_L);
       break;
-  case 19: // OUT_Z_L sent, trying to read answer
-      gyroy=(int)b;
-      CS6=1;
-uDelay(5);      
-      CS6=0;
-      u6tb=L3G4200D_OUT_Z_H | 0x80;
+  case 23: // OUT_Z_L answer received
+      tmp=(unsigned int)b;
+      gyro_read_reg(L3G4200D_OUT_Z_H);
       break;
-  case 21: // OUT_Z_H sent, trying to read answer
-//      gyroz=(int)b;
-      CS6=1;
-uDelay(5);      
-      CS6=0;
-      u6tb=L3G4200D_WHOAMI | 0x80;
+  case 25: // OUT_Z_H answer received
+      tmp += ((signed char)b * 0x100);
+      if(gyrocalcnt<CALIBRATIONSAMPLES) {
+          if(tmp>maxz)
+              maxz=tmp;
+          if(tmp<minz)
+              minz=tmp;
+          gyroz=0;
+      } else if(tmp<minz || tmp>maxz){
+          gyroz=tmp;
+      } else {
+          gyroz=0;
+      }
+      gyro_read_reg(L3G4200D_WHOAMI);
       gyrowhoamistatus=-1;
       break;
   default: // Request sent, sending dummy byte to get the answer
-      u6tb=0xFF;
+      uDelay(5);      
+      gyro_write_data(0xFF);
       break;
   } 
   gyrowhoamistatus++;
-
-
+  if(gyrocalcnt==CALIBRATIONSAMPLES) {
+      minx=minx*10/3;
+      miny=miny*10/3;
+      minz=minz*10/3;
+      maxx=maxx*10/3;
+      maxy=maxy*10/3;
+      maxz=maxz*10/3;
+  } else if(gyrocalcnt<CALIBRATIONSAMPLES) {
+      gyrocalcnt++;
+  }
   /* Clear the 'reception complete' flag.	*/
   ir_s6ric = 0;
-  
 }
 
 

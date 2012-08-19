@@ -109,7 +109,7 @@ SPI4_Init(void) { // Melexis 90316
 
 #pragma vector = UART4_RX
 __interrupt void _uart4_receive(void) {
-      ERRORLED=1;
+//      ERRORLED=1;
     int j;
   /* Used to reference a specific location in the array while string the
   received data.   */
@@ -156,7 +156,7 @@ __interrupt void _uart4_receive(void) {
 
   /* Clear the 'reception complete' flag.	*/
   ir_s4ric = 0;
-  ERRORLED=0;
+  //ERRORLED=0;
   
 }
 

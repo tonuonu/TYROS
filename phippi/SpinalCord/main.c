@@ -254,9 +254,10 @@ main(void) {
         write("Gyro: ");
         sprintf(buf,"(%2d) ",gyrowhoamistatus);
         write(buf);
-
+// From 1/(0xFFFF/250dps)
+#define GYRORATE (0.0038147554741741054398413061722743572137026016632333f)
 //        if(accok && accwhoami==85) {
-            sprintf(buf,"whoami %3u temp %4d x:%4d y:%4d z:%4d",gyrowhoami,35-gyrotemp,gyrox,gyroy,gyroz);
+            sprintf(buf,"whoami %3u temp %4d x:%7.1f y:%7.1f z:%7.1f",gyrowhoami,35-gyrotemp,gyrox*GYRORATE,gyroy*GYRORATE,gyroz*GYRORATE);
             write(buf);
 //        } else {
 //            write("ERROR");
