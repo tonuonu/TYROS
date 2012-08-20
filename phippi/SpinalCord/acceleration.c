@@ -40,6 +40,7 @@ int accwhoamistatus=0;
  */
 int acccalcnt=0;
 static int avgx=0,avgy=0,avgz=0;
+static int firsttime=1;
 
 void
 SPI2_Init(void) { // Accel sensor
@@ -139,17 +140,28 @@ __interrupt void _uart2_receive(void) {
   switch(accwhoamistatus) {
   case 0: // Writing bit to disable I2C
       accelerometer_write_data(MMA7455_REG_I2CDIS);
-  case 1: // MMA7455_REG_I2CDIS written. Trying to get XOUTL
-      accelerometer_read_reg(MMA7455L_REG_WHOAMI);
-      break;
-  case 3: // WHOAMI answer received. Sending request to write REG_MCTL
-      accwhoami=(int) b;
+  case 1: // MMA7455_REG_I2CDIS written. Sending request to write REG_MCTL
       accelerometer_write_reg(MMA7455L_REG_MCTL);
       break;
-  case 4: // REG_MCTL written, writing MODE_MEASUREMENT into it
+  case 2: // REG_MCTL written, writing MODE_MEASUREMENT into it
       accelerometer_write_data(MMA7455L_GSELECT_2 | MMA7455L_MODE_MEASUREMENT); 
       break;
-  case 5: // _MODE_MEASUREMENT written. Trying to get XOUTL
+  case 3: // MODE_MEASUREMENT written. Trying to get REG_WHOAMI
+      if(firsttime) {
+          firsttime=0;
+          CS2=1;
+          /* 
+           * When switching device on using MMA7455L_MODE_MEASUREMENT
+           * delay of 1millisecond
+           */
+          uDelay(255);
+          uDelay(255);
+          uDelay(255);
+      } 
+      accelerometer_read_reg(MMA7455L_REG_WHOAMI);
+      break;
+  case 5: // REG_WHOAMI answer received. Trying to get XOUTL
+      accwhoami=(int) b;
       accelerometer_read_reg(MMA7455L_REG_XOUT8);
       break;
   case 7: // XOUTL sent, trying to read answer
@@ -180,7 +192,7 @@ __interrupt void _uart2_receive(void) {
   case 13: // MMA7455L_REG_TOUT sent, trying to read answer
       acctout=(signed char) b-avgz;
       accelerometer_read_reg(MMA7455L_REG_WHOAMI);
-      accwhoamistatus=-1;
+      accwhoamistatus=2; // 3 after ++ later
       break;
   default:
       u2tb=0xFF;
