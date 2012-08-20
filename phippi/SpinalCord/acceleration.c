@@ -71,7 +71,7 @@ SPI2_Init(void) { // Accel sensor
     clk1_u2c0 = 0;                                         // 
     txept_u2c0 = 0;                                        // Transmit register empty flag 
     crd_u2c0 = 1;                                          // CTS disabled when 1
-    nch_u2c0 = 0;                                          // 0=Output mode "open drain" for TXD and CLOCK pin 
+    nch_u2c0 = 1;                                          // 0=Output mode "open drain" for TXD and CLOCK pin 
     ckpol_u2c0 = 0;                                        // CLK Polarity 0 rising edge, 1 falling edge
     uform_u2c0 = 1;                                        // 1=MSB first
 
@@ -106,86 +106,84 @@ SPI2_Init(void) { // Accel sensor
 
 void
 accelerometer_read_reg(unsigned char c) {
+    CLOCK2=0;
+    TX2=0;
+    CS2=1;
+    uDelay(5);
+    CS2=0;
     u2tb = c << 1;
 }
+
 void
 accelerometer_write_reg(unsigned char c) {
+    CLOCK2=0;
+    TX2=0;
+    CS2=1;
+    uDelay(5);
+    CS2=0;
     u2tb = (c << 1) |  MMA7455L_WRITE_BIT;
+}
+
+void
+accelerometer_write_data(unsigned char c) {
+    u2tb = c ; 
 }
 
 #pragma vector = UART2_RX
 __interrupt void _uart2_receive(void) {
 /* 
     This is done in main() to start whole process:
-    CS2=0;
-    accelerometer_read_reg( MMA7455L_REG_WHOAMI); 
+    accelerometer_write_reg( MMA7455L_REG_I2CAD ); 
 */  
   signed char b=u2rb & 0xFF;
   switch(accwhoamistatus) {
-  case 0: // Request sent, sending dummy byte to get the answer
-  case 4:
-  case 6:
-  case 8:
-  case 10:
-      u2tb=0xFF;
+  case 0: // Writing bit to disable I2C
+      accelerometer_write_data(MMA7455_REG_I2CDIS);
+  case 1: // MMA7455_REG_I2CDIS written. Trying to get XOUTL
+      accelerometer_read_reg(MMA7455L_REG_WHOAMI);
       break;
-  case 1: // WHOAMI answer received. Sending request to write REG_MCTL
+  case 3: // WHOAMI answer received. Sending request to write REG_MCTL
       accwhoami=(int) b;
-      CS2=1;
-      uDelay(5);
-      CS2=0;
       accelerometer_write_reg(MMA7455L_REG_MCTL);
       break;
-  case 2: // REG_MCTL written, writing MODE_MEASUREMENT into it
-      u2tb=(MMA7455L_GSELECT_2 | MMA7455L_MODE_MEASUREMENT); 
+  case 4: // REG_MCTL written, writing MODE_MEASUREMENT into it
+      accelerometer_write_data(MMA7455L_GSELECT_2 | MMA7455L_MODE_MEASUREMENT); 
       break;
-  case 3: // _MODE_MEASUREMENT written. Trying to get XOUTL
-      CS2=1;
-      uDelay(5);
-      CS2=0;
+  case 5: // _MODE_MEASUREMENT written. Trying to get XOUTL
       accelerometer_read_reg(MMA7455L_REG_XOUT8);
       break;
-  case 5: // XOUTL sent, trying to read answer
+  case 7: // XOUTL sent, trying to read answer
       if(acccalcnt<100) {
           avgx+=(int)b;
       } else {
           accx=(signed char) b-avgx;
       }
-      CS2=1;
-      uDelay(5);
-      CS2=0;
-      u2tb=MMA7455L_REG_YOUT8 << 1;
+      accelerometer_read_reg(MMA7455L_REG_YOUT8);
       break;
-  case 7: // YOUTL sent, trying to read answer
+  case 9: // YOUTL sent, trying to read answer
       if(acccalcnt<100) {
           avgy+=(int)b;
       } else {
           accy=(signed char) b-avgy;
       }
-      CS2=1;
-      uDelay(5);
-      CS2=0;
-      u2tb=MMA7455L_REG_ZOUT8 << 1;
+      accelerometer_read_reg(MMA7455L_REG_ZOUT8);
       break;
-  case 9: // ZOUTL sent, trying to read answer
+  case 11: // ZOUTL sent, trying to read answer
       if(acccalcnt<100) {
           avgz+=(int)b;
           acccalcnt++;
       } else {
           accz=(signed char) b-avgz;
       }
-      CS2=1;
-      uDelay(5);
-      CS2=0;
-      u2tb=MMA7455L_REG_TOUT << 1;
+      accelerometer_read_reg(MMA7455L_REG_TOUT);
       break;
-  case 11: // MMA7455L_REG_TOUT sent, trying to read answer
+  case 13: // MMA7455L_REG_TOUT sent, trying to read answer
       acctout=(signed char) b-avgz;
-      CS2=1;
-      uDelay(5);
-      CS2=0;
-      u2tb=MMA7455L_REG_WHOAMI << 1;
+      accelerometer_read_reg(MMA7455L_REG_WHOAMI);
       accwhoamistatus=-1;
+      break;
+  default:
+      u2tb=0xFF;
       break;
   } 
   accwhoamistatus++;

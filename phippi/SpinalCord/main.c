@@ -105,8 +105,7 @@ main(void) {
         uDelay(255); 
     }
     u4tb=0xAA;
-    CS2=0;
-    accelerometer_read_reg( MMA7455L_REG_WHOAMI ); 
+    accelerometer_write_reg( MMA7455L_REG_I2CAD ); 
     CS6=0;
     u6tb=L3G4200D_WHOAMI | 0x80;
 //    wdc7=0; // Wait ~20ms before reset
