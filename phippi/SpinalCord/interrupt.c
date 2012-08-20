@@ -40,8 +40,10 @@ s_int(void) {
     ticks++;
     if(ticks % 100 == 0) {
         status.sek_flag=1;
-        // This turns on PWM on buzzer
-        ta4=1;        
+        if(buzzer) {
+            // This turns on PWM on buzzer
+            ta4=1;
+        }
     } else if(ticks % 100 == 1  ) {
         // Turn off buzzer
         ta4=0;

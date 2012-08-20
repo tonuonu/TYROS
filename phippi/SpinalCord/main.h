@@ -59,6 +59,7 @@ extern int gyrowhoamistatus;
 extern char mlx1data1;
 extern char mlx1data2;
 extern int mlx1whoamistatus;
+extern int buzzer;
 /*
  * IAR-HEW compatibility 
  */

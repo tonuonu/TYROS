@@ -39,6 +39,7 @@ double twist[6]={0,0,0,0,0,0};
 int pwm[2]={0,0};
 int pwmtarget[2]={0,0};
 int lastpwm=0;
+int buzzer=1; // If audible heartbeas is on
 
 void updateOLED1 () {
     OLED_Show_String(  1, "Panda is", 0, 0*8);
@@ -190,6 +191,15 @@ main(void) {
                 }
                 sprintf(buf,"panda %s",PANDA ? "on":"off");
                 write(buf);              
+            } else if(strncmp(command,"buzzer ",7)==0) {
+                int tmp;
+                for(tmp=0,tok = strtok(command," "); tok && tmp<=2 ; tok=strtok(0," "),tmp++) {
+                    if(tmp == 1) {
+                        buzzer=(int)strtod(tok,NULL); 
+                    }
+                }
+                sprintf(buf,"buzzer %s",buzzer ? "on":"off");
+                write(buf);              
             } else if(strncmp(command,"charge ",7)==0) {
                 int tmp;
                 for(tmp=0,tok = strtok(command," "); tok && tmp<=2 ; tok=strtok(0," "),tmp++) {
@@ -274,7 +284,7 @@ main(void) {
         if(acccalcnt<CALIBRATIONSAMPLES) {
             sprintf(buf,"whoami %2d CALIBRATING",accwhoami);
         } else {
-// http://www.wolframalpha.com/input/?i=G+to+m%2Fs2
+          // http://www.wolframalpha.com/input/?i=G+to+m%2Fs2
           // Whole 8bit range is +-2G, so each unit is 4/256 G-s
           // Each G is 9.809 m/s2
           sprintf(buf,"whoami %2d x:%8.4f y:%8.4f z:%8.4f temp:%4d",accwhoami,4.0*9.807/256.0*accx,4.0*9.807/256.0*accy,4.0*9.807/256.0*accz,acctout);
