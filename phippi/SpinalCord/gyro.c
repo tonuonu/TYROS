@@ -45,7 +45,7 @@ SPI6_Init(void) {
 #define	f1_CLK_SPEED 24000000
     // 10MHz max clock
 //    u6brg = (unsigned char)(((f1_CLK_SPEED)/(2*5000000))-1);
-    u6brg = (unsigned char)(((f1_CLK_SPEED)/(2*1000000))-1);
+    u6brg = (unsigned char)(((f1_CLK_SPEED)/(2*2000000))-1);
 
     CS6d = PD_OUTPUT;
     CS6=1; // CS is high, means disabled

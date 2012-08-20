@@ -47,7 +47,7 @@ void
 SPI2_Init(void) { // Accel sensor
     pu22=1; // pull up for CLK2 or p7_2
 #define f1_CLK_SPEED 24000000
-    u2brg =  (unsigned char)(((f1_CLK_SPEED)/(2*100000))-1);
+    u2brg =  (unsigned char)(((f1_CLK_SPEED)/(2*500000))-1);
     // 8MHz max
 //    u2brg =  (unsigned char)(((f1_CLK_SPEED)/(2*400000))-1);
 
@@ -108,21 +108,23 @@ SPI2_Init(void) { // Accel sensor
 
 void
 accelerometer_read_reg(unsigned char c) {
-    CLOCK2=0;
-    TX2=0;
     CS2=1;
-    uDelay(5);
+    // Datasheet does not specify CS timing but tells SPI is 8Mhz
+    // This is 125ns period
+    // On 48Mhz each cycle is ~21nS, so
+    // 125nS/21=~6
+    uDelay(6);
     CS2=0;
+    uDelay(6);
     u2tb = c << 1;
 }
 
 void
 accelerometer_write_reg(unsigned char c) {
-    CLOCK2=0;
-    TX2=0;
     CS2=1;
-    uDelay(5);
+    uDelay(6);
     CS2=0;
+    uDelay(6);
     u2tb = (c << 1) |  MMA7455L_WRITE_BIT;
 }
 
@@ -133,10 +135,10 @@ accelerometer_write_data(unsigned char c) {
 
 #pragma vector = UART2_RX
 __interrupt void _uart2_receive(void) {
-/* 
-    This is done in main() to start whole process:
-    accelerometer_write_reg( MMA7455L_REG_I2CAD ); 
-*/  
+  /* 
+   * This is done in main() to start whole process:
+   * accelerometer_write_reg( MMA7455L_REG_I2CAD ); 
+   */
   signed char b=u2rb & 0xFF;
   switch(accwhoamistatus) {
   case 0: // Writing bit to disable I2C
@@ -149,16 +151,18 @@ __interrupt void _uart2_receive(void) {
       break;
   case 3: // MODE_MEASUREMENT written. Trying to get REG_WHOAMI
       if(firsttime) {
-          firsttime=0;
           CS2=1;
+          firsttime=0;
           /* 
            * When switching device on using MMA7455L_MODE_MEASUREMENT
-           * delay of 1millisecond
+           * delay of 20milliseconds
            */
-          uDelay(255);
-          uDelay(255);
-          uDelay(255);
-      } 
+          // 20 000uS needed. On 48Mhz each cycle is ~21nS, so
+          // 20 000 000nS/21=~100000
+          for(int i=0;i<1000;i++) {
+              uDelay(100);
+          }
+      }
       accelerometer_read_reg(MMA7455L_REG_WHOAMI);
       break;
   case 5: // REG_WHOAMI answer received. Trying to get XOUTL
@@ -192,8 +196,8 @@ __interrupt void _uart2_receive(void) {
       break;
   case 13: // MMA7455L_REG_TOUT sent, trying to read answer
       acctout=(signed char) b-avgz;
-      accelerometer_read_reg(MMA7455L_REG_WHOAMI);
       accwhoamistatus=2; // 3 after ++ later
+      accelerometer_read_reg(MMA7455L_REG_WHOAMI);
       break;
   default:
       u2tb=0xFF;
