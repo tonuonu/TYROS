@@ -254,9 +254,10 @@ main(void) {
         sprintf(buf,"(%2d) ",gyrowhoamistatus);
         write(buf);
 // From 1/(0xFFFF/250dps)
-#define GYRORATE (0.0038147554741741054398413061722743572137026016632333f)
+        // http://www.wolframalpha.com/input/?i=1%2F%280xFFFF%2F250%29+degrees+in+radians
+#define GYRORATE (6.658e-5)
 //        if(accok && accwhoami==85) {
-            sprintf(buf,"whoami %3u temp %4d x:%7.1f y:%7.1f z:%7.1f",gyrowhoami,35-gyrotemp,gyrox*GYRORATE,gyroy*GYRORATE,gyroz*GYRORATE);
+            sprintf(buf,"whoami %3u temp %4d x:%8.5f y:%8.5f z:%8.5f",gyrowhoami,35-gyrotemp,gyrox*GYRORATE,gyroy*GYRORATE,gyroz*GYRORATE);
             write(buf);
 //        } else {
 //            write("ERROR");
@@ -270,10 +271,13 @@ main(void) {
         write(buf);
 
 //        if(accok && accwhoami==85) {
-        if(acccalcnt<100) {
+        if(acccalcnt<CALIBRATIONSAMPLES) {
             sprintf(buf,"whoami %2d CALIBRATING",accwhoami);
         } else {
-            sprintf(buf,"whoami %2d x:%4d y:%4d z:%4d temp:%4d",accwhoami,accx,accy,accz,acctout);
+// http://www.wolframalpha.com/input/?i=G+to+m%2Fs2
+          // Whole 8bit range is +-2G, so each unit is 4/256 G-s
+          // Each G is 9.809 m/s2
+          sprintf(buf,"whoami %2d x:%8.4f y:%8.4f z:%8.4f temp:%4d",accwhoami,4.0*9.807/256.0*accx,4.0*9.807/256.0*accy,4.0*9.807/256.0*accz,acctout);
         }
             write(buf);
 //        } else {

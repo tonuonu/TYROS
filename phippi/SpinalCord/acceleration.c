@@ -35,9 +35,10 @@ int accwhoami=0;
 signed char accx=0,accy=0,accz=0,acctout=0;
 int accwhoamistatus=0;
 /* 
- * During startup we read 100 values from sensor for all X,Y,Z acces to 
+ * During startup we read CALIBRATIONSAMPLES values from sensor for all X,Y,Z acces to 
  * calculate and negate error, gravitation etc. 
  */
+
 int acccalcnt=0;
 static int avgx=0,avgy=0,avgz=0;
 static int firsttime=1;
@@ -165,7 +166,7 @@ __interrupt void _uart2_receive(void) {
       accelerometer_read_reg(MMA7455L_REG_XOUT8);
       break;
   case 7: // XOUTL sent, trying to read answer
-      if(acccalcnt<100) {
+      if(acccalcnt<CALIBRATIONSAMPLES) {
           avgx+=(int)b;
       } else {
           accx=(signed char) b-avgx;
@@ -173,7 +174,7 @@ __interrupt void _uart2_receive(void) {
       accelerometer_read_reg(MMA7455L_REG_YOUT8);
       break;
   case 9: // YOUTL sent, trying to read answer
-      if(acccalcnt<100) {
+      if(acccalcnt<CALIBRATIONSAMPLES) {
           avgy+=(int)b;
       } else {
           accy=(signed char) b-avgy;
@@ -181,7 +182,7 @@ __interrupt void _uart2_receive(void) {
       accelerometer_read_reg(MMA7455L_REG_ZOUT8);
       break;
   case 11: // ZOUTL sent, trying to read answer
-      if(acccalcnt<100) {
+      if(acccalcnt<CALIBRATIONSAMPLES) {
           avgz+=(int)b;
           acccalcnt++;
       } else {
@@ -200,10 +201,10 @@ __interrupt void _uart2_receive(void) {
   } 
   accwhoamistatus++;
 
-  if(acccalcnt==100) {
-      avgx/=100;
-      avgy/=100;
-      avgz/=100;      
+  if(acccalcnt==CALIBRATIONSAMPLES) {
+      avgx/=CALIBRATIONSAMPLES;
+      avgy/=CALIBRATIONSAMPLES;
+      avgz/=CALIBRATIONSAMPLES;      
       acccalcnt++; // Now becomes 101 and indicates "Calibration done"
   }
   /* Clear the 'reception complete' flag.	*/
