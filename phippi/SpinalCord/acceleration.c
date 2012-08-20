@@ -99,7 +99,7 @@ SPI2_Init(void) { // Accel sensor
     u2smr4 = 0x00;
 
     DISABLE_IRQ
-    ilvl_s2ric =0x05;       
+    ilvl_s2ric =0x02;       
     ir_s2ric   =0;            
     ENABLE_IRQ
  
@@ -144,6 +144,7 @@ __interrupt void _uart2_receive(void) {
   switch(accwhoamistatus) {
   case 0: // Writing bit to disable I2C
       accelerometer_write_data(MMA7455_REG_I2CDIS);
+      break;
   case 1: // MMA7455_REG_I2CDIS written. Sending request to write REG_MCTL
       accelerometer_write_reg(MMA7455L_REG_MCTL);
       break;
@@ -197,7 +198,7 @@ __interrupt void _uart2_receive(void) {
       break;
   case 13: // MMA7455L_REG_TOUT sent, trying to read answer
       acctout=(signed char) b;
-      accwhoamistatus=3; // 4 after ++ later
+      accwhoamistatus=4-1; // 4 after accwhoamistatus++ later
       accelerometer_read_reg(MMA7455L_REG_WHOAMI);
       break;
   default:
@@ -210,7 +211,7 @@ __interrupt void _uart2_receive(void) {
       avgx/=CALIBRATIONSAMPLES;
       avgy/=CALIBRATIONSAMPLES;
       avgz/=CALIBRATIONSAMPLES;      
-      acccalcnt++; // Now becomes 101 and indicates "Calibration done"
+      acccalcnt++; // Now becomes CALIBRATIONSAMPLES+1 and indicates "Calibration done"
   }
   /* Clear the 'reception complete' flag.	*/
   ir_s2ric = 0;

@@ -47,12 +47,12 @@ s_int(void) {
         }
         break;
     case 1:  
-        if(bat>6.3) { // If battery is not dead yet 
+        if(bat>6.3 || bat < 4.0) { // If battery is not dead yet 
             ta4=0; // Turn off buzzer
         }
         break;
     case 50:  
-        if(bat>6.1) { // If battery is not dead yet 
+        if(bat>6.1 ) { // If battery is not dead yet 
             ta4=0; // Turn off buzzer
         }
         break;

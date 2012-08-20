@@ -55,9 +55,9 @@ extern unsigned char gyrowhoami;
 extern signed int gyrox,gyroy,gyroz;
 extern signed char gyrotemp;
 extern int gyrowhoamistatus;
-extern char mlx1data1;
-extern char mlx1data2;
+extern unsigned int mlx1data,mlx2data;
 extern int mlx1whoamistatus;
+extern int mlx2whoamistatus;
 extern int buzzer;
 extern float bat;
 /*

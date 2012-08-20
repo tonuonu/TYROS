@@ -100,13 +100,16 @@ main(void) {
     OLED_Fade_In();
     updateOLED1();    
     PANDA=1;
-    MELEXIS_EN=0; // Low is ON
+    MELEXIS_EN=0; // Low is ON, This is 5V LDO
+    CS4=0;
+    CS7=0;
     // 300uS needed. On 48Mhz each cycle is ~21nS, so
     // 300 000nS/21=~1200
     for(j=0;j<2;j++) {
         uDelay(255); 
     }
     u4tb=0xAA;
+    u7tb=0xAA;
     accelerometer_write_reg( MMA7455L_REG_I2CAD); 
     CS6=0;
     u6tb=L3G4200D_WHOAMI | 0x80;
@@ -246,17 +249,19 @@ main(void) {
             command[0]=0;
         }        
         
-#if 1
-        write(VT100CURSORMELEXISL);
-        write("Melexis L :");
+        write(VT100CURSORMELEXISR);
+        write("Melexis R :");
         sprintf(buf,"(%2d) ",mlx1whoamistatus);
         write(buf);
-        sprintf(buf,"%d %d",mlx1data1,mlx1data2);
+        sprintf(buf,"%6d ",mlx1data);
         write(buf);
-//        write(VT100CURSORMELEXISR);
-//        write("Melexis R :");
+        write(VT100CURSORMELEXISL);
+        write("Melexis L :");
+        sprintf(buf,"(%2d) ",mlx2whoamistatus);
+        write(buf);
+        sprintf(buf,"%6d ",mlx2data);
+        write(buf);
 
-#endif        
 
       /* Gyroscope */
 #if 1
@@ -312,7 +317,7 @@ main(void) {
         write(buf);
         sprintf(buf,"(battery %.1fV) ", bat );
         write(buf);
-        if(bat<7.0) 
+        if(bat<6.8) 
           errorflag=1;
 #endif
 
@@ -340,9 +345,9 @@ main(void) {
           CHARGE=0; // Turn off CHARGE pin
         }
         if(errorflag) {
-          ERRORLED=1;
+    //      ERRORLED=1;
         } else {
-          ERRORLED=0; 
+    //      ERRORLED=0; 
         } 
         
     }

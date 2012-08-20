@@ -99,7 +99,7 @@ SPI6_Init(void) {
     u6smr4 = 0x00;       
     
     DISABLE_IRQ
-    ilvl_s6ric =0x04;       
+    ilvl_s6ric =0x03;       
     ir_s6ric   =0;            
     ENABLE_IRQ
     pu11 = 1; // gyro RX interface needs pullup on RX6 or p4_6

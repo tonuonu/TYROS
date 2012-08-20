@@ -180,8 +180,8 @@ uart0_init(void) {
     u0tb = u0rb;	
     u0tb = 0;			
         
-    s0ric = 0x02;   // Receive interrupt
-    s0tic = 0x01;   // Send interrupt
+    s0ric = 0x04;   // Receive interrupt
+    s0tic = 0x05;   // Send interrupt
 
     TX0s = PF_UART;
     TX0d = PD_OUTPUT;
