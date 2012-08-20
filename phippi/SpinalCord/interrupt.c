@@ -38,17 +38,25 @@ s_int(void) {
     // We may want to do something once per second in main loop
     // so we set flag to indicate when to do.
     ticks++;
-    if(ticks % 100 == 0) {
+    switch(ticks % 100) {
+    case 0:
         status.sek_flag=1;
-        if(buzzer) {
+        if(buzzer || bat < 6.6) {
             // This turns on PWM on buzzer
             ta4=1;
         }
-    } else if(ticks % 100 == 1  ) {
-        // Turn off buzzer
-        ta4=0;
+        break;
+    case 1:  
+        if(bat>6.3) { // If battery is not dead yet 
+            ta4=0; // Turn off buzzer
+        }
+        break;
+    case 50:  
+        if(bat>6.1) { // If battery is not dead yet 
+            ta4=0; // Turn off buzzer
+        }
+        break;
     }
-  
     
     if(JOY_RIGHT == 0) {
 //      OLED_Set_Display_Mode(0x03);                           // Inverse display
@@ -144,9 +152,9 @@ s_int(void) {
     }
 #endif    
        
-     if(ticks % 48 == 1  ) {
+/*     if(ticks % 48 == 1  ) {
          ta4=0;
-    }    
+    }*/    
 }
 
 #if 0

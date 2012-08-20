@@ -40,6 +40,7 @@ int pwm[2]={0,0};
 int pwmtarget[2]={0,0};
 int lastpwm=0;
 int buzzer=1; // If audible heartbeas is on
+float bat=999.0f;
 
 void updateOLED1 () {
     OLED_Show_String(  1, "Panda is", 0, 0*8);
@@ -106,7 +107,7 @@ main(void) {
         uDelay(255); 
     }
     u4tb=0xAA;
-    accelerometer_write_reg( MMA7455L_REG_I2CAD ); 
+    accelerometer_write_reg( MMA7455L_REG_I2CAD); 
     CS6=0;
     u6tb=L3G4200D_WHOAMI | 0x80;
 //    wdc7=0; // Wait ~20ms before reset
@@ -181,7 +182,7 @@ main(void) {
             } else if(strncmp(command,"reset",5)==0) {
                 sprintf(buf,"RESETTING BOARD");
                 write(buf);              
-                asm("jmp 0xfffffffc");            
+                asm("jmp 0xffffffff");            
             } else if(strncmp(command,"panda ",6)==0) {
                 int tmp;
                 for(tmp=0,tok = strtok(command," "); tok && tmp<=2 ; tok=strtok(0," "),tmp++) {
@@ -300,7 +301,7 @@ main(void) {
         ad[1]=AD01 & 0x3FF;
         ad[2]=AD02 & 0x3FF;
         ad[3]=AD03 & 0x3FF;
-        float bat=(float)ad[3]*(13.64/0x3FF);
+        bat=(float)ad[3]*(13.64/0x3FF);
         float capacitor=(float)ad[2]/2.27333333 ; // 0x3FF/450V
         write(VT100CURSORAD);
         sprintf(buf,"(L motor %.1fA) ", (float)ad[0]/50.0 );
@@ -339,9 +340,9 @@ main(void) {
           CHARGE=0; // Turn off CHARGE pin
         }
         if(errorflag) {
-        //  ERRORLED=1; 
+          ERRORLED=1;
         } else {
-        //  ERRORLED=0; 
+          ERRORLED=0; 
         } 
         
     }

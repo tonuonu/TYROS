@@ -51,7 +51,6 @@ extern int pwmtarget[2];
 extern int accok, accwhoami; 
 extern int accwhoamistatus;
 
-
 extern unsigned char gyrowhoami;
 extern signed int gyrox,gyroy,gyroz;
 extern signed char gyrotemp;
@@ -60,6 +59,7 @@ extern char mlx1data1;
 extern char mlx1data2;
 extern int mlx1whoamistatus;
 extern int buzzer;
+extern float bat;
 /*
  * IAR-HEW compatibility 
  */
