@@ -45,7 +45,7 @@ SPI6_Init(void) {
 #define	f1_CLK_SPEED 24000000
     // 10MHz max clock
 //    u6brg = (unsigned char)(((f1_CLK_SPEED)/(2*5000000))-1);
-    u6brg = (unsigned char)(((f1_CLK_SPEED)/(2*1000000))-1);
+    u6brg = (unsigned char)(((f1_CLK_SPEED)/(2*2000000))-1);
 
     CS6d = PD_OUTPUT;
     CS6=1; // CS is high, means disabled
@@ -99,7 +99,7 @@ SPI6_Init(void) {
     u6smr4 = 0x00;       
     
     DISABLE_IRQ
-    ilvl_s6ric =0x04;       
+    ilvl_s6ric =0x02;       
     ir_s6ric   =0;            
     ENABLE_IRQ
     pu11 = 1; // gyro RX interface needs pullup on RX6 or p4_6

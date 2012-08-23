@@ -30,6 +30,28 @@
 #include "SPI.h"
 #include "mma7455l.h"
 
+int todocase=0;
+
+#pragma vector=TIMER_A0
+__interrupt void
+oneshot1(void) {
+    ERRORLED=0;
+    CS7=0;
+    uDelay(6); // t6, 10+uS on scope, 6.9 required
+    u7tb=0xAA;
+    mlx2whoamistatus=0;
+    ir_ta0ic = 0;
+}
+
+#pragma vector=TIMER_A3
+__interrupt void
+oneshot2(void) {
+    CS4=0;
+    uDelay(6); // t6, 10+uS on scope, 6.9 required
+    u4tb=0xAA;
+    mlx1whoamistatus=0;
+    ir_ta3ic = 0;
+}
 
 #pragma vector=TIMER_B5
 __interrupt void
@@ -38,17 +60,25 @@ s_int(void) {
     // We may want to do something once per second in main loop
     // so we set flag to indicate when to do.
     ticks++;
-    if(ticks % 100 == 0) {
+    switch(ticks % 100) {
+    case 0:
         status.sek_flag=1;
-        if(buzzer) {
+        if(buzzer || bat < 6.6) {
             // This turns on PWM on buzzer
             ta4=1;
         }
-    } else if(ticks % 100 == 1  ) {
-        // Turn off buzzer
-        ta4=0;
+        break;
+    case 1:  
+        if(bat>6.3 || bat < 4.0) { // If battery is not dead yet 
+            ta4=0; // Turn off buzzer
+        }
+        break;
+    case 50:  
+        if(bat>6.1 ) { // If battery is not dead yet 
+            ta4=0; // Turn off buzzer
+        }
+        break;
     }
-  
     
     if(JOY_RIGHT == 0) {
 //      OLED_Set_Display_Mode(0x03);                           // Inverse display
@@ -144,9 +174,9 @@ s_int(void) {
     }
 #endif    
        
-     if(ticks % 48 == 1  ) {
+/*     if(ticks % 48 == 1  ) {
          ta4=0;
-    }    
+    }*/    
 }
 
 #if 0

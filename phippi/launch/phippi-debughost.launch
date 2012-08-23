@@ -1,9 +1,6 @@
 <launch>
-
-
-  <node pkg="image_view" type="image_view" name="mycamtest" respawn="true" >
+    <node pkg="image_view" type="image_view" name="mycamtest" respawn="true" >
          <remap from="image" to="/mycam/image_raw"/>
-  </node>
-
+    </node>
 </launch>
 

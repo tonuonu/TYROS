@@ -216,7 +216,6 @@ void HardwareSetup(void);
 #define BUZZERs     p3_6s
 
 #define TIMERB2COUNT	2000 // about 12,5kHz
-#define TIMER4COUNT	100
 
 #define SPI_DELAY (50)
 

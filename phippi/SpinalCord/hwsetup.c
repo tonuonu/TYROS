@@ -297,20 +297,6 @@ CapacitorCharger_Init(void) {
 static void 
 Analog_Init(void) {
 
-    AN00s = PF_ANALOG;
-    AN01s = PF_ANALOG;
-    AN02s = PF_ANALOG;
-    AN03s = PF_ANALOG;
-
-    AN00d = PD_INPUT;
-    AN01d = PD_INPUT;
-    AN02d = PD_INPUT;
-    AN03d = PD_INPUT;
-
-    AN00 = 0;
-    AN01 = 0;
-    AN02 = 0;
-    AN03 = 0;
     
     ch0_ad0con0  = 0; // does not matter in sweep mode       
     ch1_ad0con0  = 0; // does not matter in sweep mode           
@@ -331,12 +317,10 @@ Analog_Init(void) {
     opa1_ad0con1  = 0; // External op amp not used
 
 
-    smp_ad0con2  = 1; // with sample and hold
+    smp_ad0con2  = 0; // with sample and hold
     aps0_ad0con2 = 0; // an_0 to an_7
     aps1_ad0con2 = 0; // an_0 to an_7
     trg0_ad0con2 = 0; // does not matter
- 
-    
 
     dus_ad0con3    = 0; // no DMA
     mss_ad0con3    = 0; // not multi-port sweep mode
@@ -345,16 +329,61 @@ Analog_Init(void) {
     msf1_ad0con3   = 0; // multi port sweep status flag. Disabled.
 //        ad0con3 = 0x00; 
     /* Setting A/D0 control register3
-                                        Disable DMAC operating mode
-                                        AD frequency set fAD/2
-                                        */
-   ad0con4 = 0;     
+       Disable DMAC operating mode
+       AD frequency set fAD/2
+    */
+    ad0con4 = 0;     
+    AN00s = PF_ANALOG;
+    AN01s = PF_ANALOG;
+    AN02s = PF_ANALOG;
+    AN03s = PF_ANALOG;
+
+    AN00d = PD_INPUT;
+    AN01d = PD_INPUT;
+    AN02d = PD_INPUT;
+    AN03d = PD_INPUT;
+
+    AN00 = 0;
+    AN01 = 0;
+    AN02 = 0;
+    AN03 = 0;
+
 }
 
 static void 
 Joy_Init(void) {
     pu02 = 1; // P1_0 to P1_3 Pull-up Control Bit
     pu03 = 1; // P1_4 to P1_7 Pull-up Control Bit
+}
+
+static void
+Oneshot_Init(void) {
+    // Timer 0 for SPI7
+  
+    tmod0_ta0mr = 0; // One shot timer mode
+    tmod1_ta0mr = 1; // One shot timer mode
+    tck0_ta0mr  = 0; // f1 clock source    
+    tck1_ta0mr  = 1; // f1 clock source    
+    mr2_ta0mr   = 0; // Start on ta0os bit
+    ta0         = 1;
+    ta0s  = 5; // start counter
+    DISABLE_IRQ
+    ilvl_ta0ic =0x04;       
+    ir_ta0ic   =0;            
+    ENABLE_IRQ
+      
+    // Timer 3 for SPI4
+    tmod0_ta3mr = 0; // One shot timer mode
+    tmod1_ta3mr = 1; // One shot timer mode
+    tck0_ta3mr  = 0; // f1 clock source    
+    tck1_ta3mr  = 1; // f1 clock source    
+    mr2_ta3mr   = 0; // Start on ta0os bit
+    ta3         = 1;
+    ta3s  = 5; // start counter
+    DISABLE_IRQ
+    ilvl_ta3ic =0x04;       
+    ir_ta3ic   =0;            
+    ENABLE_IRQ
 }
 
 void
@@ -385,6 +414,7 @@ HardwareSetup(void) {
     ENABLE_IRQ;
     Analog_Init();
     PWM_Init();
+    Oneshot_Init();
 }
 
 

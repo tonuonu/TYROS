@@ -39,13 +39,10 @@ char command[TX_BUFF_SIZE]="";
 unsigned short tx0_ptr = 0;
 volatile unsigned short tx0_ptrr = 0;
 
-char rx8_buff[RX_BUFF_SIZE];
-unsigned short rx8_ptr = 0;
 char rx0_buff[RX_BUFF_SIZE];
 unsigned short rx0_ptr = 0;
 
 #define	f1_CLK_SPEED	base_freq
-
 
 int putchar (int i ) {
     if( tx0_ptr == tx0_ptrr) { 
@@ -63,8 +60,7 @@ int putchar (int i ) {
 }
 
 #pragma vector = UART0_TX
-__interrupt void _uart0_transmit(void)
-{
+__interrupt void _uart0_transmit(void) {
     if( tx0_ptr != tx0_ptrr) {
         u0tb = (short) tx0_buff[tx0_ptrr++];
         if ( tx0_ptrr >= TX_BUFF_SIZE ) 
@@ -77,10 +73,7 @@ __interrupt void _uart0_receive(void) {
     if (rx0_ptr >= RX_BUFF_SIZE) {
         rx0_ptr = RX_BUFF_SIZE-1;
     }
-    while(ri_u0c1 == 0) {
-        /* Make sure that the receive is complete */
-    }
-
+    
     /* Read the received data */
     U0_in = (unsigned char)u0rb;
     switch(U0_in) {
@@ -88,11 +81,8 @@ __interrupt void _uart0_receive(void) {
         rx0_buff[rx0_ptr]=0;
         strcpy(command,rx0_buff);
         rx0_ptr=0;
-        write(VT100CURSORRESTORE);
         putchar(0x0a);
         putchar(0x0d);
-        write(VT100CURSORSAVE);
-
         break;
     case 127:
         rx0_ptr--;
@@ -101,13 +91,10 @@ __interrupt void _uart0_receive(void) {
     default:
        rx0_buff[rx0_ptr]= U0_in;
        rx0_ptr++;
-       write(VT100CURSORRESTORE);
        putchar(U0_in);
-       write(VT100CURSORSAVE);
        break;
     }
 }
-
 
 #if 0
 #pragma vector = UART5_TX
@@ -186,15 +173,15 @@ uart0_init(void) {
     ti_u0c1    = 0; // Transmit buffer empty flag
     re_u0c1    = 1; // Set the bit to 1 to enable data reception
     ri_u0c1    = 0; // Receive complete flag
-    u0irs_u0c1 = 0; // Select a source for the UARTi transmit interrupt
+    u0irs_u0c1 = 1; // Interrupt  when transmission is completed. 
     u0rrm_u0c1 = 0; // Set the bit to 1 to use continuous receive mode
     u0lch_u0c1 = 0; // Set the bit to 1 to use logic inversion
     
     u0tb = u0rb;	
     u0tb = 0;			
         
-    s0ric = 0x02;   // Receive interrupt
-    s0tic = 0x01;   // Send interrupt
+    s0ric = 0x04;   // Receive interrupt
+    s0tic = 0x05;   // Send interrupt
 
     TX0s = PF_UART;
     TX0d = PD_OUTPUT;

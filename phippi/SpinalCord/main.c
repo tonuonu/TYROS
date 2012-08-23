@@ -40,6 +40,7 @@ int pwm[2]={0,0};
 int pwmtarget[2]={0,0};
 int lastpwm=0;
 int buzzer=1; // If audible heartbeas is on
+float bat=999.0f;
 
 void updateOLED1 () {
     OLED_Show_String(  1, "Panda is", 0, 0*8);
@@ -99,19 +100,19 @@ main(void) {
     OLED_Fade_In();
     updateOLED1();    
     PANDA=1;
-    MELEXIS_EN=0; // Low is ON
+    MELEXIS_EN=0; // Low is ON, This is 5V LDO
+    CS4=0;
+    CS7=0;
     // 300uS needed. On 48Mhz each cycle is ~21nS, so
     // 300 000nS/21=~1200
     for(j=0;j<2;j++) {
         uDelay(255); 
     }
     u4tb=0xAA;
-    accelerometer_write_reg( MMA7455L_REG_I2CAD ); 
+    u7tb=0xAA;
+    accelerometer_write_reg( MMA7455L_REG_I2CAD); 
     CS6=0;
     u6tb=L3G4200D_WHOAMI | 0x80;
-//    wdc7=0; // Wait ~20ms before reset
-//    cm06=1; // Make Watchdog RESET, not just call inteerupt
-//    wdts=1; // Start Watchdog
     while (1) {
         int errorflag=0;
         char buf[256];
@@ -181,7 +182,11 @@ main(void) {
             } else if(strncmp(command,"reset",5)==0) {
                 sprintf(buf,"RESETTING BOARD");
                 write(buf);              
-                asm("jmp 0xfffffffc");            
+//                asm("jmp 0xfffffffc");       
+                asm("jmp 0xfcffffff");       
+//                asm("jmp 0xffff801c");
+//                asm("jmp 0x1c80ffff");
+                // 1c 80 ff ff
             } else if(strncmp(command,"panda ",6)==0) {
                 int tmp;
                 for(tmp=0,tok = strtok(command," "); tok && tmp<=2 ; tok=strtok(0," "),tmp++) {
@@ -245,17 +250,32 @@ main(void) {
             command[0]=0;
         }        
         
-#if 1
-        write(VT100CURSORMELEXISL);
-        write("Melexis L :");
+        write(VT100CURSORMELEXISR);
+        write("Melexis R :");
         sprintf(buf,"(%2d) ",mlx1whoamistatus);
         write(buf);
-        sprintf(buf,"%d %d",mlx1data1,mlx1data2);
+        sprintf(buf,"%1d ",mlx1status);
         write(buf);
-//        write(VT100CURSORMELEXISR);
-//        write("Melexis R :");
+        sprintf(buf,"%6d ",mlx1data);
+        write(buf);
+        write(VT100CURSORMELEXISL);
+        write("Melexis L :");
+        sprintf(buf,"(%2d) ",mlx2whoamistatus);
+        write(buf);
+        switch(mlx2status) {
+        case 1:
+            write("sensor err ");
+            break;          
+        case 2:
+            write("sensor ok  ");
+            break;          
+        case 3:
+            write("no sensor ");
+            break;          
+        }
+        sprintf(buf,"%6d ",mlx2data);
+        write(buf);
 
-#endif        
 
       /* Gyroscope */
 #if 1
@@ -300,7 +320,7 @@ main(void) {
         ad[1]=AD01 & 0x3FF;
         ad[2]=AD02 & 0x3FF;
         ad[3]=AD03 & 0x3FF;
-        float bat=(float)ad[3]*(13.64/0x3FF);
+        bat=(float)ad[3]*(13.64/0x3FF);
         float capacitor=(float)ad[2]/2.27333333 ; // 0x3FF/450V
         write(VT100CURSORAD);
         sprintf(buf,"(L motor %.1fA) ", (float)ad[0]/50.0 );
@@ -311,7 +331,7 @@ main(void) {
         write(buf);
         sprintf(buf,"(battery %.1fV) ", bat );
         write(buf);
-        if(bat<7.0) 
+        if(bat<6.8) 
           errorflag=1;
 #endif
 
@@ -339,9 +359,9 @@ main(void) {
           CHARGE=0; // Turn off CHARGE pin
         }
         if(errorflag) {
-        //  ERRORLED=1; 
+    //      ERRORLED=1;
         } else {
-        //  ERRORLED=0; 
+    //      ERRORLED=0; 
         } 
         
     }
