@@ -60,6 +60,7 @@ extern int mlx1whoamistatus;
 extern int mlx2whoamistatus;
 extern int buzzer;
 extern float bat;
+extern char mlx1status,mlx2status;
 /*
  * IAR-HEW compatibility 
  */

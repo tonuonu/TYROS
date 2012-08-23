@@ -356,6 +356,36 @@ Joy_Init(void) {
     pu03 = 1; // P1_4 to P1_7 Pull-up Control Bit
 }
 
+static void
+Oneshot_Init(void) {
+    // Timer 0 for SPI7
+  
+    tmod0_ta0mr = 0; // One shot timer mode
+    tmod1_ta0mr = 1; // One shot timer mode
+    tck0_ta0mr  = 0; // f1 clock source    
+    tck1_ta0mr  = 1; // f1 clock source    
+    mr2_ta0mr   = 0; // Start on ta0os bit
+    ta0         = 1;
+    ta0s  = 5; // start counter
+    DISABLE_IRQ
+    ilvl_ta0ic =0x04;       
+    ir_ta0ic   =0;            
+    ENABLE_IRQ
+      
+    // Timer 3 for SPI4
+    tmod0_ta3mr = 0; // One shot timer mode
+    tmod1_ta3mr = 1; // One shot timer mode
+    tck0_ta3mr  = 0; // f1 clock source    
+    tck1_ta3mr  = 1; // f1 clock source    
+    mr2_ta3mr   = 0; // Start on ta0os bit
+    ta3         = 1;
+    ta3s  = 5; // start counter
+    DISABLE_IRQ
+    ilvl_ta3ic =0x04;       
+    ir_ta3ic   =0;            
+    ENABLE_IRQ
+}
+
 void
 HardwareSetup(void) {
     /* 
@@ -384,6 +414,7 @@ HardwareSetup(void) {
     ENABLE_IRQ;
     Analog_Init();
     PWM_Init();
+    Oneshot_Init();
 }
 
 

@@ -40,6 +40,8 @@ unsigned char tmpmlx2data2;
 unsigned char tmpmlx2data3;
 unsigned char tmpmlx2data4;
 
+char mlx1status=0,mlx2status=0;
+
 void
 SPI4_Init(void) { // Right Melexis 90316
     /* 
@@ -118,8 +120,7 @@ SPI4_Init(void) { // Right Melexis 90316
 
 #pragma vector = UART4_RX
 __interrupt void _uart4_receive(void) {
-  ERRORLED=1;
-    int j;
+
   /* Used to reference a specific location in the array while string the
   received data.   */
   unsigned char b=u4rb; 
@@ -155,22 +156,22 @@ __interrupt void _uart4_receive(void) {
       uDelay(200); 
       if( tmpmlx1data1 == (unsigned char)~ tmpmlx1data3 &&  tmpmlx1data2 == (unsigned char)~ tmpmlx1data4) {
           if((tmpmlx1data2 & 3) == 2) { // error code, not angular data
-          //    mlx1data = 999;
+              mlx1status=1;
           } else {
+              mlx1status=2;
               mlx1data = ((unsigned int) tmpmlx1data1 << 6) | ((unsigned int) tmpmlx1data2 >>  2) ;
           }
+      } else {
+          mlx1status=3;
       }
       u4tb=0xFF;
       break;
   case 9:
       uDelay(25); // t4, 8+uS on scope, 6.9 required
       CS4=1;
-      for(j=0;j<25;j++)            
-          uDelay(255); // t5, 300/1500uS required, 1600 on scope
-      CS4=0;
-      uDelay(6); // t6, 10+uS on scope, 6.9 required
-      u4tb=0xAA;
-      mlx1whoamistatus=-1;
+      ERRORLED=1;
+      ta3  = 50*15; // Set timer 1500us or 1.5ms
+      ta3os = 1; // start timer
       break;
   default:        
       uDelay(200); // t2 and t7, 15uS/45uS required,  
@@ -251,8 +252,8 @@ SPI7_Init(void) { // Left Melexis 90316
 
 #pragma vector = UART7_RX
 __interrupt void _uart7_receive(void) {
-  ERRORLED=1;
-    int j;
+
+
   /* Used to reference a specific location in the array while string the
   received data.   */
   unsigned char b=u7rb; 
@@ -288,22 +289,22 @@ __interrupt void _uart7_receive(void) {
       uDelay(200); 
       if( tmpmlx2data1 == (unsigned char)~ tmpmlx2data3 &&  tmpmlx2data2 == (unsigned char)~ tmpmlx2data4) {
           if((tmpmlx2data2 & 3) == 2) { // error code, not angular data
-          //    mlx1data = 999;
+              mlx2status=1;
           } else {
               mlx2data = ((unsigned int) tmpmlx2data1 << 6) | ((unsigned int) tmpmlx2data2 >>  2) ;
+              mlx2status=2;
           }
+      } else {
+          mlx2status=3;
       }
       u7tb=0xFF;
       break;
   case 9:
       uDelay(25); // t4, 8+uS on scope, 6.9 required
       CS7=1;
-      for(j=0;j<25;j++)            
-          uDelay(255); // t5, 300/1500uS required, 1600 on scope
-      CS7=0;
-      uDelay(6); // t6, 10+uS on scope, 6.9 required
-      u7tb=0xAA;
-      mlx2whoamistatus=-1;
+      ERRORLED=1;
+      ta0  = 50*15; // Set timer 1500us or 1.5ms
+      ta0os = 1; // start timer
       break;
   default:        
       uDelay(200); // t2 and t7, 15uS/45uS required,  
