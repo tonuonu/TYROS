@@ -110,7 +110,7 @@ SPI4_Init(void) { // Right Melexis 90316
     
     pu27=1;
     DISABLE_IRQ
-    ilvl_s4ric =0x06;   
+    ilvl_s4ric =0x01;   
     ir_s4ric   =0;            
     ENABLE_IRQ
 
@@ -240,7 +240,7 @@ SPI7_Init(void) { // Left Melexis 90316
     u7brg = 0x60;                                             // (unsigned char)(((f1_CLK_SPEED)/(2*BIT_RATE))-1);
 
     DISABLE_IRQ
-    ilvl_s7ric =0x07;   
+    ilvl_s7ric =0x01;   
     ir_s7ric   =0;            
     ENABLE_IRQ
     
