@@ -96,58 +96,6 @@ __interrupt void _uart0_receive(void) {
     }
 }
 
-#if 0
-#pragma vector = UART5_TX
-__interrupt void _uart5_transmit(void)
-{
-    if( tx5_ptr != tx5_ptrr) {
-        u5tb = (short) tx5_buff[tx5_ptrr++];
-        if ( tx5_ptrr >= TX_BUFF_SIZE ) 
-            tx5_ptrr = 0;
-    }
-}
-#pragma vector = UART5_RX
-__interrupt void _uart5_receive(void) {
-    if (rx5_ptr >= RX_BUFF_SIZE) {
-        rx5_ptr = RX_BUFF_SIZE-1;
-    }
-    while(ri_u5c1 == 0) {
-        /* Make sure that the receive is complete */
-    }
-
-    /* Read the received data */
-    U5_in = (unsigned char)u5rb;
-    switch(U5_in) {
-    case 13:
-        rx5_buff[rx5_ptr]=0;
-        strcpy(command,rx5_buff);
-        rx5_ptr=0;
-        write(VT100CURSORRESTORE);
-        putchar(0x0a);
-        putchar(0x0d);
-        write(VT100CURSORSAVE);
-
-        break;
-    case 127:
-        rx5_ptr--;
-        rx5_buff[rx5_ptr]= 0;
-        break;
-    default:
-       rx5_buff[rx5_ptr]= U5_in;
-       rx5_ptr++;
-       write(VT100CURSORRESTORE);
-       putchar(U5_in);
-       write(VT100CURSORSAVE);
-
-       break;
-    }
-}
-
-#endif
-
-
-
-
 void 
 uart0_init(void) {
     u0brg = (f1_CLK_SPEED / 16 / 115200) - 1;	
@@ -187,48 +135,7 @@ uart0_init(void) {
     TX0d = PD_OUTPUT;
     RX0s = PF_UART;
 }
-#if 0
-void 
-uart5_init(void) {
-    u5brg = (f1_CLK_SPEED / 16 / 115200) - 1;	
-//   u5brg = (f1_CLK_SPEED / 16 / 9600) - 1;	
 
-    smd0_u5mr  = 1;  // 8 bit character lenght
-    smd1_u5mr  = 0;  // 8 bit character lenght
-    smd2_u5mr  = 1;  // 8 bit character lenght
-    ckdir_u5mr = 0; // internal clock
-    stps_u5mr  = 0; // Stop bit length 0
-    prye_u5mr  = 0; // parity not enabled
-    pry_u5mr   = 0; // parity not enabled
-    iopol_u5mr = 0; // IO polarity is normal
-
-    clk0_u5c0  = 0; // clock source f1
-    clk1_u5c0  = 0; // clock source f1
-    txept_u5c0 = 0; // Transmit register empty flag
-    crd_u5c0   = 1; // CTS disabled
-    nch_u5c0   = 0; // Select an output mode of the TXDi pin??
-    ckpol_u5c0 = 0; // Select a transmit/receive clock polarity
-    uform_u5c0 = 0; // Select either LSB first or MSB first
-
-    te_u5c1    = 1; // Set the bit to 1 to enable data transmission/reception
-    ti_u5c1    = 0; // Transmit buffer empty flag
-    re_u5c1    = 1; // Set the bit to 1 to enable data reception
-    ri_u5c1    = 0; // Receive complete flag
-    u5irs_u5c1 = 0; // Select a source for the UARTi transmit interrupt
-    u5rrm_u5c1 = 0; // Set the bit to 1 to use continuous receive mode
-    u5lch_u5c1 = 0; // Set the bit to 1 to use logic inversion
-    
-    u5tb = u5rb;	
-    u5tb = 0;			
-        
-    s5ric = 0x02;   // Receive interrupt
-    s5tic = 0x01;   // Send interrupt
-
-    TX5s = PF_UART;
-    TX5d = PD_OUTPUT;
-    RX5s = PF_UART;
-}
-#endif
 void 
 uart8_init(void) {
         u8brg = (f1_CLK_SPEED / 16 / 9600) - 1;
@@ -244,21 +151,6 @@ uart8_init(void) {
 	u8c1 = 0x05;
 }
 
-
-void 
-putchar5hexnr (unsigned char d) {
-    if (d> 9) {
-        d+=7;
-    }
-    putchar(d+'0');
-}
-
-void 
-puthex ( unsigned char d) {
-    putchar5hexnr( d>>4 );
-    putchar5hexnr(d&0x0F);
-}
-
 void write(char *c) {
    char *ptr=c;
    while(*ptr)
@@ -270,16 +162,6 @@ void writeln(char *c) {
    putchar(0x0a);
    putchar(0x0d);
 }    
-
-
-
-void 
-uart8_send ( unsigned char d) {
-    while(ti_u8c1 == 0) {
-        NOP();
-    }
-    u8tb = (short)d;
-}
 
 void 
 uart7_send(unsigned char d) {

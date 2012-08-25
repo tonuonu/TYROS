@@ -102,7 +102,6 @@ SPI2_Init(void) { // Accel sensor
     ilvl_s2ric =0x02;       
     ir_s2ric   =0;            
     ENABLE_IRQ
- 
 }
 
 void
