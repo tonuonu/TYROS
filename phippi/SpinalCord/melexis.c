@@ -272,18 +272,18 @@ __interrupt void _uart7_receive(void) {
   switch(mlx2whoamistatus) {
   case 2:
       tmpmlx2data1=(int)b;
-      uDelay(200); 
-      u7tb=0xFF;
+      ta0  = 25; // Set timer 50us 
+      ta0os = 1; // start timer
       break;
   case 3:
       tmpmlx2data2=(int)b;
-      uDelay(200); 
-      u7tb=0xFF;
+      ta0  = 25; // Set timer 50us 
+      ta0os = 1; // start timer
       break;
   case 4:
       tmpmlx2data3=(int)b;
-      uDelay(200); 
-      u7tb=0xFF;
+      ta0  = 25; // Set timer 50us 
+      ta0os = 1; // start timer
       break;
   case 5:
       tmpmlx2data4=(int)b;
@@ -298,7 +298,6 @@ __interrupt void _uart7_receive(void) {
 //            int x =((16384 + 0        - 1  )% 16384) 16383
 //            int x =((16384 + 1        - 0  )% 16384) 1
 //            int x =((16384 + 100      - 200)% 16384) 16284
-                      
               if(x < (16384/2)) {
                   revolutions+= (float)x/(16384.0f);  
               } else {
@@ -313,17 +312,20 @@ __interrupt void _uart7_receive(void) {
       }
       u7tb=0xFF;
       break;
-  case 9:
+  case 6:
       uDelay(25); // t4, 8+uS on scope, 6.9 required
       CS7=1;
-      ERRORLED=1;
       ta0  = 50*15; // Set timer 1500us or 1.5ms
       ta0os = 1; // start timer
       break;
-  default:        
-      uDelay(200); // t2 and t7, 15uS/45uS required,  
-      u7tb=0xFF;
-  } 
+  default:   
+      if(mlx2whoamistatus==1) // no need for delay
+          u7tb=0xFF;
+      else {
+          ta0  = 25; // Set timer 50us 
+          ta0os = 1; // start timer
+      }
+  }
   mlx2whoamistatus++;
 
   /* Clear the 'reception complete' flag. */

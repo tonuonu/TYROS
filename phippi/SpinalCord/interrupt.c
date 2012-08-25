@@ -35,22 +35,28 @@ int todocase=0;
 #pragma vector=TIMER_A0
 __interrupt void
 oneshot1(void) {
-    ERRORLED=0;
+  switch(mlx2whoamistatus) {
+  case 6+1:
     CS7=0;
     uDelay(6); // t6, 10+uS on scope, 6.9 required
     u7tb=0xAA;
     mlx2whoamistatus=0;
+    break;
+  default:
+    u7tb=0xFF;
+  }   
     ir_ta0ic = 0;
 }
 
 #pragma vector=TIMER_A3
 __interrupt void
 oneshot2(void) {
+  
     CS4=0;
     uDelay(6); // t6, 10+uS on scope, 6.9 required
     u4tb=0xAA;
     mlx1whoamistatus=0;
-    ir_ta3ic = 0;
+  ir_ta3ic = 0;
 }
 
 #pragma vector=TIMER_B5
