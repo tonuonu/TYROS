@@ -129,7 +129,7 @@ __interrupt void _uart4_receive(void) {
   2 bytes sent to chip - AA, FF
   2 bytes responded with data
   2 bytes of same data inverted responded
-  4 bytes of 0xFF
+  4 bytes of 0xFF (we ignore them)
   10 in total.
   From state machine perspective 0 and 1 are AA,FF
   The 2 and 3 contain some data, rest can be jsut ignored
@@ -181,8 +181,6 @@ __interrupt void _uart4_receive(void) {
       }
   } 
   mlx1whoamistatus++;
-
-  /* Clear the 'reception complete' flag. */
   ir_s4ric = 0;
   
 }
@@ -208,13 +206,11 @@ SPI7_Init(void) { // Left Melexis 90316
     stps_u7mr  = 0;                                        // 0=1 stop bit, 0 required
     pry_u7mr   = 0;                                        // Parity, 0=odd, 0 required 
     prye_u7mr  = 0;                                        // Parity Enable? 0=disable, 0 required 
-//    iopol_u7mr = 0;                                        // IO Polarity, 0=not inverted, 0 required
 
     clk0_u7c0 = 0;                                         // Clock source f1 for u4brg
     clk1_u7c0 = 0;                                         // 
     txept_u7c0 = 0;                                        // Transmit register empty flag 
     crd_u7c0 = 1;                                          // CTS disabled when 1
-//    nch_u7c0 = 1;                                          // 0=Output mode "open drain" for TXD and CLOCK pin 
     ckpol_u7c0 = 1;                                        // CLK Polarity 
     uform_u7c0 = 1;                                        // 1=MSB first
 
@@ -224,31 +220,12 @@ SPI7_Init(void) { // Left Melexis 90316
     ri_u7c1 = 0;                                           // Receive complete flag - U4RB is empty.
     u7irs = 1;                                        // Interrupt  when transmission  is completed, U4TB is empty. 
     u7rrm = 0;                                        // Continuous receive mode off
-#if 0
-    // All "undefined" errors here
-    u7lch = 0;                                        // Logical inversion off 
-
-    u7smr = 0x00;                                          // Set 0 
-    u7smr2 = 0x00;                                         // Set 0 
-
-    sse_u7smr3 = 0;                                        // SS is disabled when 0
-    ckph_u7smr3 = 0;                                       // Non clock delayed 
-    dinc_u7smr3 = 0;                                       // Master mode when 0
-    nodc_u7smr3 = 0;                                       // Select a clock output  mode "push-pull" when 0 
-    err_u7smr3 = 0;                                        // Error flag, no error when 0 
-    dl0_u7smr3 = 0;                                        // Set 0 for no  delay 
-    dl1_u7smr3 = 0;                                        // Set 0 for no  delay 
-    dl2_u7smr3 = 0;                                        // Set 0 for no  delay 
-    u7smr4 = 0x00;                                         // Set 0. u4c0 must be set before this function
-#endif
     u7brg = 0x60;                                             // (unsigned char)(((f1_CLK_SPEED)/(2*BIT_RATE))-1);
 
     DISABLE_IRQ
     ilvl_s7ric =0x01;   
     ir_s7ric   =0;            
-    ENABLE_IRQ
-    
-    
+    ENABLE_IRQ 
 
 }
 
