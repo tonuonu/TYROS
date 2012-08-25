@@ -138,18 +138,18 @@ __interrupt void _uart4_receive(void) {
   switch(mlx1whoamistatus) {
   case 2:
       tmpmlx1data1=(int)b;
-      uDelay(200); 
-      u4tb=0xFF;
+      ta3  = 25; // Set timer 50us 
+      ta3os = 1; // start timer
       break;
   case 3:
       tmpmlx1data2=(int)b;
-      uDelay(200); 
-      u4tb=0xFF;
+      ta3  = 25; // Set timer 50us 
+      ta3os = 1; // start timer
       break;
   case 4:
       tmpmlx1data3=(int)b;
-      uDelay(200); 
-      u4tb=0xFF;
+      ta3  = 25; // Set timer 50us 
+      ta3os = 1; // start timer
       break;
   case 5:
       tmpmlx1data4=(int)b;
@@ -166,16 +166,19 @@ __interrupt void _uart4_receive(void) {
       }
       u4tb=0xFF;
       break;
-  case 9:
+  case 6:
       uDelay(25); // t4, 8+uS on scope, 6.9 required
       CS4=1;
-      ERRORLED=1;
       ta3  = 50*15; // Set timer 1500us or 1.5ms
       ta3os = 1; // start timer
       break;
-  default:        
-      uDelay(200); // t2 and t7, 15uS/45uS required,  
-      u4tb=0xFF;
+  default:   
+      if(mlx2whoamistatus==1) // no need for delay
+          u4tb=0xFF;
+      else {
+          ta3  = 25; // Set timer 50us 
+          ta3os = 1; // start timer
+      }
   } 
   mlx1whoamistatus++;
 

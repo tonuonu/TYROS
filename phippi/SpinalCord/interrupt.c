@@ -51,11 +51,16 @@ oneshot1(void) {
 #pragma vector=TIMER_A3
 __interrupt void
 oneshot2(void) {
-  
+  switch(mlx1whoamistatus) {
+  case 6+1:
     CS4=0;
     uDelay(6); // t6, 10+uS on scope, 6.9 required
     u4tb=0xAA;
     mlx1whoamistatus=0;
+    break;
+  default:
+    u4tb=0xFF;
+  }   
   ir_ta3ic = 0;
 }
 

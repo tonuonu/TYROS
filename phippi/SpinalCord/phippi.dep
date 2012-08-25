@@ -149,6 +149,10 @@
           <name>ICCR32C</name>
           <file> 53 30 15 23 22 16 33 20 29 38 18 1 37 46 17 45 50</file>
         </tool>
+        <tool>
+          <name>BICOMP</name>
+          <file> 53 30 15 23 22 33 20 29 38 18 1 37 46 17 45 50</file>
+        </tool>
       </inputs>
     </file>
     <file>
