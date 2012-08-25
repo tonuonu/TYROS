@@ -249,6 +249,7 @@ SPI7_Init(void) { // Left Melexis 90316
 
 }
 
+float revolutions;
 
 #pragma vector = UART7_RX
 __interrupt void _uart7_receive(void) {
@@ -291,8 +292,21 @@ __interrupt void _uart7_receive(void) {
           if((tmpmlx2data2 & 3) == 2) { // error code, not angular data
               mlx2status=1;
           } else {
-              mlx2data = ((unsigned int) tmpmlx2data1 << 6) | ((unsigned int) tmpmlx2data2 >>  2) ;
+              int tmp = ((unsigned int) tmpmlx2data1 << 6) | ((unsigned int) tmpmlx2data2 >>  2) ;
+              int x =((16384 + mlx2data - tmp )% 16384);
+//            int x =((16384 + 0        - 0  )% 16384) 0
+//            int x =((16384 + 0        - 1  )% 16384) 16383
+//            int x =((16384 + 1        - 0  )% 16384) 1
+//            int x =((16384 + 100      - 200)% 16384) 16284
+                      
+              if(x < (16384/2)) {
+                  revolutions+= (float)x/(16384.0f);  
+              } else {
+                  revolutions-= (float)(16384-x)/(16384.0f);
+              }
+                
               mlx2status=2;
+              mlx2data = tmp;
           }
       } else {
           mlx2status=3;

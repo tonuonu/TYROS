@@ -260,10 +260,10 @@ main(void) {
         write(buf);
         write(VT100CURSORMELEXISL);
         write("Melexis L :");
-        sprintf(buf,"(%2d) (%3u %3u %3u %3u) ",
+        sprintf(buf,"(%2d) (%3u %3u %3u %3u) %f ",
                 (unsigned char)mlx2whoamistatus, 
                 (unsigned char)tmpmlx2data1,(unsigned char)tmpmlx2data2,
-                (unsigned char)~tmpmlx2data3,(unsigned char)~tmpmlx2data4);
+                (unsigned char)~tmpmlx2data3,(unsigned char)~tmpmlx2data4,revolutions);
         write(buf);
         switch(mlx2status) {
         case 1:
