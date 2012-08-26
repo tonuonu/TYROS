@@ -68,8 +68,11 @@ extern unsigned char get_uart5(void);
 #define VT100CURSORBALL       "\x1b" "[06;1H"  // Set cursor to nullpoint
 #define VT100CURSORPANDA      "\x1b" "[07;1H"  // Set cursor to nullpoint
 #define VT100CURSORCHARGER    "\x1b" "[08;1H"  // Set cursor to nullpoint
-#define VT100CURSORAD         "\x1b" "[09;1H"  // Set cursor to nullpoint
+#define VT100CURSORBATTERY    "\x1b" "[09;1H"  // Set cursor to nullpoint
 #define VT100CURSORGYRO       "\x1b" "[10;1H"  // Set cursor to nullpoint
+#define VT100CURSORLEFTMOTOR  "\x1b" "[11;1H"  // Set cursor to nullpoint
+#define VT100CURSORRIGHTMOTOR "\x1b" "[12;1H"  // Set cursor to nullpoint
+#define VT100CURSORCAPACITOR  "\x1b" "[12;1H"  // Set cursor to nullpoint
 #define VT100CURSORPROMPT     "\x1b" "[14;1H"  // Set cursor to nullpoint
 #define VT100CURSORACC        "\x1b" "[11;1H"  // Set cursor to nullpoint
 #define VT100SCROLLSCREEN     "\x1b" "[15;40r" // Enable scrolling from row {start} to row {end}.

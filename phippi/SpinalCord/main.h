@@ -67,7 +67,8 @@ extern unsigned char tmpmlx2data2;
 extern unsigned char tmpmlx2data3;
 extern unsigned char tmpmlx2data4;
 
-extern float revolutions;
+extern float revolutions1;
+extern float revolutions2;
 /*
  * IAR-HEW compatibility 
  */

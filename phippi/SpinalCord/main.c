@@ -258,39 +258,19 @@ main(void) {
         write(buf);
         sprintf(buf,"%6d ",mlx1data);
         write(buf);
-        write(VT100CURSORMELEXISL);
-        write("Melexis L :");
-        sprintf(buf,"(%2d) (%3u %3u %3u %3u) %f ",
-                (unsigned char)mlx2whoamistatus, 
-                (unsigned char)tmpmlx2data1,(unsigned char)tmpmlx2data2,
-                (unsigned char)~tmpmlx2data3,(unsigned char)~tmpmlx2data4,revolutions);
-        write(buf);
-        switch(mlx2status) {
-        case 1:
-            write("sensor err ");
-            break;          
-        case 2:
-            write("sensor ok  ");
-            break;          
-        case 3:
-            write("no sensor ");
-            break;          
-        }
-        sprintf(buf,"%6d ",mlx2data);
-        write(buf);
 
 
       /* Gyroscope */
 #if 1
         write(VT100CURSORGYRO);
-        write("Gyro: ");
-        sprintf(buf,"(%2d) ",gyrowhoamistatus);
-        write(buf);
+        write("Gyroscope: ");
+//        sprintf(buf,"(%2d) ",gyrowhoamistatus);
+//        write(buf);
 // From 1/(0xFFFF/250dps)
         // http://www.wolframalpha.com/input/?i=1%2F%280xFFFF%2F250%29+degrees+in+radians
 #define GYRORATE (6.658e-5)
 //        if(accok && accwhoami==85) {
-            sprintf(buf,"whoami %3u temp %4d x:%8.5f y:%8.5f z:%8.5f",gyrowhoami,35-gyrotemp,gyrox*GYRORATE,gyroy*GYRORATE,gyroz*GYRORATE);
+            sprintf(buf,"x:%8.5f y:%8.5f z:%8.5f",gyrox*GYRORATE,gyroy*GYRORATE,gyroz*GYRORATE);
             write(buf);
 //        } else {
 //            write("ERROR");
@@ -300,17 +280,17 @@ main(void) {
 #if 1
         write(VT100CURSORACC);
         write("Acceleration: ");
-        sprintf(buf,"(%2d) ",accwhoamistatus);
-        write(buf);
+ //       sprintf(buf,"(%2d) ",accwhoamistatus);
+ //       write(buf);
 
 //        if(accok && accwhoami==85) {
         if(acccalcnt<CALIBRATIONSAMPLES) {
-            sprintf(buf,"whoami %2d CALIBRATING",accwhoami);
+ //           sprintf(buf,"whoami %2d CALIBRATING",accwhoami);
         } else {
           // http://www.wolframalpha.com/input/?i=G+to+m%2Fs2
           // Whole 8bit range is +-2G, so each unit is 4/256 G-s
           // Each G is 9.809 m/s2
-          sprintf(buf,"whoami %2d x:%8.4f y:%8.4f z:%8.4f temp:%4d",accwhoami,4.0*9.807/256.0*accx,4.0*9.807/256.0*accy,4.0*9.807/256.0*accz,acctout);
+          sprintf(buf,"x:%8.4f y:%8.4f z:%8.4f",4.0*9.807/256.0*accx,4.0*9.807/256.0*accy,4.0*9.807/256.0*accz);
         }
             write(buf);
 //        } else {
@@ -325,15 +305,46 @@ main(void) {
         ad[3]=AD03 & 0x3FF;
         bat=(float)ad[3]*(13.64/0x3FF);
         float capacitor=(float)ad[2]/2.27333333 ; // 0x3FF/450V
-        write(VT100CURSORAD);
-        sprintf(buf,"(L motor %.1fA) ", (float)ad[0]/50.0 );
+        write(VT100CURSORCAPACITOR);
+        sprintf(buf,"Capacitor: %3.0f V", capacitor);
         write(buf);
-        sprintf(buf,"(R motor %.1fA) ", (float)ad[1]/50.0 );
+        write(VT100CURSORBATTERY);
+        sprintf(buf,"Battery: %3.1f V", bat );
         write(buf);
-        sprintf(buf,"(Capacitor %.0fV) ", capacitor);
+        write(VT100CURSORLEFTMOTOR);
+        sprintf(buf,"Left motor: %4.1fA ", (float)ad[0]/50.0 );
         write(buf);
-        sprintf(buf,"(battery %.1fV) ", bat );
+/*        
+        sprintf(buf,"(%2d) (%3u %3u %3u %3u) %f ",
+                (unsigned char)mlx2whoamistatus, 
+                (unsigned char)tmpmlx2data1,(unsigned char)tmpmlx2data2,
+                (unsigned char)~tmpmlx2data3,(unsigned char)~tmpmlx2data4,revolutions);
+        */
+        sprintf(buf,"%6.1f m",revolutions1);
         write(buf);
+
+/* switch(mlx2status) {
+        case 1:
+            write("sensor err ");
+            break;          
+        case 2:
+            write("sensor ok  ");
+            break;          
+        case 3:
+            write("no sensor ");
+            break;          
+        }
+        sprintf(buf,"%6d ",mlx2data);
+        write(buf);
+*/
+        
+        write(VT100CURSORRIGHTMOTOR);
+        sprintf(buf,"Right motor: %4.1fA ", (float)ad[1]/50.0 );
+        write(buf);
+        sprintf(buf,"%6.1f m",revolutions2);
+        write(buf);
+        
+        
         if(bat<6.8) 
           errorflag=1;
 #endif

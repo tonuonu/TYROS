@@ -53,7 +53,7 @@ SPI3_Init(void) // OLED
     txept_u3c0 = 0;                                        // Transmit
     crd_u3c0 = 1;                                          // CTS disabled 
     nch_u3c0 = 0;                                          // Output mode
-    ckpol_u3c0 = 0;                                        // Polarity
+    ckpol_u3c0 = 0;                                        // CLK Polarity 0 rising edge, 1 falling edge (0 ok)
     uform_u3c0 = 1;                                        // MSB first
     te_u3c1 = 1;                                           // Transmission 
     ti_u3c1 = 0;                                           // Must be 0 to 

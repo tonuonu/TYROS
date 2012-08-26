@@ -106,8 +106,8 @@ void HardwareSetup(void);
 #define OLED_ENABLE  p4_4
 #define OLED_ENABLEd pd4_4
 
-#define OLED_VDD     p4_5
-#define OLED_VDDd    pd4_5
+//#define OLED_VDD     p4_5
+//#define OLED_VDDd    pd4_5
 
 #define OLED_CS       p5_7
 #define OLED_CSd      pd5_7
