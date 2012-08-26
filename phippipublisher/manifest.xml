@@ -1,0 +1,16 @@
+<package>
+  <description brief="phippipublisher">
+
+     phippipublisher
+
+  </description>
+  <author>robot</author>
+  <license>BSD</license>
+  <review status="unreviewed" notes=""/>
+  <url>http://ros.org/wiki/phippipublisher</url>
+
+  <depend package="roscpp"/>
+
+</package>
+
+
