@@ -229,7 +229,8 @@ SPI7_Init(void) { // Left Melexis 90316
 
 }
 
-float revolutions;
+float revolutions1=0.0f;
+float revolutions2=0.0f;
 
 #pragma vector = UART7_RX
 __interrupt void _uart7_receive(void) {
@@ -279,9 +280,9 @@ __interrupt void _uart7_receive(void) {
 //            int x =((16384 + 1        - 0  )% 16384) 1
 //            int x =((16384 + 100      - 200)% 16384) 16284
               if(x < (16384/2)) {
-                  revolutions+= (float)x/(16384.0f);  
+                  revolutions2+= (float)x/(16384.0f);  
               } else {
-                  revolutions-= (float)(16384-x)/(16384.0f);
+                  revolutions2-= (float)(16384-x)/(16384.0f);
               }
                 
               mlx2status=2;
