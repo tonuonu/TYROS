@@ -1,11 +1,79 @@
+/*
+ *  Copyright (c) 2011, Tonu Samuel
+ *  All rights reserved.
+ *
+ *  This file is part of TYROS.
+ *
+ *  TYROS is free software: you can redistribute it and/or modify
+ *  it under the terms of the GNU General Public License as published by
+ *  the Free Software Foundation, either version 3 of the License, or
+ *  (at your option) any later version.
+ *
+ *  TYROS is distributed in the hope that it will be useful,
+ *  but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *  GNU General Public License for more details.
+ *
+ *  You should have received a copy of the GNU General Public License
+ *  along with TYROS.  If not, see <http://www.gnu.org/licenses/>.
+ *
+ */
+
 #include "ros/ros.h"
 #include "std_msgs/String.h"
 
 #include <sstream>
 
-/**
- * This tutorial demonstrates simple sending of messages over the ROS system.
- */
+
+#include <stdio.h>   /* Standard input/output definitions */
+#include <string.h>  /* String function definitions */
+#include <unistd.h>  /* UNIX standard function definitions */
+#include <fcntl.h>   /* File control definitions */
+#include <errno.h>   /* Error number definitions */
+#include <termios.h> /* POSIX terminal control definitions */
+
+int fd=-1; 
+
+double angular=0.0, linear=0.0;
+
+int
+open_port(void){
+        struct termios tio;
+        memset(&tio,0,sizeof(tio));
+        tio.c_iflag=0;
+        tio.c_oflag=0;
+        tio.c_cflag=CS8|CREAD|CLOCAL;           // 8n1, see termios.h for more information
+        tio.c_lflag=0;
+        tio.c_cc[VMIN]=1;
+        tio.c_cc[VTIME]=5;
+	fd = open("/dev/ttyUSB0", O_RDWR | O_NOCTTY | O_NDELAY);
+	if (fd == -1) {
+	    ROS_ERROR("open_port: Unable to open /dev/ttyUSB0");
+	} else {
+	    ROS_INFO("open_port: opened /dev/ttyUSB0");
+	    fcntl(fd, F_SETFL, 0);
+            cfsetospeed(&tio,B115200);            // 115200 baud
+            cfsetispeed(&tio,B115200);            // 115200 baud
+	}
+   //     fcntl(fd,F_SETFL,FNDELAY); // Make read() call nonblocking
+	return (fd);
+}
+
+
+const char *keywords[]={
+	"Acceleration",
+	"Gyroscope",
+	"Gyro",
+	"Left wheel",
+	"Right wheel",
+	"Battery",
+	"Capacitor",
+	"Ball",
+	0
+};
+
+
+
 int main(int argc, char **argv)
 {
   /**
@@ -64,7 +132,7 @@ int main(int argc, char **argv)
     ss << "hello world " << count;
     msg.data = ss.str();
 
-    ROS_INFO("%s", msg.data.c_str());
+  //  ROS_INFO("%s", msg.data.c_str());
 
     /**
      * The publish() function is how you send messages. The parameter
@@ -76,10 +144,37 @@ int main(int argc, char **argv)
 
     ros::spinOnce();
 
-    loop_rate.sleep();
+    if(0 > fd) {
+        ROS_WARN("/dev/ttyUSB0 is not yet open. Trying to fix this...");
+        open_port();
+    } 
+    int len=0;
+    if(0 > fd)  {
+        ROS_ERROR("/dev/ttyUSB0 is still not open?! Now I give up!");
+    } else {
+	char buf[256];
+	int nbytes=read(fd,buf,sizeof(buf));
+	char *p=strchr(buf,27);
+	int offset=p-buf;
+        if(offset<200 && p[1]=='[' && p[4]==';' && p[6]=='H') {
+            char *p2=strchr(&p[7],':');
+	    if(p2>0) {
+	        *p2=0;
+	        printf("%s\n",&p[7]);
+		const char **kw=keywords;
+		while(*kw) {
+		    if(strcmp(*kw,&p[7])==0) {
+			    printf("->%s\n",*kw);
+		    }
+	            kw++;
+		}
+	    }
+
+	}
+    }
+ //   loop_rate.sleep();
     ++count;
   }
-
 
   return 0;
 }
