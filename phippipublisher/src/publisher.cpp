@@ -63,16 +63,23 @@ open_port(void){
 const char *keywords[]={
 	"Acceleration",
 	"Gyroscope",
-	"Gyro",
-	"Left wheel",
-	"Right wheel",
+	"Left motor",
+	"Right motor",
 	"Battery",
 	"Capacitor",
 	"Ball",
 	0
 };
 
-
+enum kwnum {
+	KW_ACCELERATION=0,
+	KW_GYROSCOPE=1,
+	KW_LEFTMOTOR=2,
+	KW_RIGHTMOTOR=3,
+	KW_BATTERY=4,
+	KW_CAPACITOR=5,
+	KW_BALL=6,
+};
 
 int main(int argc, char **argv)
 {
@@ -160,13 +167,53 @@ int main(int argc, char **argv)
             char *p2=strchr(&p[7],':');
 	    if(p2>0) {
 	        *p2=0;
-	        printf("%s\n",&p[7]);
+	        //printf("%s\n",&p[7]);
 		const char **kw=keywords;
+		int kwnum=0;
 		while(*kw) {
 		    if(strcmp(*kw,&p[7])==0) {
-			    printf("->%s\n",*kw);
+			    printf("->Matched '%s'\n",*kw);
+
+                            float p,x,y,z;
+                            int n;
+
+                            errno = 0;
+			    switch(kwnum) {
+			        case KW_ACCELERATION:
+                                    n = sscanf(&p2[1]," %f ", &p);
+	                            break;
+			        case KW_GYROSCOPE:
+                                    n = sscanf(&p2[1]," x:%f y:%f z:%f", &x ,&y, &z);
+	                            break;
+			        case KW_BATTERY:
+                                    n = sscanf(&p2[1]," %f ", &p);
+	                            break;
+			        case KW_RIGHTMOTOR:
+                                    n = sscanf(&p2[1]," %f ", &p);
+	                            break;
+			        case KW_LEFTMOTOR:
+                                    n = sscanf(&p2[1]," %f ", &p);
+	                            break;
+			        case KW_CAPACITOR:
+                                    n = sscanf(&p2[1]," %f ", &p);
+	                            break;
+                                default:
+				    printf("ERROR: unhandled kwnum %d\n",kwnum);
+				    exit(0);
+			    }
+                            if (n == 1) {
+                                printf("read: %f\n", p);
+                            } else if (n == 3) {
+                                printf("read: %f %f %f\n", x,y,z);
+                            } else if (errno != 0) {
+                                perror("scanf");
+                            } else {
+                            //    printf( "(%d) No matching characters in '%c'\n",n,p2[1]);
+                            }
+
 		    }
 	            kw++;
+		    kwnum++;
 		}
 	    }
 
