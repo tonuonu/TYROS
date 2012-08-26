@@ -164,9 +164,9 @@ int main(int argc, char **argv)
 	char *p=strchr(buf,27);
 	int offset=p-buf;
         if(offset<200 && p[1]=='[' && p[4]==';' && p[6]=='H') {
-            char *p2=strchr(&p[7],':');
-	    if(p2>0) {
-	        *p2=0;
+            char *colonptr=strchr(&p[7],':');
+	    if(colonptr>0) {
+	        *colonptr=0;
 	        //printf("%s\n",&p[7]);
 		const char **kw=keywords;
 		int kwnum=0;
@@ -180,22 +180,22 @@ int main(int argc, char **argv)
                             errno = 0;
 			    switch(kwnum) {
 			        case KW_ACCELERATION:
-                                    n = sscanf(&p2[1]," %f ", &p);
+                                    n = sscanf(&colonptr[1]," %f ", &p);
 	                            break;
 			        case KW_GYROSCOPE:
-                                    n = sscanf(&p2[1]," x:%f y:%f z:%f", &x ,&y, &z);
+                                    n = sscanf(&colonptr[1]," x: %f y: %f z: %f", &x ,&y, &z);
 	                            break;
 			        case KW_BATTERY:
-                                    n = sscanf(&p2[1]," %f ", &p);
+                                    n = sscanf(&colonptr[1]," %f V", &p);
 	                            break;
 			        case KW_RIGHTMOTOR:
-                                    n = sscanf(&p2[1]," %f ", &p);
+                                    n = sscanf(&colonptr[1]," %f ", &p);
 	                            break;
 			        case KW_LEFTMOTOR:
-                                    n = sscanf(&p2[1]," %f ", &p);
+                                    n = sscanf(&colonptr[1]," %f ", &p);
 	                            break;
 			        case KW_CAPACITOR:
-                                    n = sscanf(&p2[1]," %f ", &p);
+                                    n = sscanf(&colonptr[1]," %f ", &p);
 	                            break;
                                 default:
 				    printf("ERROR: unhandled kwnum %d\n",kwnum);
@@ -208,7 +208,7 @@ int main(int argc, char **argv)
                             } else if (errno != 0) {
                                 perror("scanf");
                             } else {
-                            //    printf( "(%d) No matching characters in '%c'\n",n,p2[1]);
+                                printf( "(%d) No matching characters in '%c'\n",n,colonptr[2]);
                             }
 
 		    }
