@@ -184,7 +184,16 @@ s_int(void) {
         pwmtarget[1]++;
     }
 #endif    
-       
+    /* 
+    sammu pikkuseks saan umbes 54.5 mm
+    Kalle-Gustav Kruus: 4,306 tais mootori pooret sammu kohta
+    Kalle-Gustav Kruus: nagu 0.1mm põõrde kohta umbes
+    Tonu Samuel: 0.07900917431  mm siis poorde kohta*/
+    
+    offset1=revolutions1*0.07900917431/1000.0;
+    offset2=revolutions2*0.07900917431/1000.0;
+    revolutions1=0.0;
+    revolutions2=0.0;
 /*     if(ticks % 48 == 1  ) {
          ta4=0;
     }*/    

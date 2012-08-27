@@ -320,7 +320,7 @@ main(void) {
                 (unsigned char)tmpmlx2data1,(unsigned char)tmpmlx2data2,
                 (unsigned char)~tmpmlx2data3,(unsigned char)~tmpmlx2data4,revolutions);
         */
-        sprintf(buf,"%6.1f m",revolutions1);
+        sprintf(buf,"%6.1f m",offset1);
         write(buf);
 
 /* switch(mlx2status) {
@@ -341,7 +341,7 @@ main(void) {
         write(VT100CURSORRIGHTMOTOR);
         sprintf(buf,"Right motor: %4.1fA ", (float)ad[1]/50.0 );
         write(buf);
-        sprintf(buf,"%6.1f m",revolutions2);
+        sprintf(buf,"%6.1f m",offset2);
         write(buf);
         
         
