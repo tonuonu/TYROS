@@ -32,6 +32,7 @@
 
 extern int alarm;
 volatile unsigned short ticks;
+volatile unsigned short ticks2;
 
 extern char command[TX_BUFF_SIZE];
 
@@ -320,7 +321,7 @@ main(void) {
                 (unsigned char)tmpmlx2data1,(unsigned char)tmpmlx2data2,
                 (unsigned char)~tmpmlx2data3,(unsigned char)~tmpmlx2data4,revolutions);
         */
-        sprintf(buf,"%6.1f m",offset1);
+        sprintf(buf,"%6.1f m",distanceleft);
         write(buf);
 
 /* switch(mlx2status) {
@@ -341,12 +342,15 @@ main(void) {
         write(VT100CURSORRIGHTMOTOR);
         sprintf(buf,"Right motor: %4.1fA ", (float)ad[1]/50.0 );
         write(buf);
-        sprintf(buf,"%6.1f m",offset2);
+        sprintf(buf,"%6.1f m",distanceright );
         write(buf);
         
+        write(VT100CURSORODOMETRY);
+        sprintf(buf,"Odometry: dx:%f dy:%f yaw:%f",dx,dy,yaw );
+        write(buf);
         
         if(bat<6.8) 
-          errorflag=1;
+            errorflag=1;
 #endif
 
         write(VT100CURSORMELEXISE);

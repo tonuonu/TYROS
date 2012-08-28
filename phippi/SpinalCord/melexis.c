@@ -231,8 +231,11 @@ SPI7_Init(void) { // Left Melexis 90316
 
 float revolutions1=0.0f;
 float revolutions2=0.0f;
-float offset1=0.0f;
-float offset2=0.0f;
+float distanceleft=0.0f;
+float distanceright=0.0f;
+float dx=0.0f;
+float dy=0.0f;
+float yaw=0.0f;
 
 #pragma vector = UART7_RX
 __interrupt void _uart7_receive(void) {

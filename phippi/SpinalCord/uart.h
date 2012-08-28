@@ -61,10 +61,10 @@ extern unsigned char get_uart5(void);
 #define VT100CURSORNULL       "\x1b" "[00;0H"  // Set cursor to nullpoint
 #define VT100ERASESCREEN      "\x1b" "[2J"     // Erases the screen with the background colour and moves the cursor to home.
 
+#define VT100CURSORODOMETRY   "\x1b" "[02;1H"  // Set cursor to nullpoint
 #define VT100CURSORMELEXISE   "\x1b" "[03;1H"  // Set cursor to nullpoint
 #define VT100CURSORMELEXISL   "\x1b" "[04;1H"  // Set cursor to nullpoint
 #define VT100CURSORMELEXISR   "\x1b" "[05;1H"  // Set cursor to nullpoint
-
 #define VT100CURSORBALL       "\x1b" "[06;1H"  // Set cursor to nullpoint
 #define VT100CURSORPANDA      "\x1b" "[07;1H"  // Set cursor to nullpoint
 #define VT100CURSORCHARGER    "\x1b" "[08;1H"  // Set cursor to nullpoint
@@ -74,8 +74,8 @@ extern unsigned char get_uart5(void);
 #define VT100CURSORRIGHTMOTOR "\x1b" "[12;1H"  // Set cursor to nullpoint
 #define VT100CURSORCAPACITOR  "\x1b" "[12;1H"  // Set cursor to nullpoint
 #define VT100CURSORPROMPT     "\x1b" "[14;1H"  // Set cursor to nullpoint
-#define VT100CURSORACC        "\x1b" "[11;1H"  // Set cursor to nullpoint
 #define VT100SCROLLSCREEN     "\x1b" "[15;40r" // Enable scrolling from row {start} to row {end}.
+#define VT100CURSORACC        "\x1b" "[16;1H"  // Set cursor to nullpoint
 #define VT100SCROLLUP         "\x1"  "bM"      // Scroll display up one line.
 #define VT100CURSORSAVE       "\x1b" "7"       // Save cursor and attributes
 #define VT100CURSORRESTORE    "\x1b" "8"       // Restore cursor and attributes

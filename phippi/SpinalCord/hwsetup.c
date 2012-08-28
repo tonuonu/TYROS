@@ -73,7 +73,7 @@ ConfigureOperatingFrequency(char mode) {
     /* 
      * Start the 32KHz crystal 
      */
-    cm04 = 1;
+    cm04 = 0;
 
     /* 
      * Disable writing to CM0 
@@ -96,6 +96,10 @@ ConfigureOperatingFrequency(char mode) {
     cst_tcspr = 0;
     tcspr = 0x08;
     cst_tcspr = 1;                                        
+    cnt0_tcspr = 1; // f2n is 24Mhz / 16
+    cnt1_tcspr = 1; // f2n is 24Mhz / 16
+    cnt2_tcspr = 1; // f2n is 24Mhz / 16
+    cnt3_tcspr = 1; // f2n is 24Mhz / 16
 }
 
 void 
@@ -255,18 +259,25 @@ PWM_Init(void) {
     RIGHT_PWM    = 0;
 
     // FIXME, timer3 start into right place
-    TABSR_bit.TA3S = 1;
+//    TABSR_bit.TA3S = 1;
 }
 
 static void 
 Heartbeat_Init(void) {
     // Init_TMRB5 1 mS timer
-    tb5mr = 0x80;                                          // timer mode,fc/8 = 1,0 MHz
-    tb5 = 4800;                                            // 1MHz/25 - 1; Fi = 40kHz
-    tb5ic = 1;                                             // level 1 interrupt
+    tb5mr = 0x80;                       // timer mode,fc/8 = 1,0 MHz
+    tb5 = 5000;                         // 1MHz/5000 ; Fi = 200Hz
+    tb5ic = 1;                          // level 1 interrupt
     tb5s = 1;
     ticks = 0;
     LED1d  = PD_OUTPUT;
+
+    tck0_tb4mr=0; // f8
+    tck1_tb4mr=1;
+
+    tb4 = 50000-1;                       // 1MHz/50000 ; Fi = 20Hz
+    tb4ic = 2;                           // level 2 interrupt
+    tb4s = 1;
 }
 
 static void 

@@ -22,6 +22,7 @@
 void main(void);
 
 extern volatile unsigned short ticks;
+extern volatile unsigned short ticks2;
 void uart0_init(void);
 void SPI3_send_cmd(unsigned char c);
 void SPI3_send_data(unsigned char c);
@@ -69,8 +70,12 @@ extern unsigned char tmpmlx2data4;
 
 extern float revolutions1;
 extern float revolutions2;
-extern float offset1;
-extern float offset2;
+extern float distanceleft;
+extern float distanceright;
+extern float dx;
+extern float dy;
+extern float yaw;
+
 /*
  * IAR-HEW compatibility 
  */
