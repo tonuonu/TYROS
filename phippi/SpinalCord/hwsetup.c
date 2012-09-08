@@ -413,6 +413,10 @@ HardwareSetup(void) {
     Coilgun_Init();
     Panda_Init();
     Joy_Init();
+    OLED_Init(); // must be before gyro or OLED does not init properly
+    // Pullup pm p4_4, pu11 tries to  make it high while initializing gyro 
+    // and messes up our OLED init later.
+
     uart0_init(); // Panda
     SPI2_Init();  // Accel sensor
     SPI3_Init();  // OLED
@@ -421,7 +425,6 @@ HardwareSetup(void) {
     SPI6_Init();  // gyro
     //gyro_Init();
     SPI7_Init();  // Melexis sensor right
-    OLED_Init();
     ENABLE_IRQ;
     Analog_Init();
     PWM_Init();

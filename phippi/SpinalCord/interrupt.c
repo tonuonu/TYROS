@@ -94,6 +94,10 @@ s_int(void) {
         } 
 
     }
+    if(CHARGE_DONE==0) {
+        CHARGE=0;
+    }
+
     switch(ticks % 100) {
     case 0:
         status.sek_flag=1;

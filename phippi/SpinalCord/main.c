@@ -129,10 +129,10 @@ main(void) {
                 lastpwm++;
             }
         }
-#if 0
-        if(ticks % 10 == 0) {
+#if 1
+        //if(ticks % 100 == 0) {
             updateOLED();    
-        }
+        //}
 #endif
         if(command[0]!=0) {
             char *tok;

@@ -217,7 +217,7 @@ void HardwareSetup(void);
 
 #define TIMERB2COUNT	2000 // about 12,5kHz
 
-#define SPI_DELAY (50)
+#define SPI_DELAY (1)
 
 void SPI2_Init(void);
 void SPI3_Init(void);

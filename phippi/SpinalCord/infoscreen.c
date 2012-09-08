@@ -25,8 +25,11 @@ int lineno=0;
 int linepos=0;
 int mode=MODE_MANUAL;
 
-#define VT100BOLD "\x1b" "[1m"
-#define VT100NORMAL "\x1b" "[0m"
+#define VT100NORMAL  "\x1b" "[0m"
+#define VT100BOLD    "\x1b" "[1m"
+#define VT100BLINK   "\x1b" "[5m"
+#define VT100REVERSE "\x1b" "[7m"
+#define VT100ERASETOEND "\x1b" "[0K"
 const char *melexiscode(int errcode) {
   const  char *err;
   switch(errcode){
@@ -66,6 +69,8 @@ return err;
 }
 void 
 redraw_infoscreen_buffers(void) {
+    char *tmpmlx1error="";
+    char *tmpmlx2error="";
   
   switch(mode) {
   case MODE_MANUAL:
@@ -106,37 +111,50 @@ Gyroscope:                                                      7
             break;          
         }
 */
-    
-    snprintf(linedata[0],sizeof(linedata[0]),"\x1b" "[1;1H" "Status: %s%s",gyrowhoami!=211? "Gyroscope error":"OK             ","\x1b" "[0K");
-    snprintf(linedata[1],sizeof(linedata[1]),"\x1b" "[2;1H" "Battery: %s %4.2fV %3d%% Panda %s%s",bat>6.9 ?"normal      ":bat>6.3 ?"LOW         ":bat>5.0 ?"CRITICAL    ":"disconnected",bat,45,PANDA ? "on ":"off","\x1b" "[0K");
-    snprintf(linedata[2],sizeof(linedata[2]),"\x1b" "[3;1H" "Left drive: %s %4.2fm/s %5drpm pwm:%3u%% %4.1fA%s",pwm[0]<0 ?"backward":pwm[0]>0 ?"forward ":"brake   ",distanceleft *10.0f,345,(int)abs(pwm[0]),leftmotorcurrent,"\x1b" "[0K");
-    snprintf(linedata[3],sizeof(linedata[3]),"\x1b" "[4;1H" "Right drive:%s %4.2fm/s %5drpm pwm:%3u%% %4.1fA%s",pwm[1]<0 ?"backward":pwm[0]>0 ?"forward ":"brake   ",distanceright*10.0f,345,(int)abs(pwm[1]),rightmotorcurrent,"\x1b" "[0K");
-    snprintf(linedata[4],sizeof(linedata[4]),"\x1b" "[5;1H" "Coilgun: %3.0fV, %s, %s%s",capacitor,CHARGE ? "charging":"waiting ",BALL_DETECT? "Ball! ":"no ball","\x1b" "[0K");
-    snprintf(linedata[5],sizeof(linedata[5]),"\x1b" "[6;1H" "Odometry: x:%10.7fm y:%10.7fm yaw:%10.7frad%s",dx,dy,yaw,"\x1b" "[0K");
-    snprintf(linedata[6],sizeof(linedata[6]),"\x1b" "[7;1H" "%s","\x1b" "[0K");
-    
-    snprintf(linedata[7],sizeof(linedata[7]),"\x1b" "[8;1H" "%s>Normal<%sCompetition Demo Debug drivetrain Debug sensors %s",VT100BOLD,VT100NORMAL,"\x1b" "[0K");
+    if(mlx1status==3) {
+      tmpmlx1error="Left melexis sensor does not respond ";
+    } else if(mlx1status==1) {
+      tmpmlx1error="Left melexis sensor returns error ";
+    }
+    if(mlx2status==3) {
+      tmpmlx2error="Right melexis sensor does not respond ";
+    } else if(mlx2status==1) {
+      tmpmlx2error="Right melexis sensor returns error ";
+    }
+      
+    snprintf(linedata[0],sizeof(linedata[0]),"\x1b" "[1;1H" "Status: %s%s%s" VT100ERASETOEND,gyrowhoami!=211? "Gyroscope error":mlx1status==2 && mlx2status==2?"OK             ":"",tmpmlx1error,tmpmlx2error);
+    snprintf(linedata[1],sizeof(linedata[1]),"\x1b" "[2;1H" "Battery: %s %4.2fV %3.0f%% Panda %s" VT100ERASETOEND,bat>6.9 ?"normal      ":bat>6.3 ?"LOW         ":bat>5.0 ?"CRITICAL    ":"disconnected",bat,(bat-6.0f)/2.4f*100.0f,PANDA ? "on ":"off");
+    snprintf(linedata[2],sizeof(linedata[2]),"\x1b" "[3;1H" "Left drive: %s %4.2fm/s %5drpm pwm:%3u%% %4.1fA" VT100ERASETOEND,pwm[0]<0 ?"backward":pwm[0]>0 ?"forward ":"brake   ",distanceleft *10.0f,345,(int)abs(pwm[0]),leftmotorcurrent);
+    snprintf(linedata[3],sizeof(linedata[3]),"\x1b" "[4;1H" "Right drive:%s %4.2fm/s %5drpm pwm:%3u%% %4.1fA" VT100ERASETOEND,pwm[1]<0 ?"backward":pwm[0]>0 ?"forward ":"brake   ",distanceright*10.0f,345,(int)abs(pwm[1]),rightmotorcurrent);
+    snprintf(linedata[4],sizeof(linedata[4]),"\x1b" "[5;1H" "Coilgun: %3.0fV, %s, %s" VT100ERASETOEND,capacitor,CHARGE ? "charging":"waiting ",BALL_DETECT? "Ball! ":"no ball");
+    snprintf(linedata[5],sizeof(linedata[5]),"\x1b" "[6;1H" "Odometry: x:%10.7fm y:%10.7fm yaw:%10.7frad" VT100ERASETOEND,dx,dy,yaw);
+    snprintf(linedata[6],sizeof(linedata[6]),"\x1b" "[7;1H" "" VT100ERASETOEND);
+    snprintf(linedata[7],sizeof(linedata[7]),"\x1b" "[8;1H" VT100BOLD VT100REVERSE ">Normal<" VT100NORMAL "Competition Demo Debug drivetrain Debug sensors " VT100NORMAL VT100ERASETOEND);
     
     break;
   case MODE_COMPETITION:
-    snprintf(linedata[0],sizeof(linedata[0]),"\x1b" "[1;1H" "%s","\x1b" "[0K");
-    snprintf(linedata[1],sizeof(linedata[1]),"\x1b" "[2;1H" "%s","\x1b" "[0K");
-    snprintf(linedata[2],sizeof(linedata[2]),"\x1b" "[3;1H" "%s","\x1b" "[0K");
-    snprintf(linedata[3],sizeof(linedata[3]),"\x1b" "[4;1H" "%s","\x1b" "[0K");
-    snprintf(linedata[4],sizeof(linedata[4]),"\x1b" "[5;1H" "%s","\x1b" "[0K");
-    snprintf(linedata[5],sizeof(linedata[5]),"\x1b" "[6;1H" "%s","\x1b" "[0K");
-    snprintf(linedata[6],sizeof(linedata[6]),"\x1b" "[7;1H" "%s","\x1b" "[0K");
-    snprintf(linedata[7],sizeof(linedata[7]),"\x1b" "[8;1H" " Normal%s>Competition<%sDemo Debug drivetrain Debug sensors %s",VT100BOLD,VT100NORMAL,"\x1b" "[0K");
+    if(capacitor<350.0f) {
+        CHARGE=1;
+    }
+    
+    snprintf(linedata[0],sizeof(linedata[0]),"\x1b" "[1;1H" VT100ERASETOEND);
+    snprintf(linedata[1],sizeof(linedata[1]),"\x1b" "[2;1H" VT100ERASETOEND);
+    snprintf(linedata[2],sizeof(linedata[2]),"\x1b" "[3;1H" VT100ERASETOEND);
+    snprintf(linedata[3],sizeof(linedata[3]),"\x1b" "[4;1H" VT100BOLD VT100REVERSE VT100BLINK "PRESS JOYSTICK TO GO" VT100NORMAL VT100ERASETOEND );
+    snprintf(linedata[4],sizeof(linedata[4]),"\x1b" "[5;1H" "Coilgun: %3.0fV, %s, %s" VT100ERASETOEND,capacitor,CHARGE ? "charging":"waiting ",BALL_DETECT? "Ball! ":"no ball");
+    snprintf(linedata[5],sizeof(linedata[5]),"\x1b" "[6;1H" "Odometry: x:%10.7fm y:%10.7fm yaw:%10.7frad" VT100ERASETOEND,dx,dy,yaw);
+    snprintf(linedata[6],sizeof(linedata[6]),"\x1b" "[7;1H" VT100ERASETOEND);
+    snprintf(linedata[7],sizeof(linedata[7]),"\x1b" "[8;1H" " Normal" VT100BOLD VT100REVERSE ">Competition<" VT100NORMAL "Demo Debug drivetrain Debug sensors" VT100ERASETOEND);
     break;
   case MODE_DEMO:
-    snprintf(linedata[0],sizeof(linedata[0]),"\x1b" "[1;1H" "%s","\x1b" "[0K");
-    snprintf(linedata[1],sizeof(linedata[1]),"\x1b" "[2;1H" "%s","\x1b" "[0K");
-    snprintf(linedata[2],sizeof(linedata[2]),"\x1b" "[3;1H" "%s","\x1b" "[0K");
-    snprintf(linedata[3],sizeof(linedata[3]),"\x1b" "[4;1H" "%s","\x1b" "[0K");
-    snprintf(linedata[4],sizeof(linedata[4]),"\x1b" "[5;1H" "%s","\x1b" "[0K");
-    snprintf(linedata[5],sizeof(linedata[5]),"\x1b" "[6;1H" "%s","\x1b" "[0K");
-    snprintf(linedata[6],sizeof(linedata[6]),"\x1b" "[7;1H" "%s","\x1b" "[0K");
-    snprintf(linedata[7],sizeof(linedata[7]),"\x1b" "[8;1H" " Normal Competition%s>Demo<%sDebug drivetrain Debug sensors %s",VT100BOLD,VT100NORMAL,"\x1b" "[0K");
+    snprintf(linedata[0],sizeof(linedata[0]),"\x1b" "[1;1H" "" VT100ERASETOEND);
+    snprintf(linedata[1],sizeof(linedata[1]),"\x1b" "[2;1H" "" VT100ERASETOEND);
+    snprintf(linedata[2],sizeof(linedata[2]),"\x1b" "[3;1H" "" VT100ERASETOEND);
+    snprintf(linedata[3],sizeof(linedata[3]),"\x1b" "[4;1H" "" VT100ERASETOEND);
+    snprintf(linedata[4],sizeof(linedata[4]),"\x1b" "[5;1H" "" VT100ERASETOEND);
+    snprintf(linedata[5],sizeof(linedata[5]),"\x1b" "[6;1H" "" VT100ERASETOEND);
+    snprintf(linedata[6],sizeof(linedata[6]),"\x1b" "[7;1H" "" VT100ERASETOEND);
+    snprintf(linedata[7],sizeof(linedata[7]),"\x1b" "[8;1H" " Normal Competition"VT100BOLD VT100REVERSE ">Demo<" VT100NORMAL "Debug drivetrain Debug sensors" VT100ERASETOEND);
     break;
   case MODE_DEBUG_SENSORS:
     {
@@ -166,7 +184,7 @@ Gyroscope:                                                      7
   0123456789012345678901234567890123456789012345678901234567890123
   0         1         2         3         4         5         6 
 */
-    snprintf(linedata[7],sizeof(linedata[7]),"\x1b" "[8;1H" " Normal Competition Demo Debug drivetrain%s>Debug sensors<%s%s",VT100BOLD,VT100NORMAL,"\x1b" "[0K");
+    snprintf(linedata[7],sizeof(linedata[7]),"\x1b" "[8;1H" " Normal Competition Demo Debug drivetrain"VT100BOLD VT100REVERSE ">Debug sensors<" VT100NORMAL VT100ERASETOEND);
     }
     break;
   case MODE_DEBUG_DRIVETRAIN:
@@ -177,7 +195,7 @@ Gyroscope:                                                      7
     snprintf(linedata[4],sizeof(linedata[4]),"\x1b" "[5;1H" "%s","\x1b" "[0K");
     snprintf(linedata[5],sizeof(linedata[5]),"\x1b" "[6;1H" "%s","\x1b" "[0K");
     snprintf(linedata[6],sizeof(linedata[6]),"\x1b" "[7;1H" "%s","\x1b" "[0K");
-    snprintf(linedata[7],sizeof(linedata[7]),"\x1b" "[8;1H" " Normal Competition Demo%s>Debug drivetrain<%sDebug sensors %s",VT100BOLD,VT100NORMAL,"\x1b" "[0K"); 
+    snprintf(linedata[7],sizeof(linedata[7]),"\x1b" "[8;1H" " Normal Competition Demo"VT100BOLD VT100REVERSE ">Debug drivetrain<" VT100NORMAL "Debug sensors " VT100ERASETOEND); 
     break;
   default:
  //   mode=0;

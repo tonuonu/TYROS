@@ -118,22 +118,29 @@ accelerometer_receive(void) {
 */
 void
 SPI3_send_data(unsigned char c) {
-    while (ti_u3c1 == 0)
-        NOP();
-    uDelay(SPI_DELAY);
+//    while (ti_u3c1 == 0)
+//        NOP();
+//    uDelay(SPI_DELAY);
     OLED_DATACOMMAND = 1;
     uDelay(SPI_DELAY);
     u3tb = c;
+    uDelay(12);
+//    uDelay(255);
+//    uDelay(255);
+ 
 }
 
 void
 SPI3_send_cmd(unsigned char c) {
-    while (ti_u3c1 == 0)
-        NOP();
-    uDelay(SPI_DELAY);
+//    while (ti_u3c1 == 0)
+//        NOP();
+//    uDelay(SPI_DELAY);
     OLED_DATACOMMAND = 0;
     uDelay(SPI_DELAY);
     u3tb = c;
+    uDelay(12);
+//    uDelay(255);
+//    uDelay(255);
 }
 
 
