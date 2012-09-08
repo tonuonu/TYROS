@@ -73,7 +73,7 @@ ConfigureOperatingFrequency(char mode) {
     /* 
      * Start the 32KHz crystal 
      */
-    cm04 = 0;
+    cm04 = 1;
 
     /* 
      * Disable writing to CM0 

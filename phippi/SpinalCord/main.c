@@ -41,8 +41,11 @@ int pwm[2]={0,0};
 int pwmtarget[2]={0,0};
 int lastpwm=0;
 int buzzer=1; // If audible heartbeas is on
-float bat=999.0f;
-
+float bat=0.0f;
+float capacitor=0.0f;
+float leftmotorcurrent =0.0f ;
+float rightmotorcurrent=0.0f ;
+        
 void updateOLED1 () {
     OLED_Show_String(  1, "Panda is", 0, 0*8);
     OLED_Show_String(  1, "Charger is", 0, 1*8);
@@ -81,6 +84,7 @@ main(void) {
     OLED_Set_Display_Mode(0x00);                           // Entire Display Off
     OLED_Show_Logo();
     OLED_Set_Display_Mode(0x02);                           // Entire Display On
+#if 0
     write(VT100RESET);
     write(VT100RESETATTR);
     write(VT100CURSORNULL);
@@ -95,6 +99,8 @@ main(void) {
     putchar('>'); 
     putchar(' ');
     write(VT100CURSORSAVE);
+#endif
+    u0tb=0;
     Delay(2);
     OLED_Fade_Out();
     OLED_Fill_RAM(0x00);
@@ -115,7 +121,6 @@ main(void) {
     CS6=0;
     u6tb=L3G4200D_WHOAMI | 0x80;
     while (1) {
-        int errorflag=0;
         char buf[256];
         if (status.sek_flag==1) {
             status.sek_flag=0;
@@ -124,10 +129,11 @@ main(void) {
                 lastpwm++;
             }
         }
+#if 0
         if(ticks % 10 == 0) {
             updateOLED();    
         }
-
+#endif
         if(command[0]!=0) {
             char *tok;
             if(strncmp(command,"twist ",6)==0) {
@@ -250,11 +256,11 @@ main(void) {
             write(VT100CURSORSAVE);
             command[0]=0;
         }        
-        
+#if 0        
         write(VT100CURSORMELEXISR);
-        write("Melexis R :");
-        sprintf(buf,"(%2d) ",mlx1whoamistatus);
-        write(buf);
+        write("Melexis R:");
+//        sprintf(buf,"(%2d) ",mlx1whoamistatus);
+//        write(buf);
         sprintf(buf,"%1d ",mlx1status);
         write(buf);
         sprintf(buf,"%6d ",mlx1data);
@@ -262,23 +268,20 @@ main(void) {
 
 
       /* Gyroscope */
-#if 1
         write(VT100CURSORGYRO);
-        write("Gyroscope: ");
+        write("Gyroscope:");
 //        sprintf(buf,"(%2d) ",gyrowhoamistatus);
 //        write(buf);
 // From 1/(0xFFFF/250dps)
         // http://www.wolframalpha.com/input/?i=1%2F%280xFFFF%2F250%29+degrees+in+radians
 #define GYRORATE (6.658e-5)
 //        if(accok && accwhoami==85) {
-            sprintf(buf,"x:%8.5f y:%8.5f z:%8.5f",gyrox*GYRORATE,gyroy*GYRORATE,gyroz*GYRORATE);
+            sprintf(buf," x:%8.5f y:%8.5f z:%8.5f",gyrox*GYRORATE,gyroy*GYRORATE,gyroz*GYRORATE);
             write(buf);
 //        } else {
 //            write("ERROR");
 //        } 
-#endif
 /* Acceleration sensor */
-#if 1
         write(VT100CURSORACC);
         write("Acceleration: ");
  //       sprintf(buf,"(%2d) ",accwhoamistatus);
@@ -297,8 +300,6 @@ main(void) {
 //        } else {
 //            write("ERROR");
 //        } 
-#endif
-#if 1
         int ad[4];
         ad[0]=AD00 & 0x3FF;
         ad[1]=AD01 & 0x3FF;
@@ -351,26 +352,24 @@ main(void) {
         
         if(bat<6.8) 
             errorflag=1;
-#endif
 
         write(VT100CURSORMELEXISE);
-        write("5V LDO :");
+        write("5V LDO:");
         write(MELEXIS_EN ? "OFF":"ON "); // Low is Enable
    
 
         write(VT100CURSORBALL);
-        write("Ball :");
+        write("Ball:");
         write(BALL_DETECT ? "No ":"Yes");
         write(VT100CURSORPANDA);
-        write("Panda :");
+        write("Panda:");
         write(PANDA ? "ON ":"OFF");
         write(VT100CURSORCHARGER);
-        write("Charger :");
+        write("Charger:");
         if(autocharge) 
             write("AUTO");
         else
             write(CHARGE ? "ON ":"OFF");
-
         if(autocharge && capacitor<400.0)
           CHARGE=1;
         if(CHARGE_DONE==0) { // Charging is DONE when signal is low
@@ -381,6 +380,7 @@ main(void) {
         } else {
     //      ERRORLED=0; 
         } 
+#endif
         
     }
 }

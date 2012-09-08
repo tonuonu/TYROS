@@ -54,13 +54,20 @@ extern int accwhoamistatus;
 
 extern unsigned char gyrowhoami;
 extern signed int gyrox,gyroy,gyroz;
+extern signed int gyrorawx,gyrorawy,gyrorawz;
+extern int gyromaxx,gyromaxy,gyromaxz;
+extern int gyrominx,gyrominy,gyrominz;
+
 extern signed char gyrotemp;
 extern int gyrowhoamistatus;
 extern unsigned int mlx1data,mlx2data;
+extern int mlx1errorcode;
+extern int mlx2errorcode;
 extern int mlx1whoamistatus;
 extern int mlx2whoamistatus;
 extern int buzzer;
-extern float bat;
+extern float bat, capacitor, leftmotorcurrent , rightmotorcurrent ;
+
 extern char mlx1status,mlx2status;
 
 extern unsigned char tmpmlx2data1;
@@ -76,6 +83,18 @@ extern float dx;
 extern float dy;
 extern float yaw;
 
+extern char linedata[8][100];
+extern int lineno;
+extern int linepos;
+extern int mode;
+void redraw_infoscreen_buffers(void);
+enum {
+  MODE_MANUAL,
+  MODE_COMPETITION,
+  MODE_DEMO,
+  MODE_DEBUG_DRIVETRAIN,
+  MODE_DEBUG_SENSORS,
+};
 /*
  * IAR-HEW compatibility 
  */

@@ -27,7 +27,8 @@
 
 int mlx1whoamistatus=0;
 int mlx2whoamistatus=0;
-
+int mlx1errorcode=0;
+int mlx2errorcode=0;
 unsigned int mlx1data=0;
 unsigned int mlx2data=0;
 unsigned char tmpmlx1data1;
@@ -157,6 +158,7 @@ __interrupt void _uart4_receive(void) {
       if( tmpmlx1data1 == (unsigned char)~ tmpmlx1data3 &&  tmpmlx1data2 == (unsigned char)~ tmpmlx1data4) {
           if((tmpmlx1data2 & 3) == 2) { // error code, not angular data
               mlx1status=1;
+              mlx1errorcode=tmpmlx1data2 >> 2; 
           } else {
               mlx1status=2;
               mlx1data = ((unsigned int) tmpmlx1data1 << 6) | ((unsigned int) tmpmlx1data2 >>  2) ;
@@ -277,6 +279,7 @@ __interrupt void _uart7_receive(void) {
       if( tmpmlx2data1 == (unsigned char)~ tmpmlx2data3 &&  tmpmlx2data2 == (unsigned char)~ tmpmlx2data4) {
           if((tmpmlx2data2 & 3) == 2) { // error code, not angular data
               mlx2status=1;
+              mlx2errorcode=tmpmlx2data2 >> 2; 
           } else {
               int tmp = ((unsigned int) tmpmlx2data1 << 6) | ((unsigned int) tmpmlx2data2 >>  2) ;
               int x =((16384 + mlx2data - tmp )% 16384);

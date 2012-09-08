@@ -185,10 +185,10 @@ void HardwareSetup(void);
 #define PANDAd      pd3_5
 
 // Joystick
-#define JOY_RIGHT   p1_3
-#define JOY_LEFT    p1_4
-#define JOY_DOWN    p1_5
-#define JOY_UP      p1_6
+#define JOY_UP      p1_3
+#define JOY_DOWN    p1_4
+#define JOY_RIGHT   p1_5
+#define JOY_LEFT    p1_6
 #define JOY_CENTER  p1_7
 
 #define JOY_UPd     pd1_3

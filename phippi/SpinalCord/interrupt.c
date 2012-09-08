@@ -74,6 +74,26 @@ s_int(void) {
      * so we set flag to indicate when to do.
      */
     ticks++;
+    if(JOY_UP == 0) {
+             pwmtarget[0]+=2;
+             pwmtarget[1]+=2;
+    } else    
+    if(JOY_DOWN == 0) {
+            pwmtarget[0]-=2;
+            pwmtarget[1]-=2;
+    } 
+
+    if(ticks %20==0){
+        if(JOY_RIGHT == 0) {
+            if(mode<4)
+                mode++;
+        }
+        if(JOY_LEFT == 0) {
+            if(mode>0)
+                mode--;
+        } 
+
+    }
     switch(ticks % 100) {
     case 0:
         status.sek_flag=1;
@@ -92,26 +112,26 @@ s_int(void) {
             ta4=0; // Turn off buzzer
         }
         break;
-    }
-    
-    if(JOY_RIGHT == 0) {
-//      OLED_Set_Display_Mode(0x03);                           // Inverse display
-      PANDA = 0;
-    } else    
-    if(JOY_LEFT == 0) {
-//        OLED_Set_Display_Mode(0x02);                           // Normal display
-        PANDA = 1;
-    } 
+    case 70:
+      {
+        // Read analog values and compute data
+        int ad[4];
+        ad[0]=AD00 & 0x3FF;
+        ad[1]=AD01 & 0x3FF;
+        ad[2]=AD02 & 0x3FF;
+        ad[3]=AD03 & 0x3FF;
+        bat=(float)ad[3]*(13.64/0x3FF);
+        capacitor=(float)ad[2]/2.27333333 ; // 0x3FF/450V
+        leftmotorcurrent =(float)ad[0]/50.0 ; // Tambov!
+        rightmotorcurrent=(float)ad[1]/50.0 ;
+      }
+      break;
 
-    if(JOY_UP == 0) {
-        pwmtarget[0]+=2;
-        pwmtarget[1]+=2;
-    } else    
-    if(JOY_DOWN == 0) {
-        pwmtarget[0]-=2;
-        pwmtarget[1]-=2;
-    } 
+     case 77: // Just at some random time but 10 times per second
+        redraw_infoscreen_buffers();
     
+    }
+   
     if(pwmtarget[0]> 100) pwmtarget[0]= 100;
     if(pwmtarget[1]> 100) pwmtarget[1]= 100;
     if(pwmtarget[0]<-100) pwmtarget[0]=-100;
@@ -230,7 +250,9 @@ b4_int(void) {
     ticks2++;
     switch(ticks2 % 2) {
     case 0:
-    case 1:  
+      break;
+    case 1: 
+      break;
     }    
         
 }

@@ -28,6 +28,7 @@
 
 unsigned char gyrowhoami=0;
 signed int gyrox=0,gyroy=0,gyroz=0;
+signed int gyrorawx=0,gyrorawy=0,gyrorawz=0;
 signed char gyrotemp=0;
 int gyrowhoamistatus=0;
 /* 
@@ -35,8 +36,8 @@ int gyrowhoamistatus=0;
  * calculate and negate error. 
  */
 int gyrocalcnt=0;
-static int maxx=0,maxy=0,maxz=0;
-static int minx=0,miny=0,minz=0;
+int gyromaxx=0,gyromaxy=0,gyromaxz=0;
+int gyrominx=0,gyrominy=0,gyrominz=0;
 static int tmp;
 
 #define CALIBRATIONSAMPLES 500
@@ -194,15 +195,15 @@ __interrupt void _uart6_receive(void) {
       gyro_read_reg(L3G4200D_OUT_X_H);
       break;
   case 17: // OUT_X_H answer received
-      tmp += ((signed char)b * 0x100);
+      gyrorawx= tmp+((signed char)b * 0x100);
       if(gyrocalcnt<CALIBRATIONSAMPLES) {
-          if(tmp>maxx)
-              maxx=tmp;
-          if(tmp<minx)
-              minx=tmp;
+          if(gyrorawx>gyromaxx)
+              gyromaxx=gyrorawx;
+          if(gyrorawx<gyrominx)
+              gyrominx=gyrorawx;
           gyrox=0;
-      } else if(tmp<minx || tmp>maxx){
-          gyrox=tmp;
+      } else if(gyrorawx<gyrominx || gyrorawx>gyromaxx){
+          gyrox=gyrorawx;
       } else {
           gyrox=0;
       }
@@ -213,15 +214,15 @@ __interrupt void _uart6_receive(void) {
       gyro_read_reg(L3G4200D_OUT_Y_H);
       break;
   case 21: // OUT_Y_H answer received
-      tmp += ((signed char)b * 0x100);
+      gyrorawy = tmp+((signed char)b * 0x100);
       if(gyrocalcnt<CALIBRATIONSAMPLES) {
-          if(tmp>maxy)
-              maxy=tmp;
-          if(tmp<miny)
-              miny=tmp;
+          if(gyrorawy>gyromaxy)
+              gyromaxy=gyrorawy;
+          if(gyrorawy<gyrominy)
+              gyrominy=gyrorawy;
           gyroy=0;
-      } else if(tmp<miny || tmp>maxy){
-          gyroy=tmp;
+      } else if(gyrorawy<gyrominy || gyrorawy>gyromaxy){
+          gyroy=gyrorawy;
       } else {
           gyroy=0;
       }
@@ -232,15 +233,15 @@ __interrupt void _uart6_receive(void) {
       gyro_read_reg(L3G4200D_OUT_Z_H);
       break;
   case 25: // OUT_Z_H answer received
-      tmp += ((signed char)b * 0x100);
+      gyrorawz= tmp+((signed char)b * 0x100);
       if(gyrocalcnt<CALIBRATIONSAMPLES) {
-          if(tmp>maxz)
-              maxz=tmp;
-          if(tmp<minz)
-              minz=tmp;
+          if(gyrorawz>gyromaxz)
+              gyromaxz=gyrorawz;
+          if(gyrorawz<gyrominz)
+              gyrominz=gyrorawz;
           gyroz=0;
-      } else if(tmp<minz || tmp>maxz){
-          gyroz=tmp;
+      } else if(gyrorawz<gyrominz || gyrorawz>gyromaxz){
+          gyroz=gyrorawz;
       } else {
           gyroz=0;
       }

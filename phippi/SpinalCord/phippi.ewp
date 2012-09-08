@@ -1624,6 +1624,9 @@
     <name>$PROJ_DIR$\hwsetup.c</name>
   </file>
   <file>
+    <name>$PROJ_DIR$\infoscreen.c</name>
+  </file>
+  <file>
     <name>$PROJ_DIR$\interrupt.c</name>
   </file>
   <file>

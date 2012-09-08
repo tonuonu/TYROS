@@ -1,5 +1,5 @@
 /*
- *  Copyright (c) 2011, Tonu Samuel
+ *  Copyright (c) 2011, 2012 Tonu Samuel
  *  All rights reserved.
  *
  *  This file is part of TYROS.
@@ -43,7 +43,7 @@ char rx0_buff[RX_BUFF_SIZE];
 unsigned short rx0_ptr = 0;
 
 #define	f1_CLK_SPEED	base_freq
-
+#if 0
 int putchar (int i ) {
     if( tx0_ptr == tx0_ptrr) { 
         while(ti_u0c1 == 0) {
@@ -58,14 +58,25 @@ int putchar (int i ) {
     }
     return i;
 }
-
+#endif
 #pragma vector = UART0_TX
 __interrupt void _uart0_transmit(void) {
-    if( tx0_ptr != tx0_ptrr) {
-        u0tb = (short) tx0_buff[tx0_ptrr++];
-        if ( tx0_ptrr >= TX_BUFF_SIZE ) 
-            tx0_ptrr = 0;
-    }
+  if(!linedata[lineno][linepos]){
+      linepos=0;
+      lineno++;
+      if(lineno>7) {
+        lineno=0;
+      }
+  }
+  u0tb=linedata[lineno][linepos];
+  linepos++;
+  if(linepos>(100-1)) {
+      lineno++;
+      if(lineno>7) {
+        lineno=0;
+      }
+      linepos=0;
+  }
 }
 
 #pragma vector = UART0_RX
@@ -98,7 +109,8 @@ __interrupt void _uart0_receive(void) {
 
 void 
 uart0_init(void) {
-    u0brg = (f1_CLK_SPEED / 16 / 115200) - 1;	
+//    u0brg = (f1_CLK_SPEED / 16 / 115200) - 1;	
+    u0brg = (f1_CLK_SPEED / 16 / 57600) - 1;	
 
     smd0_u0mr  = 1;  // 8 bit character lenght
     smd1_u0mr  = 0;  // 8 bit character lenght
@@ -128,9 +140,10 @@ uart0_init(void) {
     u0tb = u0rb;	
     u0tb = 0;			
         
-    s0ric = 0x04;   // Receive interrupt
-    s0tic = 0x05;   // Send interrupt
-
+    ilvl_s0ric =0x04;   
+    ir_s0ric   =0; 
+    ilvl_s0tic =0x04;   
+    ir_s0tic   =0; 
     TX0s = PF_UART;
     TX0d = PD_OUTPUT;
     RX0s = PF_UART;
