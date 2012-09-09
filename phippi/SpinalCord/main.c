@@ -259,11 +259,9 @@ main(void) {
 #if 0        
         write(VT100CURSORMELEXISR);
         write("Melexis R:");
-//        sprintf(buf,"(%2d) ",mlx1whoamistatus);
-//        write(buf);
-        sprintf(buf,"%1d ",mlx1status);
+        sprintf(buf,"%1d ",mlxrightstatus);
         write(buf);
-        sprintf(buf,"%6d ",mlx1data);
+        sprintf(buf,"%6d ",mlxleftdata);
         write(buf);
 
 
@@ -319,13 +317,13 @@ main(void) {
 /*        
         sprintf(buf,"(%2d) (%3u %3u %3u %3u) %f ",
                 (unsigned char)mlx2whoamistatus, 
-                (unsigned char)tmpmlx2data1,(unsigned char)tmpmlx2data2,
-                (unsigned char)~tmpmlx2data3,(unsigned char)~tmpmlx2data4,revolutions);
+                (unsigned char)tmpmlxrightdata1,(unsigned char)tmpmlxrightdata2,
+                (unsigned char)~tmpmlxrightdata3,(unsigned char)~tmpmlxrightdata4,revolutions);
         */
         sprintf(buf,"%6.1f m",distanceleft);
         write(buf);
 
-/* switch(mlx2status) {
+/* switch(mlxleftstatus) {
         case 1:
             write("sensor err ");
             break;          
@@ -336,7 +334,7 @@ main(void) {
             write("no sensor ");
             break;          
         }
-        sprintf(buf,"%6d ",mlx2data);
+        sprintf(buf,"%6d ",mlxrightdata);
         write(buf);
 */
         

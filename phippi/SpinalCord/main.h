@@ -60,23 +60,23 @@ extern int gyrominx,gyrominy,gyrominz;
 
 extern signed char gyrotemp;
 extern int gyrowhoamistatus;
-extern unsigned int mlx1data,mlx2data;
-extern int mlx1errorcode;
-extern int mlx2errorcode;
+extern unsigned int MLXLdata,MLXRdata;
+extern int mlxrighterrorcode;
+extern int mlxlefterrorcode;
 extern int mlx1whoamistatus;
 extern int mlx2whoamistatus;
 extern int buzzer;
 extern float bat, capacitor, leftmotorcurrent , rightmotorcurrent ;
 
-extern char mlx1status,mlx2status;
+extern char mlxrightstatus,mlxleftstatus;
 
-extern unsigned char tmpmlx2data1;
-extern unsigned char tmpmlx2data2;
-extern unsigned char tmpmlx2data3;
-extern unsigned char tmpmlx2data4;
+extern unsigned char tmpMLXRdata1;
+extern unsigned char tmpMLXRdata2;
+extern unsigned char tmpMLXRdata3;
+extern unsigned char tmpMLXRdata4;
 
-extern float revolutions1;
-extern float revolutions2;
+extern signed int  revolutions1;
+extern signed int  revolutions2;
 extern float distanceleft;
 extern float distanceright;
 extern float dx;

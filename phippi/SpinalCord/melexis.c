@@ -1,5 +1,5 @@
 /*
- *  Copyright (c) 2011, Tonu Samuel
+ *  Copyright (c) 2011,2012 Tonu Samuel
  *  All rights reserved.
  *
  *  This file is part of TYROS.
@@ -27,21 +27,23 @@
 
 int mlx1whoamistatus=0;
 int mlx2whoamistatus=0;
-int mlx1errorcode=0;
-int mlx2errorcode=0;
-unsigned int mlx1data=0;
-unsigned int mlx2data=0;
-unsigned char tmpmlx1data1;
-unsigned char tmpmlx1data2;
-unsigned char tmpmlx1data3;
-unsigned char tmpmlx1data4;
+int mlxrighterrorcode=0;
+int mlxlefterrorcode=0;
+long int MLXLold=-1; // -1 indicates no old data known
+long int MLXRold=-1;
+unsigned int MLXLdata=0;
+unsigned int MLXRdata=0;
+unsigned char MLXLbyte1;
+unsigned char MLXLbyte2;
+unsigned char MLXLbyte3;
+unsigned char MLXLbyte4;
 
-unsigned char tmpmlx2data1;
-unsigned char tmpmlx2data2;
-unsigned char tmpmlx2data3;
-unsigned char tmpmlx2data4;
+unsigned char MLXRbyte1;
+unsigned char MLXRbyte2;
+unsigned char MLXRbyte3;
+unsigned char MLXRbyte4;
 
-char mlx1status=0,mlx2status=0;
+char mlxrightstatus=0,mlxleftstatus=0;
 
 void
 SPI4_Init(void) { // Right Melexis 90316
@@ -138,33 +140,43 @@ __interrupt void _uart4_receive(void) {
   */
   switch(mlx1whoamistatus) {
   case 2:
-      tmpmlx1data1=(int)b;
+      MLXLbyte1=(int)b;
       ta3  = 25; // Set timer 50us 
       ta3os = 1; // start timer
       break;
   case 3:
-      tmpmlx1data2=(int)b;
+      MLXLbyte2=(int)b;
       ta3  = 25; // Set timer 50us 
       ta3os = 1; // start timer
       break;
   case 4:
-      tmpmlx1data3=(int)b;
+      MLXLbyte3=(int)b;
       ta3  = 25; // Set timer 50us 
       ta3os = 1; // start timer
       break;
   case 5:
-      tmpmlx1data4=(int)b;
+      MLXLbyte4=(int)b;
       uDelay(200); 
-      if( tmpmlx1data1 == (unsigned char)~ tmpmlx1data3 &&  tmpmlx1data2 == (unsigned char)~ tmpmlx1data4) {
-          if((tmpmlx1data2 & 3) == 2) { // error code, not angular data
-              mlx1status=1;
-              mlx1errorcode=tmpmlx1data2 >> 2; 
+      if( MLXLbyte1 == (unsigned char)~ MLXLbyte3 &&  MLXLbyte2 == (unsigned char)~ MLXLbyte4) {
+          if((MLXLbyte2 & 3) == 2) { // error code, not angular data
+              mlxleftstatus=1;
+              mlxlefterrorcode=MLXLbyte2 >> 2; 
           } else {
-              mlx1status=2;
-              mlx1data = ((unsigned int) tmpmlx1data1 << 6) | ((unsigned int) tmpmlx1data2 >>  2) ;
+              MLXLdata = ((unsigned int) MLXLbyte1 << 6) | ((unsigned int) MLXLbyte2 >>  2) ;
+
+              signed int change=0;
+              if(MLXLold != -1) // If old value is known at all
+                 change = (signed int)MLXLdata - MLXLold ;  
+              if(change < (-16384/2))
+                change+=16384;
+              if(change > (16384/2))
+                change-=16384;
+              revolutions1+=change;              
+              mlxrightstatus=2;
+              MLXLold = MLXLdata;
           }
       } else {
-          mlx1status=3;
+          mlxleftstatus=3;
       }
       u4tb=0xFF;
       break;
@@ -175,7 +187,7 @@ __interrupt void _uart4_receive(void) {
       ta3os = 1; // start timer
       break;
   default:   
-      if(mlx2whoamistatus==1) // no need for delay
+      if(mlx1whoamistatus==1) // no need for delay
           u4tb=0xFF;
       else {
           ta3  = 25; // Set timer 50us 
@@ -231,8 +243,8 @@ SPI7_Init(void) { // Left Melexis 90316
 
 }
 
-float revolutions1=0.0f;
-float revolutions2=0.0f;
+signed int  revolutions1=0LL;
+signed int  revolutions2=0LL;
 float distanceleft=0.0f;
 float distanceright=0.0f;
 float dx=0.0f;
@@ -259,45 +271,42 @@ __interrupt void _uart7_receive(void) {
   */
   switch(mlx2whoamistatus) {
   case 2:
-      tmpmlx2data1=(int)b;
+      MLXRbyte1=(int)b;
       ta0  = 25; // Set timer 50us 
       ta0os = 1; // start timer
       break;
   case 3:
-      tmpmlx2data2=(int)b;
+      MLXRbyte2=(int)b;
       ta0  = 25; // Set timer 50us 
       ta0os = 1; // start timer
       break;
   case 4:
-      tmpmlx2data3=(int)b;
+      MLXRbyte3=(int)b;
       ta0  = 25; // Set timer 50us 
       ta0os = 1; // start timer
       break;
   case 5:
-      tmpmlx2data4=(int)b;
+      MLXRbyte4=(int)b;
       uDelay(200); 
-      if( tmpmlx2data1 == (unsigned char)~ tmpmlx2data3 &&  tmpmlx2data2 == (unsigned char)~ tmpmlx2data4) {
-          if((tmpmlx2data2 & 3) == 2) { // error code, not angular data
-              mlx2status=1;
-              mlx2errorcode=tmpmlx2data2 >> 2; 
+      if( MLXRbyte1 == (unsigned char)~ MLXRbyte3 &&  MLXRbyte2 == (unsigned char)~ MLXRbyte4) {
+          if((MLXRbyte2 & 3) == 2) { // error code, not angular data
+              mlxrightstatus=1;
+              mlxrighterrorcode=MLXRbyte2 >> 2; 
           } else {
-              int tmp = ((unsigned int) tmpmlx2data1 << 6) | ((unsigned int) tmpmlx2data2 >>  2) ;
-              int x =((16384 + mlx2data - tmp )% 16384);
-//            int x =((16384 + 0        - 0  )% 16384) 0
-//            int x =((16384 + 0        - 1  )% 16384) 16383
-//            int x =((16384 + 1        - 0  )% 16384) 1
-//            int x =((16384 + 100      - 200)% 16384) 16284
-              if(x < (16384/2)) {
-                  revolutions2+= (float)x/(16384.0f);  
-              } else {
-                  revolutions2-= (float)(16384-x)/(16384.0f);
-              }
-                
-              mlx2status=2;
-              mlx2data = tmp;
+              MLXRdata = ((unsigned int) MLXRbyte1 << 6) | ((unsigned int) MLXRbyte2 >>  2) ;
+              signed int change=0;
+              if(MLXRold != -1) // If old value is known at all
+                 change = (signed int)MLXRdata - MLXRold ;  
+              if(change < (-16384/2))
+                change+=16384;
+              if(change > (16384/2))
+                change-=16384;
+              revolutions2+=change;    
+              mlxrightstatus=2;
+              MLXRold = MLXRdata;
           }
       } else {
-          mlx2status=3;
+          mlxrightstatus=3;
       }
       u7tb=0xFF;
       break;

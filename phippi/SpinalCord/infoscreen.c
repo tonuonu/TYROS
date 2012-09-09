@@ -69,8 +69,8 @@ return err;
 }
 void 
 redraw_infoscreen_buffers(void) {
-    char *tmpmlx1error="";
-    char *tmpmlx2error="";
+    char *tmpmlxrighterror="";
+    char *tmpmlxlefterror="";
   
   switch(mode) {
   case MODE_MANUAL:
@@ -94,12 +94,12 @@ Gyroscope:                                                      7
     /*        
         sprintf(buf,"(%2d) (%3u %3u %3u %3u) %f ",
                 (unsigned char)mlx2whoamistatus, 
-                (unsigned char)tmpmlx2data1,(unsigned char)tmpmlx2data2,
-                (unsigned char)~tmpmlx2data3,(unsigned char)~tmpmlx2data4,revolutions);
+                (unsigned char)tmpMLXRdata1,(unsigned char)tmpMLXRdata2,
+                (unsigned char)~tmpMLXRdata3,(unsigned char)~tmpMLXRdata4,revolutions);
         */
 //        sprintf(buf,"%6.1f m",distanceleft);
   
-/* switch(mlx2status) {
+/* switch(mlxleftstatus) {
         case 1:
             write("sensor err ");
             break;          
@@ -111,19 +111,19 @@ Gyroscope:                                                      7
             break;          
         }
 */
-    if(mlx1status==3) {
-      tmpmlx1error="Left melexis sensor does not respond ";
-    } else if(mlx1status==1) {
-      tmpmlx1error="Left melexis sensor returns error ";
+    if(mlxrightstatus==3) {
+      tmpmlxrighterror=VT100REVERSE "Right melexis sensor does not respond " VT100NORMAL;
+    } else if(mlxrightstatus==1) {
+      tmpmlxrighterror=VT100REVERSE "Right melexis sensor returns error " VT100NORMAL;
     }
-    if(mlx2status==3) {
-      tmpmlx2error="Right melexis sensor does not respond ";
-    } else if(mlx2status==1) {
-      tmpmlx2error="Right melexis sensor returns error ";
+    if(mlxleftstatus==3) {
+      tmpmlxlefterror=VT100REVERSE "Left melexis sensor does not respond " VT100NORMAL;
+    } else if(mlxleftstatus==1) {
+      tmpmlxlefterror=VT100REVERSE "Left melexis sensor returns error " VT100NORMAL;
     }
       
-    snprintf(linedata[0],sizeof(linedata[0]),"\x1b" "[1;1H" "Status: %s%s%s" VT100ERASETOEND,gyrowhoami!=211? "Gyroscope error":mlx1status==2 && mlx2status==2?"OK             ":"",tmpmlx1error,tmpmlx2error);
-    snprintf(linedata[1],sizeof(linedata[1]),"\x1b" "[2;1H" "Battery: %s %4.2fV %3.0f%% Panda %s" VT100ERASETOEND,bat>6.9 ?"normal      ":bat>6.3 ?"LOW         ":bat>5.0 ?"CRITICAL    ":"disconnected",bat,(bat-6.0f)/2.4f*100.0f,PANDA ? "on ":"off");
+    snprintf(linedata[0],sizeof(linedata[0]),"\x1b" "[1;1H" "Status: %s%s%s" VT100ERASETOEND,gyrowhoami!=211? "Gyroscope error":mlxrightstatus==2 && mlxleftstatus==2?"OK             ":"",tmpmlxrighterror,tmpmlxlefterror);
+    snprintf(linedata[1],sizeof(linedata[1]),"\x1b" "[2;1H" "Battery: %s %4.1fV %3.0f%% Panda %s" VT100ERASETOEND,bat>6.9 ?"normal      ":bat>6.3 ?"LOW         ":bat>5.0 ?"CRITICAL    ":"disconnected",bat,(bat-6.0f)/2.4f*100.0f,PANDA ? "on ":"off");
     snprintf(linedata[2],sizeof(linedata[2]),"\x1b" "[3;1H" "Left drive: %s %4.2fm/s %5drpm pwm:%3u%% %4.1fA" VT100ERASETOEND,pwm[0]<0 ?"backward":pwm[0]>0 ?"forward ":"brake   ",distanceleft *10.0f,345,(int)abs(pwm[0]),leftmotorcurrent);
     snprintf(linedata[3],sizeof(linedata[3]),"\x1b" "[4;1H" "Right drive:%s %4.2fm/s %5drpm pwm:%3u%% %4.1fA" VT100ERASETOEND,pwm[1]<0 ?"backward":pwm[0]>0 ?"forward ":"brake   ",distanceright*10.0f,345,(int)abs(pwm[1]),rightmotorcurrent);
     snprintf(linedata[4],sizeof(linedata[4]),"\x1b" "[5;1H" "Coilgun: %3.0fV, %s, %s" VT100ERASETOEND,capacitor,CHARGE ? "charging":"waiting ",BALL_DETECT? "Ball! ":"no ball");
@@ -133,17 +133,17 @@ Gyroscope:                                                      7
     
     break;
   case MODE_COMPETITION:
-    if(capacitor<350.0f) {
+    if(capacitor<390.0f) {
         CHARGE=1;
     }
     
     snprintf(linedata[0],sizeof(linedata[0]),"\x1b" "[1;1H" VT100ERASETOEND);
-    snprintf(linedata[1],sizeof(linedata[1]),"\x1b" "[2;1H" VT100ERASETOEND);
+    snprintf(linedata[1],sizeof(linedata[1]),"\x1b" "[2;1H" "Battery: %s %4.1fV %3.0f%% Panda %s" VT100ERASETOEND,bat>6.9 ?"normal      ":bat>6.3 ?"LOW         ":bat>5.0 ?"CRITICAL    ":"disconnected",bat,(bat-6.0f)/2.4f*100.0f,PANDA ? "on ":"off");
     snprintf(linedata[2],sizeof(linedata[2]),"\x1b" "[3;1H" VT100ERASETOEND);
-    snprintf(linedata[3],sizeof(linedata[3]),"\x1b" "[4;1H" VT100BOLD VT100REVERSE VT100BLINK "PRESS JOYSTICK TO GO" VT100NORMAL VT100ERASETOEND );
+    snprintf(linedata[3],sizeof(linedata[3]),"\x1b" "[4;1H" VT100ERASETOEND);
     snprintf(linedata[4],sizeof(linedata[4]),"\x1b" "[5;1H" "Coilgun: %3.0fV, %s, %s" VT100ERASETOEND,capacitor,CHARGE ? "charging":"waiting ",BALL_DETECT? "Ball! ":"no ball");
     snprintf(linedata[5],sizeof(linedata[5]),"\x1b" "[6;1H" "Odometry: x:%10.7fm y:%10.7fm yaw:%10.7frad" VT100ERASETOEND,dx,dy,yaw);
-    snprintf(linedata[6],sizeof(linedata[6]),"\x1b" "[7;1H" VT100ERASETOEND);
+    snprintf(linedata[6],sizeof(linedata[6]),"\x1b" "[7;1H" "             " VT100BOLD VT100REVERSE VT100BLINK "PUSH JOYSTICK FORWARD TO GO" VT100NORMAL VT100ERASETOEND );
     snprintf(linedata[7],sizeof(linedata[7]),"\x1b" "[8;1H" " Normal" VT100BOLD VT100REVERSE ">Competition<" VT100NORMAL "Demo Debug drivetrain Debug sensors" VT100ERASETOEND);
     break;
   case MODE_DEMO:
@@ -158,19 +158,19 @@ Gyroscope:                                                      7
     break;
   case MODE_DEBUG_SENSORS:
     {
-    const char *err1="";
-    const char *err2="";
-    if(mlx1status==1)
-      err1=melexiscode(mlx1errorcode);
-    if(mlx2status==1)
-      err2=melexiscode(mlx2errorcode);
-    snprintf(linedata[0],sizeof(linedata[0]),"\x1b" "[1;1H" "Gyro raw: whoami:%3d temp:%3d x:%6d y:%6d z:%6d%s",gyrowhoami,gyrotemp,gyrorawx,gyrorawy,gyrorawz,"\x1b" "[0K");
-    snprintf(linedata[1],sizeof(linedata[1]),"\x1b" "[2;1H" "Gyro filtered:       temp:%3d x:%6d y:%6d z:%6d%s",36-gyrotemp,gyrox,gyroy,gyroz,"\x1b" "[0K");
-    snprintf(linedata[2],sizeof(linedata[2]),"\x1b" "[3;1H" "Gyro calibrationmin min:      x:%6d y:%6d z:%6d%s",gyrominx,gyrominy,gyrominz,"\x1b" "[0K");
-    snprintf(linedata[3],sizeof(linedata[3]),"\x1b" "[4;1H" "Gyro calibrationmin max:      x:%6d y:%6d z:%6d%s",gyromaxx,gyromaxy,gyromaxz,"\x1b" "[0K");
-    snprintf(linedata[4],sizeof(linedata[4]),"\x1b" "[5;1H" "Left drive:  mlx status:%3d (%s %s) mlx raw: %5d%s",mlx1status,mlx1status==3 ? "no sensor ":(mlx1status!=2 ? "Err:":"OK        "),err1,mlx1data,"\x1b" "[0K");     
-    snprintf(linedata[5],sizeof(linedata[5]),"\x1b" "[6;1H" "Right drive: mlx status:%3d (%s %s) mlx raw: %5d%s",mlx2status,mlx2status==3 ? "no sensor ":(mlx2status!=2 ? "Err:":"OK        "),err2,mlx2data,"\x1b" "[0K");     
-    snprintf(linedata[6],sizeof(linedata[6]),"\x1b" "[7;1H" "%s","\x1b" "[0K");
+    const char *errright="";
+    const char *errleft="";
+    if(mlxrightstatus==1)
+      errright=melexiscode(mlxrighterrorcode);
+    if(mlxleftstatus==1)
+      errleft=melexiscode(mlxlefterrorcode);
+    snprintf(linedata[0],sizeof(linedata[0]),"\x1b" "[1;1H" "Gyro raw: whoami:%3d temp:%3d x:%6d y:%6d z:%6d"VT100ERASETOEND,gyrowhoami,gyrotemp,gyrorawx,gyrorawy,gyrorawz);
+    snprintf(linedata[1],sizeof(linedata[1]),"\x1b" "[2;1H" "Gyro filtered:       temp:%3d x:%6d y:%6d z:%6d"VT100ERASETOEND,36-gyrotemp,gyrox,gyroy,gyroz);
+    snprintf(linedata[2],sizeof(linedata[2]),"\x1b" "[3;1H" "Gyro calibrationmin min:      x:%6d y:%6d z:%6d"VT100ERASETOEND,gyrominx,gyrominy,gyrominz);
+    snprintf(linedata[3],sizeof(linedata[3]),"\x1b" "[4;1H" "Gyro calibrationmin max:      x:%6d y:%6d z:%6d"VT100ERASETOEND,gyromaxx,gyromaxy,gyromaxz);
+    snprintf(linedata[4],sizeof(linedata[4]),"\x1b" "[5;1H" "Left drive:  mlx status:%3d (%s %s) mlx raw: %5d"VT100ERASETOEND,mlxleftstatus ,mlxleftstatus ==3 ? "no sensor ":(mlxleftstatus !=2 ? "Err:":"OK        "),errleft,MLXLdata );     
+    snprintf(linedata[5],sizeof(linedata[5]),"\x1b" "[6;1H" "Right drive: mlx status:%3d (%s %s) mlx raw: %5d"VT100ERASETOEND,mlxrightstatus,mlxrightstatus==3 ? "no sensor ":(mlxrightstatus!=2 ? "Err:":"OK        "),errright,MLXRdata);     
+    snprintf(linedata[6],sizeof(linedata[6]),"\x1b" "[7;1H" "revolutions left %d right %d" VT100ERASETOEND,revolutions1,revolutions2);
 /*Debug sensors:
   0         1         2         3         4         5         6
   0123456789012345678901234567890123456789012345678901234567890123

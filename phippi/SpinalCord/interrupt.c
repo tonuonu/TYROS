@@ -97,6 +97,25 @@ s_int(void) {
     if(CHARGE_DONE==0) {
         CHARGE=0;
     }
+      {
+        // Read analog values and compute data
+        int ad[4];
+        ad[0]=AD00 & 0x3FF;
+        ad[1]=AD01 & 0x3FF;
+        ad[2]=AD02 & 0x3FF;
+        ad[3]=AD03 & 0x3FF;
+        bat=bat*0.9f+(float)ad[3]*(13.64/0x3FF)*0.1f;
+        capacitor=capacitor*0.9f+(float)ad[2]/2.27333333*0.1f ; // 0x3FF/450V
+        leftmotorcurrent =leftmotorcurrent *0.9f+(float)ad[0]/50.0*0.1f; // 50 is Tambov!
+        rightmotorcurrent=rightmotorcurrent*0.9f+(float)ad[1]/50.0*0.1f ;
+        if(leftmotorcurrent>10.0f | rightmotorcurrent>10.0f) {
+          ERRORLED=1;
+          pwmtarget[0]=0;
+          pwmtarget[1]=0;
+        } else {
+          ERRORLED=0;
+        }
+      }
 
     switch(ticks % 100) {
     case 0:
@@ -117,18 +136,6 @@ s_int(void) {
         }
         break;
     case 70:
-      {
-        // Read analog values and compute data
-        int ad[4];
-        ad[0]=AD00 & 0x3FF;
-        ad[1]=AD01 & 0x3FF;
-        ad[2]=AD02 & 0x3FF;
-        ad[3]=AD03 & 0x3FF;
-        bat=(float)ad[3]*(13.64/0x3FF);
-        capacitor=(float)ad[2]/2.27333333 ; // 0x3FF/450V
-        leftmotorcurrent =(float)ad[0]/50.0 ; // Tambov!
-        rightmotorcurrent=(float)ad[1]/50.0 ;
-      }
       break;
 
      case 77: // Just at some random time but 10 times per second
@@ -222,8 +229,8 @@ s_int(void) {
 #define sign(x) ((x>0.0f) - (x<0.0f))
     distanceleft =revolutions1*0.07900917431f/1000.0f;
     distanceright=revolutions2*0.07900917431f/1000.0f;
-    revolutions1=0.0f;
-    revolutions2=0.0f;
+//    revolutions1=0.0f;
+//    revolutions2=0.0f;
     if(distanceleft == distanceright) {
         dx=0.0f;
         dy=distanceleft;
