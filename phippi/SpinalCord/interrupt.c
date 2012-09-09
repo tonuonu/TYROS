@@ -29,7 +29,7 @@
 #include "hwsetup.h"
 #include "SPI.h"
 #include "mma7455l.h"
-#include <math.h>
+
 
 int todocase=0;
 
@@ -138,8 +138,10 @@ s_int(void) {
     case 70:
       break;
 
-     case 77: // Just at some random time but 10 times per second
+     case 27: // Just at some random time but 2 times per second
+     case 77: // Just at some random time but 2 times per second
         redraw_infoscreen_buffers();
+      break;
     
     }
    
@@ -218,30 +220,6 @@ s_int(void) {
         pwmtarget[1]++;
     }
 #endif    
-    /* 
-    sammu pikkuseks saan umbes 54.5 mm
-    Kalle-Gustav Kruus: 4,306 tais mootori pooret sammu kohta
-    Kalle-Gustav Kruus: nagu 0.1mm põõrde kohta umbes
-    Tonu Samuel: 0.07900917431  mm siis poorde kohta
-    /1000.0 on, et meetriteks teisendamine
-    */
-#define robotwidth 0.175     
-#define sign(x) ((x>0.0f) - (x<0.0f))
-    distanceleft =revolutions1*0.07900917431f/1000.0f;
-    distanceright=revolutions2*0.07900917431f/1000.0f;
-//    revolutions1=0.0f;
-//    revolutions2=0.0f;
-    if(distanceleft == distanceright) {
-        dx=0.0f;
-        dy=distanceleft;
-    } else {
-        float smallradius=robotwidth/((distanceleft<distanceright ? distanceright/distanceleft:distanceleft/distanceright)-1);
-        float angletraveled=(distanceleft<distanceright ? distanceleft:distanceright)/smallradius;
-        float centerradius=smallradius+(robotwidth/2.0f);
-        dy=sin(angletraveled)*centerradius;
-        dx=cos(angletraveled)*centerradius * (distanceleft < distanceright ? 1.0f : -1.0f)
-          - (sign(distanceleft)+sign(distanceright)!=1  ? centerradius : 0);
-    }
     
     
 /*     if(ticks % 48 == 1  ) {

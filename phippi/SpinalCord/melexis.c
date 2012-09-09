@@ -171,7 +171,7 @@ __interrupt void _uart4_receive(void) {
                 change+=16384;
               if(change > (16384/2))
                 change-=16384;
-              revolutions1+=change;              
+              MLXaccumulatorL+=change;              
               mlxrightstatus=2;
               MLXLold = MLXLdata;
           }
@@ -243,8 +243,8 @@ SPI7_Init(void) { // Left Melexis 90316
 
 }
 
-signed int  revolutions1=0LL;
-signed int  revolutions2=0LL;
+signed int  MLXaccumulatorL=0LL;
+signed int  MLXaccumulatorR=0LL;
 float distanceleft=0.0f;
 float distanceright=0.0f;
 float dx=0.0f;
@@ -301,7 +301,7 @@ __interrupt void _uart7_receive(void) {
                 change+=16384;
               if(change > (16384/2))
                 change-=16384;
-              revolutions2+=change;    
+              MLXaccumulatorR+=change;    
               mlxrightstatus=2;
               MLXRold = MLXRdata;
           }

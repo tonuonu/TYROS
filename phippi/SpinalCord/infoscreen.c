@@ -5,6 +5,7 @@
 #include <stdlib.h>
 #include "hwsetup.h"
 #include "main.h"
+#include <math.h>
 /*
 Competition:
   0         1         2         3         4         5         6
@@ -69,6 +70,9 @@ return err;
 }
 void 
 redraw_infoscreen_buffers(void) {
+    float angletraveled=0.0f;
+    float smallradius=0.0f;
+
     char *tmpmlxrighterror="";
     char *tmpmlxlefterror="";
   
@@ -156,6 +160,51 @@ Gyroscope:                                                      7
     snprintf(linedata[6],sizeof(linedata[6]),"\x1b" "[7;1H" "" VT100ERASETOEND);
     snprintf(linedata[7],sizeof(linedata[7]),"\x1b" "[8;1H" " Normal Competition"VT100BOLD VT100REVERSE ">Demo<" VT100NORMAL "Debug drivetrain Debug sensors" VT100ERASETOEND);
     break;
+  case MODE_DEBUG_DRIVETRAIN:
+    
+    
+    /* 
+    sammu pikkuseks saan umbes 54.5 mm
+    Kalle-Gustav Kruus: 4,306 tais mootori pooret sammu kohta
+    Kalle-Gustav Kruus: nagu 0.1mm põõrde kohta umbes
+    Tonu Samuel: 0.07900917431  mm siis poorde kohta
+    /1000.0 on, et meetriteks teisendamine
+    */
+#define robotwidth 0.175     
+#define sign(x) ((x>0.0f) - (x<0.0f))
+    distanceleft =MLXaccumulatorL*0.07900917431f/1000.0f;
+    distanceright=MLXaccumulatorR*0.07900917431f/1000.0f;
+//    MLXaccumulatorL=0.0f;
+//    MLXaccumulatorR=0.0f;
+    if(distanceleft == distanceright) {
+        dx=0.0f;
+        dy=distanceleft;
+    } else {
+        smallradius=robotwidth/((distanceleft<distanceright ? distanceright/distanceleft:distanceleft/distanceright)-1);
+        angletraveled=(distanceleft<distanceright ? distanceleft:distanceright)/smallradius;
+        float centerradius=smallradius+(robotwidth/2.0f);
+        dy=sin(angletraveled)*centerradius;
+        dx=cos(angletraveled)*centerradius * (distanceleft < distanceright ? 1.0f : -1.0f)
+          - (sign(distanceleft)+sign(distanceright)!=1  ? centerradius : 0);
+    }
+
+    
+    snprintf(linedata[0],sizeof(linedata[0]),"\x1b" "[1;1H" "" VT100ERASETOEND);
+    snprintf(linedata[1],sizeof(linedata[1]),"\x1b" "[2;1H" "" VT100ERASETOEND);
+    snprintf(linedata[2],sizeof(linedata[2]),"\x1b" "[3;1H" "" VT100ERASETOEND);
+    snprintf(linedata[3],sizeof(linedata[3]),"\x1b" "[4;1H" "" VT100ERASETOEND);
+    snprintf(linedata[4],sizeof(linedata[4]),"\x1b" "[5;1H" "dx:%f dy:%f dl:%f dr:%f angle:%f" VT100ERASETOEND,dx,dy,distanceleft,distanceright,angletraveled);
+    snprintf(linedata[5],sizeof(linedata[5]),"\x1b" "[6;1H" "revolutions left  %f, %frpm %f steps " VT100ERASETOEND
+             ,(float)MLXaccumulatorL/16384.0,(float)MLXaccumulatorL/16384.0*2.0*60.0,(float)MLXaccumulatorL/16384/4.306*2.0*60.0);
+    snprintf(linedata[6],sizeof(linedata[6]),"\x1b" "[7;1H" "revolutions right %f, %frpm %f steps " VT100ERASETOEND
+             ,(float)MLXaccumulatorR/16384.0,(float)MLXaccumulatorR/16384.0*2.0*60.0,(float)MLXaccumulatorR/16384/4.306*2.0*60.0);
+    MLXaccumulatorL=0;
+    MLXaccumulatorR=0;
+ 
+    
+    snprintf(linedata[7],sizeof(linedata[7]),"\x1b" "[8;1H" " Normal Competition Demo"VT100BOLD VT100REVERSE ">Debug drivetrain<" VT100NORMAL "Debug sensors " VT100ERASETOEND); 
+    break;
+
   case MODE_DEBUG_SENSORS:
     {
     const char *errright="";
@@ -170,7 +219,7 @@ Gyroscope:                                                      7
     snprintf(linedata[3],sizeof(linedata[3]),"\x1b" "[4;1H" "Gyro calibrationmin max:      x:%6d y:%6d z:%6d"VT100ERASETOEND,gyromaxx,gyromaxy,gyromaxz);
     snprintf(linedata[4],sizeof(linedata[4]),"\x1b" "[5;1H" "Left drive:  mlx status:%3d (%s %s) mlx raw: %5d"VT100ERASETOEND,mlxleftstatus ,mlxleftstatus ==3 ? "no sensor ":(mlxleftstatus !=2 ? "Err:":"OK        "),errleft,MLXLdata );     
     snprintf(linedata[5],sizeof(linedata[5]),"\x1b" "[6;1H" "Right drive: mlx status:%3d (%s %s) mlx raw: %5d"VT100ERASETOEND,mlxrightstatus,mlxrightstatus==3 ? "no sensor ":(mlxrightstatus!=2 ? "Err:":"OK        "),errright,MLXRdata);     
-    snprintf(linedata[6],sizeof(linedata[6]),"\x1b" "[7;1H" "revolutions left %d right %d" VT100ERASETOEND,revolutions1,revolutions2);
+
 /*Debug sensors:
   0         1         2         3         4         5         6
   0123456789012345678901234567890123456789012345678901234567890123
@@ -186,16 +235,6 @@ Gyroscope:                                                      7
 */
     snprintf(linedata[7],sizeof(linedata[7]),"\x1b" "[8;1H" " Normal Competition Demo Debug drivetrain"VT100BOLD VT100REVERSE ">Debug sensors<" VT100NORMAL VT100ERASETOEND);
     }
-    break;
-  case MODE_DEBUG_DRIVETRAIN:
-    snprintf(linedata[0],sizeof(linedata[0]),"\x1b" "[1;1H" "%s","\x1b" "[0K");
-    snprintf(linedata[1],sizeof(linedata[1]),"\x1b" "[2;1H" "%s","\x1b" "[0K");
-    snprintf(linedata[2],sizeof(linedata[2]),"\x1b" "[3;1H" "%s","\x1b" "[0K");
-    snprintf(linedata[3],sizeof(linedata[3]),"\x1b" "[4;1H" "%s","\x1b" "[0K");
-    snprintf(linedata[4],sizeof(linedata[4]),"\x1b" "[5;1H" "%s","\x1b" "[0K");
-    snprintf(linedata[5],sizeof(linedata[5]),"\x1b" "[6;1H" "%s","\x1b" "[0K");
-    snprintf(linedata[6],sizeof(linedata[6]),"\x1b" "[7;1H" "%s","\x1b" "[0K");
-    snprintf(linedata[7],sizeof(linedata[7]),"\x1b" "[8;1H" " Normal Competition Demo"VT100BOLD VT100REVERSE ">Debug drivetrain<" VT100NORMAL "Debug sensors " VT100ERASETOEND); 
     break;
   default:
  //   mode=0;

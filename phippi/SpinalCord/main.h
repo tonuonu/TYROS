@@ -75,8 +75,8 @@ extern unsigned char tmpMLXRdata2;
 extern unsigned char tmpMLXRdata3;
 extern unsigned char tmpMLXRdata4;
 
-extern signed int  revolutions1;
-extern signed int  revolutions2;
+extern signed int  MLXaccumulatorL;
+extern signed int  MLXaccumulatorR;
 extern float distanceleft;
 extern float distanceright;
 extern float dx;

@@ -152,11 +152,11 @@
       <inputs>
         <tool>
           <name>ICCR32C</name>
-          <file> 50 6 28 30 34 32 57 33 56 47 2 29 10 43</file>
+          <file> 50 6 28 30 34 32 57 33 56 47 2 29 10 43 14 13</file>
         </tool>
         <tool>
           <name>BICOMP</name>
-          <file> 50 6 28 30 34 57 33 56 47 2 29 10 43</file>
+          <file> 50 6 28 30 34 57 33 56 47 2 29 10 43 14 13</file>
         </tool>
       </inputs>
     </file>
@@ -184,11 +184,11 @@
       <inputs>
         <tool>
           <name>ICCR32C</name>
-          <file> 50 6 28 30 34 32 57 33 56 47 2 29 43 52 10 55 37 14 13</file>
+          <file> 50 6 28 30 34 32 57 33 56 47 2 29 43 52 10 55 37</file>
         </tool>
         <tool>
           <name>BICOMP</name>
-          <file> 50 6 28 30 34 57 33 56 47 2 29 43 52 10 55 37 14 13</file>
+          <file> 50 6 28 30 34 57 33 56 47 2 29 43 52 10 55 37</file>
         </tool>
       </inputs>
     </file>
