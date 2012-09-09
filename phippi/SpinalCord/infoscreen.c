@@ -172,36 +172,40 @@ Gyroscope:                                                      7
     */
 #define robotwidth 0.175     
 #define sign(x) ((x>0.0f) - (x<0.0f))
-    distanceleft =MLXaccumulatorL*0.07900917431f/1000.0f;
-    distanceright=MLXaccumulatorR*0.07900917431f/1000.0f;
-//    MLXaccumulatorL=0.0f;
-//    MLXaccumulatorR=0.0f;
+    distanceleft =(float)MLXaccumulatorL/16384.0/4.306*0.00545;
+    distanceright=(float)MLXaccumulatorR/16384.0/4.306*0.00545;
     if(distanceleft == distanceright) {
         dx=0.0f;
         dy=distanceleft;
     } else {
-        smallradius=robotwidth/((distanceleft<distanceright ? distanceright/distanceleft:distanceleft/distanceright)-1);
-        angletraveled=(distanceleft<distanceright ? distanceleft:distanceright)/smallradius;
+        if(distanceleft==0 ) {
+          smallradius=robotwidth;
+          angletraveled=distanceright/smallradius;
+        } else if(distanceright==0 ) {
+          smallradius=robotwidth;
+          angletraveled=distanceleft/smallradius;
+        }else {
+          smallradius=robotwidth/((distanceleft<distanceright ? distanceright/distanceleft:distanceleft/distanceright)-1);
+          angletraveled=(distanceleft<distanceright ? distanceleft:distanceright)/smallradius;
+        }
         float centerradius=smallradius+(robotwidth/2.0f);
         dy=sin(angletraveled)*centerradius;
         dx=cos(angletraveled)*centerradius * (distanceleft < distanceright ? 1.0f : -1.0f)
           - (sign(distanceleft)+sign(distanceright)!=1  ? centerradius : 0);
     }
-
     
     snprintf(linedata[0],sizeof(linedata[0]),"\x1b" "[1;1H" "" VT100ERASETOEND);
     snprintf(linedata[1],sizeof(linedata[1]),"\x1b" "[2;1H" "" VT100ERASETOEND);
     snprintf(linedata[2],sizeof(linedata[2]),"\x1b" "[3;1H" "" VT100ERASETOEND);
     snprintf(linedata[3],sizeof(linedata[3]),"\x1b" "[4;1H" "" VT100ERASETOEND);
     snprintf(linedata[4],sizeof(linedata[4]),"\x1b" "[5;1H" "dx:%f dy:%f dl:%f dr:%f angle:%f" VT100ERASETOEND,dx,dy,distanceleft,distanceright,angletraveled);
-    snprintf(linedata[5],sizeof(linedata[5]),"\x1b" "[6;1H" "revolutions left  %f, %frpm %f steps " VT100ERASETOEND
-             ,(float)MLXaccumulatorL/16384.0,(float)MLXaccumulatorL/16384.0*2.0*60.0,(float)MLXaccumulatorL/16384/4.306*2.0*60.0);
-    snprintf(linedata[6],sizeof(linedata[6]),"\x1b" "[7;1H" "revolutions right %f, %frpm %f steps " VT100ERASETOEND
-             ,(float)MLXaccumulatorR/16384.0,(float)MLXaccumulatorR/16384.0*2.0*60.0,(float)MLXaccumulatorR/16384/4.306*2.0*60.0);
+    snprintf(linedata[5],sizeof(linedata[5]),"\x1b" "[6;1H" "left  %.1frps, %.1frpm %.1f steps/s %.1f steps/min %.4fm/s" VT100ERASETOEND
+             ,(float)MLXaccumulatorL/16384.0*2.0,(float)MLXaccumulatorL/16384.0*2.0*60.0,(float)MLXaccumulatorL/16384.0/4.306*2.0,(float)MLXaccumulatorL/16384/4.306*2.0*60.0,distanceleft*2.0f);
+    snprintf(linedata[6],sizeof(linedata[6]),"\x1b" "[7;1H" "right %.1frps, %.1frpm %.1f steps/s %.1f steps/min %.4fm/s" VT100ERASETOEND
+             ,(float)MLXaccumulatorR/16384.0*2.0,(float)MLXaccumulatorR/16384.0*2.0*60.0,(float)MLXaccumulatorR/16384.0/4.306*2.0,(float)MLXaccumulatorR/16384/4.306*2.0*60.0,distanceright*2.0f);
     MLXaccumulatorL=0;
     MLXaccumulatorR=0;
- 
-    
+     
     snprintf(linedata[7],sizeof(linedata[7]),"\x1b" "[8;1H" " Normal Competition Demo"VT100BOLD VT100REVERSE ">Debug drivetrain<" VT100NORMAL "Debug sensors " VT100ERASETOEND); 
     break;
 
