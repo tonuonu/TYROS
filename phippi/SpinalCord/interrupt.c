@@ -46,7 +46,7 @@ oneshot1(void) {
   default:
     u7tb=0xFF;
   }   
-    ir_ta0ic = 0;
+  ir_ta0ic = 0;
 }
 
 #pragma vector=TIMER_A3
@@ -104,10 +104,10 @@ s_int(void) {
         ad[1]=AD01 & 0x3FF;
         ad[2]=AD02 & 0x3FF;
         ad[3]=AD03 & 0x3FF;
-        bat=bat*0.9f+(float)ad[3]*(13.64/0x3FF)*0.1f;
-        capacitor=capacitor*0.9f+(float)ad[2]/2.27333333*0.1f ; // 0x3FF/450V
-        leftmotorcurrent =leftmotorcurrent *0.9f+(float)ad[0]/50.0*0.1f; // 50 is Tambov!
-        rightmotorcurrent=rightmotorcurrent*0.9f+(float)ad[1]/50.0*0.1f ;
+        bat=bat*0.9f+(float)ad[3]*(13.64/0x3FF)*0.1;
+        capacitor=capacitor*0.99+(float)ad[2]/2.27333333*0.01 ; // 0x3FF/450V
+        leftmotorcurrent =leftmotorcurrent *0.9+(float)ad[0]/50.0*0.1; // 50 is Tambov!
+        rightmotorcurrent=rightmotorcurrent*0.9+(float)ad[1]/50.0*0.1 ;
         if(leftmotorcurrent>10.0f | rightmotorcurrent>10.0f) {
           ERRORLED=1;
           pwmtarget[0]=0;
@@ -120,18 +120,18 @@ s_int(void) {
     switch(ticks % 100) {
     case 0:
         status.sek_flag=1;
-        if(buzzer || bat < 6.6) {
+        if(buzzer || bat < 6.6f) {
             // This turns on PWM on buzzer
             ta4=1;
         }
         break;
     case 1:  
-        if(bat>6.3 || bat < 4.0) { // If battery is not dead yet 
+        if(bat>6.3f || bat < 4.0f) { // If battery is not dead yet 
             ta4=0; // Turn off buzzer
         }
         break;
     case 50:  
-        if(bat>6.1 ) { // If battery is not dead yet 
+        if(bat>6.1f ) { // If battery is not dead yet 
             ta4=0; // Turn off buzzer
         }
         break;

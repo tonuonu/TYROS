@@ -83,7 +83,7 @@ extern float dx;
 extern float dy;
 extern float yaw;
 
-extern char linedata[8][100];
+extern char linedata[8][150];
 extern int lineno;
 extern int linepos;
 extern int mode;
