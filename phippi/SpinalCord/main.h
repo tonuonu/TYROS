@@ -1,5 +1,5 @@
 /*
- *  Copyright (c) 2011, Tonu Samuel
+ *  Copyright (c) 2011,2012 Tonu Samuel
  *  All rights reserved.
  *
  *  This file is part of TYROS.
@@ -61,27 +61,22 @@ extern int gyrominx,gyrominy,gyrominz;
 extern signed char gyrotemp;
 extern int gyrowhoamistatus;
 extern unsigned int MLXLdata,MLXRdata;
-extern int mlxrighterrorcode;
-extern int mlxlefterrorcode;
+extern int mlxRerrcode;
+extern int mlxLerrcode;
 extern int mlx1whoamistatus;
 extern int mlx2whoamistatus;
 extern int buzzer;
 extern float bat, capacitor, leftmotorcurrent , rightmotorcurrent ;
 
-extern char mlxrightstatus,mlxleftstatus;
+extern char mlxRstatus,mlxLstatus;
 
 extern unsigned char tmpMLXRdata1;
 extern unsigned char tmpMLXRdata2;
 extern unsigned char tmpMLXRdata3;
 extern unsigned char tmpMLXRdata4;
 
-extern signed int  MLXaccumulatorL;
-extern signed int  MLXaccumulatorR;
-extern float distanceleft;
-extern float distanceright;
-extern float dx;
-extern float dy;
-extern float yaw;
+extern signed int MLXaccumulatorL;
+extern signed int MLXaccumulatorR;
 
 extern char linedata[8][150];
 extern int lineno;

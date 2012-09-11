@@ -27,8 +27,8 @@
 
 int mlx1whoamistatus=0;
 int mlx2whoamistatus=0;
-int mlxrighterrorcode=0;
-int mlxlefterrorcode=0;
+int mlxRerrcode=0;
+int mlxLerrcode=0;
 long int MLXLold=-1; // -1 indicates no old data known
 long int MLXRold=-1;
 unsigned int MLXLdata=0;
@@ -43,7 +43,7 @@ unsigned char MLXRbyte2;
 unsigned char MLXRbyte3;
 unsigned char MLXRbyte4;
 
-char mlxrightstatus=0,mlxleftstatus=0;
+char mlxRstatus=0,mlxLstatus=0;
 
 void
 SPI4_Init(void) { // Right Melexis 90316
@@ -159,8 +159,8 @@ __interrupt void _uart4_receive(void) {
       uDelay(200); 
       if( MLXLbyte1 == (unsigned char)~ MLXLbyte3 &&  MLXLbyte2 == (unsigned char)~ MLXLbyte4) {
           if((MLXLbyte2 & 3) == 2) { // error code, not angular data
-              mlxleftstatus=1;
-              mlxlefterrorcode=MLXLbyte2 >> 2; 
+              mlxLstatus=1;
+              mlxLerrcode=MLXLbyte2 >> 2; 
           } else {
               MLXLdata = ((unsigned int) MLXLbyte1 << 6) | ((unsigned int) MLXLbyte2 >>  2) ;
 
@@ -172,11 +172,11 @@ __interrupt void _uart4_receive(void) {
               if(change > (16384/2))
                 change-=16384;
               MLXaccumulatorL+=change;              
-              mlxrightstatus=2;
+              mlxRstatus=2;
               MLXLold = MLXLdata;
           }
       } else {
-          mlxleftstatus=3;
+          mlxLstatus=3;
       }
       u4tb=0xFF;
       break;
@@ -245,11 +245,6 @@ SPI7_Init(void) { // Left Melexis 90316
 
 signed int  MLXaccumulatorL=0LL;
 signed int  MLXaccumulatorR=0LL;
-float distanceleft=0.0f;
-float distanceright=0.0f;
-float dx=0.0f;
-float dy=0.0f;
-float yaw=0.0f;
 
 #pragma vector = UART7_RX
 __interrupt void _uart7_receive(void) {
@@ -290,8 +285,8 @@ __interrupt void _uart7_receive(void) {
       uDelay(200); 
       if( MLXRbyte1 == (unsigned char)~ MLXRbyte3 &&  MLXRbyte2 == (unsigned char)~ MLXRbyte4) {
           if((MLXRbyte2 & 3) == 2) { // error code, not angular data
-              mlxrightstatus=1;
-              mlxrighterrorcode=MLXRbyte2 >> 2; 
+              mlxRstatus=1;
+              mlxRerrcode=MLXRbyte2 >> 2; 
           } else {
               MLXRdata = ((unsigned int) MLXRbyte1 << 6) | ((unsigned int) MLXRbyte2 >>  2) ;
               signed int change=0;
@@ -302,11 +297,11 @@ __interrupt void _uart7_receive(void) {
               if(change > (16384/2))
                 change-=16384;
               MLXaccumulatorR+=change;    
-              mlxrightstatus=2;
+              mlxRstatus=2;
               MLXRold = MLXRdata;
           }
       } else {
-          mlxrightstatus=3;
+          mlxRstatus=3;
       }
       u7tb=0xFF;
       break;
