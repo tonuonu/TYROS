@@ -217,7 +217,11 @@ redraw_infoscreen_buffers(void) {
     if(turnL) {
         dx=dx*-1.0f;
     }
-#define GYRORATE (6.658e-5)
+    /* 
+     * Next constant is from 
+     * http://www.wolframalpha.com/input/?i=1%2F%280xFFFF%2F250%29+degrees+in+radians
+     */
+#define GYRORATE (0.00006658)
     switch(mode) {
         case MODE_MANUAL:
             if(bat<6.0) {  

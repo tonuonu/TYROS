@@ -1,5 +1,5 @@
 /*
- *  Copyright (c) 2011, Tonu Samuel
+ *  Copyright (c) 2011,2012 Tonu Samuel
  *  All rights reserved.
  *
  *  This file is part of TYROS.
@@ -271,14 +271,6 @@ Heartbeat_Init(void) {
     tb5s = 1;
     ticks = 0;
     LED1d  = PD_OUTPUT;
-/*
-    tck0_tb4mr=0; // f8
-    tck1_tb4mr=1;
-
-    tb4 = 50000-1;                       // 1MHz/50000 ; Fi = 20Hz
-    tb4ic = 2;                           // level 2 interrupt
-    tb4s = 1;
-*/
 }
 
 static void 
@@ -303,13 +295,10 @@ static void
 CapacitorCharger_Init(void) {
     CHARGE = 0;
     CHARGEd = PD_OUTPUT; 
-    
 }
 
 static void 
 Analog_Init(void) {
-
-    
     ch0_ad0con0  = 0; // does not matter in sweep mode       
     ch1_ad0con0  = 0; // does not matter in sweep mode           
     ch2_ad0con0  = 0; // does not matter in sweep mode
@@ -328,7 +317,6 @@ Analog_Init(void) {
     opa0_ad0con1  = 0; // External op amp not used
     opa1_ad0con1  = 0; // External op amp not used
 
-
     smp_ad0con2  = 0; // with sample and hold
     aps0_ad0con2 = 0; // an_0 to an_7
     aps1_ad0con2 = 0; // an_0 to an_7
@@ -339,11 +327,7 @@ Analog_Init(void) {
     cks2_ad0con3   = 1; // divide by 8
     msf0_ad0con3   = 0; // multi port sweep status flag. Disabled.
     msf1_ad0con3   = 0; // multi port sweep status flag. Disabled.
-//        ad0con3 = 0x00; 
-    /* Setting A/D0 control register3
-       Disable DMAC operating mode
-       AD frequency set fAD/2
-    */
+
     ad0con4 = 0;     
     AN00s = PF_ANALOG;
     AN01s = PF_ANALOG;
@@ -378,10 +362,10 @@ Oneshot_Init(void) {
     tck1_ta0mr  = 1; // f1 clock source    
     mr2_ta0mr   = 0; // Start on ta0os bit
     ta0         = 1;
-    ta0s  = 5; // start counter
+    ta0s        = 5; // start counter
     DISABLE_IRQ
-    ilvl_ta0ic =0x04;       
-    ir_ta0ic   =0;            
+    ilvl_ta0ic  = 0x04;       
+    ir_ta0ic    = 0;            
     ENABLE_IRQ
       
     // Timer 3 for SPI4
@@ -391,10 +375,10 @@ Oneshot_Init(void) {
     tck1_ta3mr  = 1; // f1 clock source    
     mr2_ta3mr   = 0; // Start on ta0os bit
     ta3         = 1;
-    ta3s  = 5; // start counter
+    ta3s        = 5; // start counter
     DISABLE_IRQ
-    ilvl_ta3ic =0x04;       
-    ir_ta3ic   =0;            
+    ilvl_ta3ic  = 0x04;       
+    ir_ta3ic    = 0;            
     ENABLE_IRQ
 }
 
@@ -415,23 +399,18 @@ HardwareSetup(void) {
     Coilgun_Init();
     Panda_Init();
     Joy_Init();
-    OLED_Init(); // must be before gyro or OLED does not init properly
+    // OLED init must be before gyro or OLED does not init properly
     // Pullup pm p4_4, pu11 tries to  make it high while initializing gyro 
-    // and messes up our OLED init later.
-
+    // and messes up our OLED init later.    OLED_Init(); 
     uart0_init(); // Panda
     SPI2_Init();  // Accel sensor
     SPI3_Init();  // OLED
     SPI4_Init();  // Melexis sensor left
-    // 5 is old and now unused serial 
     SPI6_Init();  // gyro
-    //gyro_Init();
     SPI7_Init();  // Melexis sensor right
     ENABLE_IRQ;
     Analog_Init();
     PWM_Init();
     Oneshot_Init();
 }
-
-
 
