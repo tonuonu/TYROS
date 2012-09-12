@@ -61,21 +61,21 @@ int putchar (int i ) {
 #endif
 #pragma vector = UART0_TX
 __interrupt void _uart0_transmit(void) {
-  if(!linedata[lineno][linepos]){
-      linepos=0;
+  if(!text[lineno][textpos]){
+      textpos=0;
       lineno++;
       if(lineno>7) {
         lineno=0;
       }
   }
-  u0tb=linedata[lineno][linepos];
-  linepos++;
-  if(linepos>(100-1)) {
+  u0tb=text[lineno][textpos];
+  textpos++;
+  if(textpos>(100-1)) {
       lineno++;
       if(lineno>7) {
         lineno=0;
       }
-      linepos=0;
+      textpos=0;
   }
 }
 

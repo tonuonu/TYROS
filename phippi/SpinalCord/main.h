@@ -78,9 +78,9 @@ extern unsigned char tmpMLXRdata4;
 extern signed int MLXaccumulatorL;
 extern signed int MLXaccumulatorR;
 
-extern char linedata[8][150];
+extern char text[8][150];
 extern int lineno;
-extern int linepos;
+extern int textpos;
 extern int mode;
 void redraw_infoscreen_buffers(void);
 enum {
