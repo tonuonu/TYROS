@@ -81,6 +81,7 @@ melexiscode(int errcode) {
 void 
 redraw_infoscreen_buffers(void) {
 
+#define UPDATESPERSEC (5.0)     // We get called exactly 5 times per second
 #define ROBOTWIDTH    (0.175)   // 17.5 cm is distance from left to right legs
 #define TURNSPERSTEP  (4.306)   // Motor shaft makes 4.306 turns for one step 
 #define METERSPERSTEP (0.00545) // One step is 54.5mm but we use meters...
@@ -208,20 +209,24 @@ redraw_infoscreen_buffers(void) {
     }
     switch(mode) {
         case MODE_MANUAL:
-            if(mlxRstatus==3) {
-                tmpRerror=VT100REVERSE "Right position sensor missing" VT100NORMAL " ";
-            } else if(mlxRstatus==1) {
-                tmpRerror=VT100REVERSE "Right position sensor returns error" VT100NORMAL " ";
-            }
-            if(mlxLstatus==3) {
-                tmpLerror=VT100REVERSE "Left position sensor missing" VT100NORMAL " ";
-            } else if(mlxLstatus==1) {
-                tmpLerror=VT100REVERSE "Left position sensor returns error" VT100NORMAL " ";
+            if(bat<6.0) {  
+              tmpLerror=VT100REVERSE "Position sensors LDO off due to low battery " VT100NORMAL " ";
+            } else {
+               if(mlxRstatus==3) {
+                   tmpRerror=VT100REVERSE "Right position sensor missing" VT100NORMAL " ";
+               } else if(mlxRstatus==1) {
+                   tmpRerror=VT100REVERSE "Right position sensor returns error" VT100NORMAL " ";
+               }
+               if(mlxLstatus==3) {
+                   tmpLerror=VT100REVERSE "Left position sensor missing" VT100NORMAL " ";
+               } else if(mlxLstatus==1) {
+                   tmpLerror=VT100REVERSE "Left position sensor returns error" VT100NORMAL " ";
+               }
             }
             snprintf(text[0],sizeof(text[0]),"\x1b" "[1;1H" "Status: %s%s%s" VT100NORMAL VT100ERASETOEND,gyrowhoami!=211? "Gyroscope error":mlxRstatus==2 && mlxLstatus==2?"OK":"",tmpRerror,tmpLerror);
             snprintf(text[1],sizeof(text[1]),"\x1b" "[2;1H" "Battery: %s %4.1fV %3.0f%% Panda %s" VT100ERASETOEND,bat>6.9 ?"normal      ":bat>6.3 ?"LOW         ":bat>5.0 ?"CRITICAL    ":"disconnected",bat,batpercent,PANDA ? "on ":"off");
-            snprintf(text[2],sizeof(text[2]),"\x1b" "[3;1H" "Left drive: %s %4.2fm/s %.0frpm pwm:%3u%% %4.1fA" VT100ERASETOEND,pwm[0]<0 ?"backward":pwm[0]>0 ?"forward ":"brake   ",distanceL *10.0f,revolutionsL*2.0*60.0,(int)abs(pwm[0]),leftmotorcurrent);
-            snprintf(text[3],sizeof(text[3]),"\x1b" "[4;1H" "Right drive:%s %4.2fm/s %.0frpm pwm:%3u%% %4.1fA" VT100ERASETOEND,pwm[1]<0 ?"backward":pwm[0]>0 ?"forward ":"brake   ",distanceR*10.0f,revolutionsR*2.0*60.0,(int)abs(pwm[1]),rightmotorcurrent);
+            snprintf(text[2],sizeof(text[2]),"\x1b" "[3;1H" "Left drive: %s %4.2fm/s %.0frpm pwm:%3u%% %4.1fA" VT100ERASETOEND,pwm[0]<0 ?"backward":pwm[0]>0 ?"forward ":"brake   ",distanceL*10.0f,revolutionsL*UPDATESPERSEC*60.0,(int)abs(pwm[0]),leftmotorcurrent);
+            snprintf(text[3],sizeof(text[3]),"\x1b" "[4;1H" "Right drive:%s %4.2fm/s %.0frpm pwm:%3u%% %4.1fA" VT100ERASETOEND,pwm[1]<0 ?"backward":pwm[0]>0 ?"forward ":"brake   ",distanceR*10.0f,revolutionsR*UPDATESPERSEC*60.0,(int)abs(pwm[1]),rightmotorcurrent);
             snprintf(text[4],sizeof(text[4]),"\x1b" "[5;1H" "Coilgun: %3.0fV, %s, %s" VT100ERASETOEND,capacitor,CHARGE ? "charging":"waiting ",BALL_DETECT ? "no ball":"Ball! ");
             snprintf(text[5],sizeof(text[5]),"\x1b" "[6;1H" "Odometry: x:%fm y:%fm yaw:%frad" VT100ERASETOEND,dx,dy,yaw);
             snprintf(text[6],sizeof(text[6]),"\x1b" "[7;1H" "" VT100ERASETOEND);
@@ -257,9 +262,9 @@ redraw_infoscreen_buffers(void) {
             snprintf(text[3],sizeof(text[3]),"\x1b" "[4;1H" "" VT100ERASETOEND);
             snprintf(text[4],sizeof(text[4]),"\x1b" "[5;1H" "dx:%f dy:%f dl:%fm dr:%fm angle:%f" VT100ERASETOEND,dx,dy,distanceL,distanceR,yaw);
             snprintf(text[5],sizeof(text[5]),"\x1b" "[6;1H" "left  %.1frps, %.1frpm %.1f steps/s %.1f steps/min %.4fm/s" VT100ERASETOEND
-                ,revolutionsL*2.0,revolutionsL*2.0*60.0,revolutionsL/TURNSPERSTEP*2.0,revolutionsL/TURNSPERSTEP*2.0*60.0,distanceL*2.0f);
+                ,revolutionsL*UPDATESPERSEC,revolutionsL*UPDATESPERSEC*60.0,revolutionsL/TURNSPERSTEP*UPDATESPERSEC,revolutionsL/TURNSPERSTEP*UPDATESPERSEC*60.0,distanceL*UPDATESPERSEC);
             snprintf(text[6],sizeof(text[6]),"\x1b" "[7;1H" "right %.1frps, %.1frpm %.1f steps/s %.1f steps/min %.4fm/s" VT100ERASETOEND
-                ,revolutionsR*2.0,revolutionsR*2.0*60.0,revolutionsR/TURNSPERSTEP*2.0,revolutionsR/TURNSPERSTEP*2.0*60.0,distanceR*2.0f);
+                ,revolutionsR*UPDATESPERSEC,revolutionsR*UPDATESPERSEC*60.0,revolutionsR/TURNSPERSTEP*UPDATESPERSEC,revolutionsR/TURNSPERSTEP*UPDATESPERSEC*60.0,distanceR*UPDATESPERSEC);
             snprintf(text[7],sizeof(text[7]),"\x1b" "[8;1H" " Normal Competition Demo"VT100BOLD VT100REVERSE ">Debug drivetrain<" VT100NORMAL "Debug sensors " VT100ERASETOEND); 
             break;
         case MODE_DEBUG_SENSORS:

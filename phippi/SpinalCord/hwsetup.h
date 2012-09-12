@@ -110,7 +110,7 @@ void HardwareSetup(void);
 #define OLED_CSd      pd5_7
 
 // Melexis LDO enable
-#define MELEXIS_EN  p3_0
+#define MELEXIS_EN   p3_0
 #define MELEXIS_ENd  pd3_0
 
 // Serial 4, melexis rotation sensor

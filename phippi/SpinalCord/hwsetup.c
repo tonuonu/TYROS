@@ -271,13 +271,14 @@ Heartbeat_Init(void) {
     tb5s = 1;
     ticks = 0;
     LED1d  = PD_OUTPUT;
-
+/*
     tck0_tb4mr=0; // f8
     tck1_tb4mr=1;
 
     tb4 = 50000-1;                       // 1MHz/50000 ; Fi = 20Hz
     tb4ic = 2;                           // level 2 interrupt
     tb4s = 1;
+*/
 }
 
 static void 
@@ -409,6 +410,7 @@ HardwareSetup(void) {
     Heartbeat_Init();
     ERRORLEDd=PD_OUTPUT; // error LED
     MELEXIS_ENd=PD_OUTPUT;
+    MELEXIS_EN=0; // Low is ON, This is 5V LDO
     CapacitorCharger_Init();
     Coilgun_Init();
     Panda_Init();

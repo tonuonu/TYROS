@@ -39,8 +39,7 @@ extern char command[TX_BUFF_SIZE];
 double twist[6]={0,0,0,0,0,0};
 int pwm[2]={0,0};
 int pwmtarget[2]={0,0};
-int lastpwm=0;
-int buzzer=1; // If audible heartbeas is on
+int buzzer=1; // If audible heartbeat is on
 float bat=0.0f;
 float capacitor=0.0f;
 float leftmotorcurrent =0.0f ;
@@ -70,8 +69,7 @@ void updateOLED () {
     OLED_Show_String(  1, buf, 26, 2*8);
     sprintf(buf,"%4d", pwm[1]);
     OLED_Show_String(  1, buf, 26, 3*8); 
-    sprintf(buf,"%2d", lastpwm);
-    OLED_Show_String(  1, buf, 19, 4*8); 
+
 }
 
 void
@@ -107,7 +105,6 @@ main(void) {
     OLED_Fade_In();
     updateOLED1();    
     PANDA=1;
-    MELEXIS_EN=0; // Low is ON, This is 5V LDO
     CS4=0;
     CS7=0;
     // 300uS needed. On 48Mhz each cycle is ~21nS, so
@@ -122,13 +119,10 @@ main(void) {
     u6tb=L3G4200D_WHOAMI | 0x80;
     while (1) {
         char buf[256];
-        if (status.sek_flag==1) {
-            status.sek_flag=0;
-            LED1 ^= 1;
-            if(lastpwm < 60) {
-                lastpwm++;
-            }
-        }
+    
+          
+
+ 
 #if 1
         //if(ticks % 100 == 0) {
             updateOLED();    
@@ -173,8 +167,7 @@ main(void) {
                 sprintf(buf,"new twist x=%f(m/s), y=%f(m/s), yaw=%f(deg)",twist[0],twist[1],twist[5]);
                 write(buf);
             } else if(strncmp(command,"pwm ",4)==0) {
-                int tmp;
-                lastpwm=0;
+                int tmp;            
                 for(tmp=0,tok = strtok(command," "); tok && tmp<=2 ; tok=strtok(0," "),tmp++) {
                     if(tmp >= 1) {
                         pwmtarget[tmp-1]=(int)strtod(tok,NULL); 
