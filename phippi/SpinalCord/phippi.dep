@@ -105,6 +105,10 @@
       </outputs>
       <inputs>
         <tool>
+          <name>BICOMP</name>
+          <file> 12 21 22 38 40 46 20 45 19 57 26 43 37 15 53 13 28 18 49</file>
+        </tool>
+        <tool>
           <name>ICCR32C</name>
           <file> 12 21 22 38 40 46 44 20 45 19 57 26 43 37 15 53 13 28 18 49</file>
         </tool>

@@ -125,7 +125,7 @@ main(void) {
  
 #if 1
         //if(ticks % 100 == 0) {
-            updateOLED();    
+     //       updateOLED();    
         //}
 #endif
         if(command[0]!=0) {
