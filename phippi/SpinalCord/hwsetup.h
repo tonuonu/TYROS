@@ -106,15 +106,13 @@ void HardwareSetup(void);
 #define OLED_ENABLE  p4_4
 #define OLED_ENABLEd pd4_4
 
-//#define OLED_VDD     p4_5
-//#define OLED_VDDd    pd4_5
-
 #define OLED_CS       p5_7
 #define OLED_CSd      pd5_7
 
 // Melexis LDO enable
 #define MELEXIS_EN  p3_0
 #define MELEXIS_ENd  pd3_0
+
 // Serial 4, melexis rotation sensor
 #define CS4         p9_4
 #define CLOCK4      p9_5

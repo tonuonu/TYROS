@@ -86,19 +86,28 @@ redraw_infoscreen_buffers(void) {
 #define METERSPERSTEP (0.00545) // One step is 54.5mm but we use meters...
 #define UNITSPERTURN  (16384.0) // Motor shaft position sensor has 14 bits resolution
 #define sign(x) ((x>0.0) - (x<0.0))
-
-    float turnangle;
+    float yaw;
     float smallradius=0.0f;
     float revolutionsL;
     float revolutionsR;
     char *tmpLerror="";
     char *tmpRerror="";
-    float distanceL=0.0f;
-    float distanceR=0.0f;
-    float dx=0.0f;
-    float dy=0.0f;
-    float yaw=0.0f;
+    float distanceL;
+    float distanceR;
+    float dx;
+    float dy;
+    char turnL;
+    /*
+     * Computer percentage of battery left. 2cell LiPo batteries are known
+     * to vary between 6..8.4V, so we scale this range from 0..100%.
+     */
+    float batpercent=(bat-6.0f)/2.4f*100.0f;
 
+    if(batpercent<0.0f) {
+      batpercent=0.0f;
+    } else if(batpercent>100.0f){
+      batpercent=100.0f;
+    }
     /* 
      * Make sure other interrupts does not update MLXaccumulatorL
      * and MLXaccumulatorR while we work with them.
@@ -118,12 +127,13 @@ redraw_infoscreen_buffers(void) {
     /*
      * When both side legs have walked some distance,
      * robot has moved on imaginary curve. We compute
-     * radius in meters of this curve. "smallradius"
+     * radius of this curve in meters. "smallradius"
      * is distance from center of this curve to nearest
      * robot legs. "centerradius" is from center of
      * curve to center of robot.
      */
     float centerradius;
+    
     if(distanceL == distanceR) {
         /*
          * When both legs have traveled equal distance, we have no curve
@@ -131,117 +141,141 @@ redraw_infoscreen_buffers(void) {
          * right turn), Y has incremented by distance traveled and angle
          * change is 0
          */
-        turnangle=0.0f;
+        yaw=0.0f;
         smallradius= INFINITY;
         centerradius=ROBOTWIDTH/2.0;
         dx=0.0f;
         dy=distanceL;
+        turnL=0;
     } else if(distanceL==0 || distanceR==0) {
         /* 
-         * When only one side legs have moved then robot rotates over other legs 
+         * When only one side legs have moved then robot rotates over imaginary 
+         * center under other legs
          */
         smallradius=0.0f;
         centerradius=ROBOTWIDTH/2.0;
         if(distanceL==0) {
-            turnangle=distanceR/ROBOTWIDTH;
+            yaw=distanceR/ROBOTWIDTH;
+            turnL=1;
         } else {
-            turnangle=distanceL/ROBOTWIDTH;
+            yaw=distanceL/ROBOTWIDTH;
+            turnL=0;
         }
     } else {
         /*
          * If we end up here, then all exceptional cases are handled and
          * both sides have walked some unequal distance. Center of circle
          * is somewhere left (when distanceL<distanceR) or right (when 
-         * distanceL>distanceR) of us.
+         * distanceL>distanceR) of us. Exception is, when direction of
+         * left and right side were different. Then center is somewhere 
+         * under robot body.
          */
-        int turnleft = distanceL < distanceR ? 1 : 0;
-        smallradius=ROBOTWIDTH/((turnleft ? distanceR/distanceL:distanceL/distanceR)-1.0f);
+        turnL = distanceL < distanceR ? 1 : 0;
+        if(turnL) {
+            /* 
+             * We are turning left. Imaginary center is left of us
+             */
+            smallradius=ROBOTWIDTH/(distanceR/distanceL-1.0f);
+            yaw=distanceL/smallradius;
+        } else {
+            /* 
+             * We are turning right. Imaginary center is right of us
+             */
+            smallradius=ROBOTWIDTH/(distanceL/distanceR-1.0f);
+            yaw=distanceR/smallradius;
+        }
         centerradius=smallradius+(ROBOTWIDTH/2.0f);
-        turnangle=(distanceL<distanceR ? distanceL:distanceR)/smallradius;
+        /*
+         * Here is nonmature code. If one side goes forward another backward,
+         * where is our center?
+         */
         if(sign(distanceL) != sign(distanceR)) {
-            turnangle/=2;
+            yaw/=2.0f;
         }
     }
-    dy=sin(turnangle)*centerradius;
-    dx=cos(turnangle)*centerradius-centerradius;
-    if(distanceL>distanceR && distanceL != 0 && distanceR != 0)
-        dx=dx*-1.0;
-  switch(mode) {
-  case MODE_MANUAL:
-    if(mlxRstatus==3) {
-      tmpRerror=VT100REVERSE "Right position sensor missing" VT100NORMAL " ";
-    } else if(mlxRstatus==1) {
-      tmpRerror=VT100REVERSE "Right position sensor returns error" VT100NORMAL " ";
+    /* Compute our relative location now */
+    dy=sin(yaw)*centerradius;
+    dx=cos(yaw)*centerradius-centerradius;
+    /* If we turn left, X coordinate should get negative */
+    if(turnL) {
+        dx=dx*-1.0f;
     }
-    if(mlxLstatus==3) {
-      tmpLerror=VT100REVERSE "Left position sensor missing" VT100NORMAL " ";
-    } else if(mlxLstatus==1) {
-      tmpLerror=VT100REVERSE "Left position sensor returns error" VT100NORMAL " ";
+    switch(mode) {
+        case MODE_MANUAL:
+            if(mlxRstatus==3) {
+                tmpRerror=VT100REVERSE "Right position sensor missing" VT100NORMAL " ";
+            } else if(mlxRstatus==1) {
+                tmpRerror=VT100REVERSE "Right position sensor returns error" VT100NORMAL " ";
+            }
+            if(mlxLstatus==3) {
+                tmpLerror=VT100REVERSE "Left position sensor missing" VT100NORMAL " ";
+            } else if(mlxLstatus==1) {
+                tmpLerror=VT100REVERSE "Left position sensor returns error" VT100NORMAL " ";
+            }
+            snprintf(linedata[0],sizeof(linedata[0]),"\x1b" "[1;1H" "Status: %s%s%s" VT100NORMAL VT100ERASETOEND,gyrowhoami!=211? "Gyroscope error":mlxRstatus==2 && mlxLstatus==2?"OK":"",tmpRerror,tmpLerror);
+            snprintf(linedata[1],sizeof(linedata[1]),"\x1b" "[2;1H" "Battery: %s %4.1fV %3.0f%% Panda %s" VT100ERASETOEND,bat>6.9 ?"normal      ":bat>6.3 ?"LOW         ":bat>5.0 ?"CRITICAL    ":"disconnected",bat,batpercent,PANDA ? "on ":"off");
+            snprintf(linedata[2],sizeof(linedata[2]),"\x1b" "[3;1H" "Left drive: %s %4.2fm/s %.0frpm pwm:%3u%% %4.1fA" VT100ERASETOEND,pwm[0]<0 ?"backward":pwm[0]>0 ?"forward ":"brake   ",distanceL *10.0f,revolutionsL*2.0*60.0,(int)abs(pwm[0]),leftmotorcurrent);
+            snprintf(linedata[3],sizeof(linedata[3]),"\x1b" "[4;1H" "Right drive:%s %4.2fm/s %.0frpm pwm:%3u%% %4.1fA" VT100ERASETOEND,pwm[1]<0 ?"backward":pwm[0]>0 ?"forward ":"brake   ",distanceR*10.0f,revolutionsR*2.0*60.0,(int)abs(pwm[1]),rightmotorcurrent);
+            snprintf(linedata[4],sizeof(linedata[4]),"\x1b" "[5;1H" "Coilgun: %3.0fV, %s, %s" VT100ERASETOEND,capacitor,CHARGE ? "charging":"waiting ",BALL_DETECT ? "no ball":"Ball! ");
+            snprintf(linedata[5],sizeof(linedata[5]),"\x1b" "[6;1H" "Odometry: x:%fm y:%fm yaw:%frad" VT100ERASETOEND,dx,dy,yaw);
+            snprintf(linedata[6],sizeof(linedata[6]),"\x1b" "[7;1H" "" VT100ERASETOEND);
+            snprintf(linedata[7],sizeof(linedata[7]),"\x1b" "[8;1H" VT100BOLD VT100REVERSE ">Normal<" VT100NORMAL "Competition Demo Debug drivetrain Debug sensors " VT100NORMAL VT100ERASETOEND);
+            break;
+        case MODE_COMPETITION:
+            if(capacitor<395.0f) {
+                CHARGE=1;
+            }
+            snprintf(linedata[0],sizeof(linedata[0]),"\x1b" "[1;1H" VT100ERASETOEND);
+            snprintf(linedata[1],sizeof(linedata[1]),"\x1b" "[2;1H" "Battery: %s %4.1fV %3.0f%% Panda %s" VT100ERASETOEND,bat>6.9 ?"normal      ":bat>6.3 ?"LOW         ":bat>5.0 ?"CRITICAL    ":"disconnected",bat,batpercent,PANDA ? "on ":"off");
+            snprintf(linedata[2],sizeof(linedata[2]),"\x1b" "[3;1H" VT100ERASETOEND);
+            snprintf(linedata[3],sizeof(linedata[3]),"\x1b" "[4;1H" VT100ERASETOEND);
+            snprintf(linedata[4],sizeof(linedata[4]),"\x1b" "[5;1H" "Coilgun: %3.0fV, %s, %s" VT100ERASETOEND,capacitor,CHARGE ? "charging":"waiting ",BALL_DETECT? "Ball! ":"no ball");
+            snprintf(linedata[5],sizeof(linedata[5]),"\x1b" "[6;1H" "Odometry: x:%10.7fm y:%10.7fm yaw:%10.7frad" VT100ERASETOEND,dx,dy,yaw);
+            snprintf(linedata[6],sizeof(linedata[6]),"\x1b" "[7;1H" "             " VT100BOLD VT100REVERSE VT100BLINK "PUSH JOYSTICK FORWARD TO GO" VT100NORMAL VT100ERASETOEND );
+            snprintf(linedata[7],sizeof(linedata[7]),"\x1b" "[8;1H" " Normal" VT100BOLD VT100REVERSE ">Competition<" VT100NORMAL "Demo Debug drivetrain Debug sensors" VT100ERASETOEND);
+            break;
+        case MODE_DEMO:
+            snprintf(linedata[0],sizeof(linedata[0]),"\x1b" "[1;1H" "" VT100ERASETOEND);
+            snprintf(linedata[1],sizeof(linedata[1]),"\x1b" "[2;1H" "" VT100ERASETOEND);
+            snprintf(linedata[2],sizeof(linedata[2]),"\x1b" "[3;1H" "" VT100ERASETOEND);
+            snprintf(linedata[3],sizeof(linedata[3]),"\x1b" "[4;1H" "" VT100ERASETOEND);
+            snprintf(linedata[4],sizeof(linedata[4]),"\x1b" "[5;1H" "" VT100ERASETOEND);
+            snprintf(linedata[5],sizeof(linedata[5]),"\x1b" "[6;1H" "" VT100ERASETOEND);
+            snprintf(linedata[6],sizeof(linedata[6]),"\x1b" "[7;1H" "" VT100ERASETOEND);
+            snprintf(linedata[7],sizeof(linedata[7]),"\x1b" "[8;1H" " Normal Competition"VT100BOLD VT100REVERSE ">Demo<" VT100NORMAL "Debug drivetrain Debug sensors" VT100ERASETOEND);
+            break;
+        case MODE_DEBUG_DRIVETRAIN:
+            snprintf(linedata[0],sizeof(linedata[0]),"\x1b" "[1;1H" "" VT100ERASETOEND);
+            snprintf(linedata[1],sizeof(linedata[1]),"\x1b" "[2;1H" "" VT100ERASETOEND);
+            snprintf(linedata[2],sizeof(linedata[2]),"\x1b" "[3;1H" "" VT100ERASETOEND);
+            snprintf(linedata[3],sizeof(linedata[3]),"\x1b" "[4;1H" "" VT100ERASETOEND);
+            snprintf(linedata[4],sizeof(linedata[4]),"\x1b" "[5;1H" "dx:%f dy:%f dl:%fm dr:%fm angle:%f" VT100ERASETOEND,dx,dy,distanceL,distanceR,yaw);
+            snprintf(linedata[5],sizeof(linedata[5]),"\x1b" "[6;1H" "left  %.1frps, %.1frpm %.1f steps/s %.1f steps/min %.4fm/s" VT100ERASETOEND
+                ,revolutionsL*2.0,revolutionsL*2.0*60.0,revolutionsL/TURNSPERSTEP*2.0,revolutionsL/TURNSPERSTEP*2.0*60.0,distanceL*2.0f);
+            snprintf(linedata[6],sizeof(linedata[6]),"\x1b" "[7;1H" "right %.1frps, %.1frpm %.1f steps/s %.1f steps/min %.4fm/s" VT100ERASETOEND
+                ,revolutionsR*2.0,revolutionsR*2.0*60.0,revolutionsR/TURNSPERSTEP*2.0,revolutionsR/TURNSPERSTEP*2.0*60.0,distanceR*2.0f);
+            snprintf(linedata[7],sizeof(linedata[7]),"\x1b" "[8;1H" " Normal Competition Demo"VT100BOLD VT100REVERSE ">Debug drivetrain<" VT100NORMAL "Debug sensors " VT100ERASETOEND); 
+            break;
+        case MODE_DEBUG_SENSORS:
+            {
+                const char *errR="";
+                const char *errL="";
+                if(mlxRstatus==1) {
+                    errR=melexiscode(mlxRerrcode);
+                }
+                if(mlxLstatus ==1){
+                    errL=melexiscode(mlxLerrcode);
+                }
+                snprintf(linedata[0],sizeof(linedata[0]),"\x1b" "[1;1H" "Gyro raw: whoami:%3d temp:%3d x:%6d y:%6d z:%6d" VT100ERASETOEND,gyrowhoami,gyrotemp,gyrorawx,gyrorawy,gyrorawz);
+                snprintf(linedata[1],sizeof(linedata[1]),"\x1b" "[2;1H" "Gyro filtered:       temp:%3d x:%6d y:%6d z:%6d" VT100ERASETOEND,36-gyrotemp,gyrox,gyroy,gyroz);
+                snprintf(linedata[2],sizeof(linedata[2]),"\x1b" "[3;1H" "Gyro calibrationmin min:      x:%6d y:%6d z:%6d" VT100ERASETOEND,gyrominx,gyrominy,gyrominz);
+                snprintf(linedata[3],sizeof(linedata[3]),"\x1b" "[4;1H" "Gyro calibrationmin max:      x:%6d y:%6d z:%6d" VT100ERASETOEND,gyromaxx,gyromaxy,gyromaxz);
+                snprintf(linedata[4],sizeof(linedata[4]),"\x1b" "[5;1H" "Left drive:  mlx status:%3d (%s %s) mlx raw: %5d" VT100ERASETOEND,mlxLstatus ,mlxLstatus ==3 ? "no sensor ":(mlxLstatus !=2 ? "Err:":"OK        "),errL,MLXLdata );     
+                snprintf(linedata[5],sizeof(linedata[5]),"\x1b" "[6;1H" "Right drive: mlx status:%3d (%s %s) mlx raw: %5d" VT100ERASETOEND,mlxRstatus,mlxRstatus==3 ? "no sensor ":(mlxRstatus!=2 ? "Err:":"OK        "),errR,MLXRdata);     
+                snprintf(linedata[7],sizeof(linedata[7]),"\x1b" "[8;1H" " Normal Competition Demo Debug drivetrain" VT100BOLD VT100REVERSE ">Debug sensors<" VT100NORMAL VT100ERASETOEND);
+            }
+            break;
+        default:
+            break;
     }
-    snprintf(linedata[0],sizeof(linedata[0]),"\x1b" "[1;1H" "Status: %s%s%s" VT100NORMAL VT100ERASETOEND,gyrowhoami!=211? "Gyroscope error":mlxRstatus==2 && mlxLstatus==2?"OK":"",tmpRerror,tmpLerror);
-    snprintf(linedata[1],sizeof(linedata[1]),"\x1b" "[2;1H" "Battery: %s %4.1fV %3.0f%% Panda %s" VT100ERASETOEND,bat>6.9 ?"normal      ":bat>6.3 ?"LOW         ":bat>5.0 ?"CRITICAL    ":"disconnected",bat,(bat-6.0f)/2.4f*100.0f,PANDA ? "on ":"off");
-    snprintf(linedata[2],sizeof(linedata[2]),"\x1b" "[3;1H" "Left drive: %s %4.2fm/s %.0frpm pwm:%3u%% %4.1fA" VT100ERASETOEND,pwm[0]<0 ?"backward":pwm[0]>0 ?"forward ":"brake   ",distanceL *10.0f,revolutionsL*2.0*60.0,(int)abs(pwm[0]),leftmotorcurrent);
-    snprintf(linedata[3],sizeof(linedata[3]),"\x1b" "[4;1H" "Right drive:%s %4.2fm/s %.0frpm pwm:%3u%% %4.1fA" VT100ERASETOEND,pwm[1]<0 ?"backward":pwm[0]>0 ?"forward ":"brake   ",distanceR*10.0f,revolutionsR*2.0*60.0,(int)abs(pwm[1]),rightmotorcurrent);
-    snprintf(linedata[4],sizeof(linedata[4]),"\x1b" "[5;1H" "Coilgun: %3.0fV, %s, %s" VT100ERASETOEND,capacitor,CHARGE ? "charging":"waiting ",BALL_DETECT ? "no ball":"Ball! ");
-    snprintf(linedata[5],sizeof(linedata[5]),"\x1b" "[6;1H" "Odometry: x:%fm y:%fm yaw:%frad" VT100ERASETOEND,dx,dy,turnangle);
-    snprintf(linedata[6],sizeof(linedata[6]),"\x1b" "[7;1H" "" VT100ERASETOEND);
-    snprintf(linedata[7],sizeof(linedata[7]),"\x1b" "[8;1H" VT100BOLD VT100REVERSE ">Normal<" VT100NORMAL "Competition Demo Debug drivetrain Debug sensors " VT100NORMAL VT100ERASETOEND);
-    break;
-  case MODE_COMPETITION:
-    if(capacitor<395.0f) {
-        CHARGE=1;
-    }
-    snprintf(linedata[0],sizeof(linedata[0]),"\x1b" "[1;1H" VT100ERASETOEND);
-    snprintf(linedata[1],sizeof(linedata[1]),"\x1b" "[2;1H" "Battery: %s %4.1fV %3.0f%% Panda %s" VT100ERASETOEND,bat>6.9 ?"normal      ":bat>6.3 ?"LOW         ":bat>5.0 ?"CRITICAL    ":"disconnected",bat,(bat-6.0f)/2.4f*100.0f,PANDA ? "on ":"off");
-    snprintf(linedata[2],sizeof(linedata[2]),"\x1b" "[3;1H" VT100ERASETOEND);
-    snprintf(linedata[3],sizeof(linedata[3]),"\x1b" "[4;1H" VT100ERASETOEND);
-    snprintf(linedata[4],sizeof(linedata[4]),"\x1b" "[5;1H" "Coilgun: %3.0fV, %s, %s" VT100ERASETOEND,capacitor,CHARGE ? "charging":"waiting ",BALL_DETECT? "Ball! ":"no ball");
-    snprintf(linedata[5],sizeof(linedata[5]),"\x1b" "[6;1H" "Odometry: x:%10.7fm y:%10.7fm yaw:%10.7frad" VT100ERASETOEND,dx,dy,yaw);
-    snprintf(linedata[6],sizeof(linedata[6]),"\x1b" "[7;1H" "             " VT100BOLD VT100REVERSE VT100BLINK "PUSH JOYSTICK FORWARD TO GO" VT100NORMAL VT100ERASETOEND );
-    snprintf(linedata[7],sizeof(linedata[7]),"\x1b" "[8;1H" " Normal" VT100BOLD VT100REVERSE ">Competition<" VT100NORMAL "Demo Debug drivetrain Debug sensors" VT100ERASETOEND);
-    break;
-  case MODE_DEMO:
-    snprintf(linedata[0],sizeof(linedata[0]),"\x1b" "[1;1H" "" VT100ERASETOEND);
-    snprintf(linedata[1],sizeof(linedata[1]),"\x1b" "[2;1H" "" VT100ERASETOEND);
-    snprintf(linedata[2],sizeof(linedata[2]),"\x1b" "[3;1H" "" VT100ERASETOEND);
-    snprintf(linedata[3],sizeof(linedata[3]),"\x1b" "[4;1H" "" VT100ERASETOEND);
-    snprintf(linedata[4],sizeof(linedata[4]),"\x1b" "[5;1H" "" VT100ERASETOEND);
-    snprintf(linedata[5],sizeof(linedata[5]),"\x1b" "[6;1H" "" VT100ERASETOEND);
-    snprintf(linedata[6],sizeof(linedata[6]),"\x1b" "[7;1H" "" VT100ERASETOEND);
-    snprintf(linedata[7],sizeof(linedata[7]),"\x1b" "[8;1H" " Normal Competition"VT100BOLD VT100REVERSE ">Demo<" VT100NORMAL "Debug drivetrain Debug sensors" VT100ERASETOEND);
-    break;
-  case MODE_DEBUG_DRIVETRAIN:
-    snprintf(linedata[0],sizeof(linedata[0]),"\x1b" "[1;1H" "" VT100ERASETOEND);
-    snprintf(linedata[1],sizeof(linedata[1]),"\x1b" "[2;1H" "" VT100ERASETOEND);
-    snprintf(linedata[2],sizeof(linedata[2]),"\x1b" "[3;1H" "" VT100ERASETOEND);
-    snprintf(linedata[3],sizeof(linedata[3]),"\x1b" "[4;1H" "" VT100ERASETOEND);
-    snprintf(linedata[4],sizeof(linedata[4]),"\x1b" "[5;1H" "dx:%f dy:%f dl:%fm dr:%fm angle:%f" VT100ERASETOEND,dx,dy,distanceL,distanceR,turnangle);
-    snprintf(linedata[5],sizeof(linedata[5]),"\x1b" "[6;1H" "left  %.1frps, %.1frpm %.1f steps/s %.1f steps/min %.4fm/s" VT100ERASETOEND
-             ,revolutionsL*2.0,revolutionsL*2.0*60.0,revolutionsL/TURNSPERSTEP*2.0,revolutionsL/TURNSPERSTEP*2.0*60.0,distanceL*2.0f);
-    snprintf(linedata[6],sizeof(linedata[6]),"\x1b" "[7;1H" "right %.1frps, %.1frpm %.1f steps/s %.1f steps/min %.4fm/s" VT100ERASETOEND
-             ,revolutionsR*2.0,revolutionsR*2.0*60.0,revolutionsR/TURNSPERSTEP*2.0,revolutionsR/TURNSPERSTEP*2.0*60.0,distanceR*2.0f);
-    snprintf(linedata[7],sizeof(linedata[7]),"\x1b" "[8;1H" " Normal Competition Demo"VT100BOLD VT100REVERSE ">Debug drivetrain<" VT100NORMAL "Debug sensors " VT100ERASETOEND); 
-    break;
-  case MODE_DEBUG_SENSORS:
-    {
-        const char *errR="";
-        const char *errL="";
-        if(mlxRstatus==1)
-            errR=melexiscode(mlxRerrcode);
-        if(mlxLstatus ==1)
-            errL=melexiscode(mlxLerrcode);
-        snprintf(linedata[0],sizeof(linedata[0]),"\x1b" "[1;1H" "Gyro raw: whoami:%3d temp:%3d x:%6d y:%6d z:%6d"VT100ERASETOEND,gyrowhoami,gyrotemp,gyrorawx,gyrorawy,gyrorawz);
-        snprintf(linedata[1],sizeof(linedata[1]),"\x1b" "[2;1H" "Gyro filtered:       temp:%3d x:%6d y:%6d z:%6d"VT100ERASETOEND,36-gyrotemp,gyrox,gyroy,gyroz);
-        snprintf(linedata[2],sizeof(linedata[2]),"\x1b" "[3;1H" "Gyro calibrationmin min:      x:%6d y:%6d z:%6d"VT100ERASETOEND,gyrominx,gyrominy,gyrominz);
-        snprintf(linedata[3],sizeof(linedata[3]),"\x1b" "[4;1H" "Gyro calibrationmin max:      x:%6d y:%6d z:%6d"VT100ERASETOEND,gyromaxx,gyromaxy,gyromaxz);
-        snprintf(linedata[4],sizeof(linedata[4]),"\x1b" "[5;1H" "Left drive:  mlx status:%3d (%s %s) mlx raw: %5d"VT100ERASETOEND,mlxLstatus ,mlxLstatus ==3 ? "no sensor ":(mlxLstatus !=2 ? "Err:":"OK        "),errL,MLXLdata );     
-        snprintf(linedata[5],sizeof(linedata[5]),"\x1b" "[6;1H" "Right drive: mlx status:%3d (%s %s) mlx raw: %5d"VT100ERASETOEND,mlxRstatus,mlxRstatus==3 ? "no sensor ":(mlxRstatus!=2 ? "Err:":"OK        "),errR,MLXRdata);     
-        snprintf(linedata[7],sizeof(linedata[7]),"\x1b" "[8;1H" " Normal Competition Demo Debug drivetrain"VT100BOLD VT100REVERSE ">Debug sensors<" VT100NORMAL VT100ERASETOEND);
-    }
-    break;
-  default:
-    break;
-  }
-
-
 }
