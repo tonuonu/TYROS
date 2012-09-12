@@ -88,6 +88,12 @@ redraw_infoscreen_buffers(void) {
 #define UNITSPERTURN  (16384.0) // Motor shaft position sensor has 14 bits resolution
 #define sign(x) ((x>0.0) - (x<0.0))
     /*
+     * To have consistent gyroscope reading, we make local copy of them while 
+     * keeping interrupts disabled
+     */
+    signed int mygyrox,mygyroy,mygyroz;
+  
+    /*
      * When both side legs have walked some distance,
      * robot has moved on imaginary curve. We compute
      * radius of this curve in meters. "smallradius"
@@ -133,6 +139,10 @@ redraw_infoscreen_buffers(void) {
     revolutionsR= (float)MLXaccumulatorR/UNITSPERTURN;
     MLXaccumulatorL=0;
     MLXaccumulatorR=0;
+    /* Make also consistent local copy of gyro readings */
+    mygyrox=gyrox;
+    mygyroy=gyroy;
+    mygyroz=gyroz;
     ENABLE_IRQ
     /*
      * We do everything in SI units, so distance 
@@ -230,7 +240,7 @@ redraw_infoscreen_buffers(void) {
             snprintf(text[3],sizeof(text[3]),"\x1b" "[4;1H" "Right drive:%s %4.2fm/s %.0frpm pwm:%3u%% %4.1fA" VT100ERASETOEND,pwm[1]<0 ?"backward":pwm[0]>0 ?"forward ":"brake   ",distanceR*10.0f,revolutionsR*UPDATESPERSEC*60.0,(int)abs(pwm[1]),rightmotorcurrent);
             snprintf(text[4],sizeof(text[4]),"\x1b" "[5;1H" "Coilgun: %3.0fV, %s, %s" VT100ERASETOEND,capacitor,CHARGE ? "charging":"waiting ",BALL_DETECT ? "no ball":"Ball! ");
             snprintf(text[5],sizeof(text[5]),"\x1b" "[6;1H" "Odometry: x:%fm y:%fm yaw:%frad" VT100ERASETOEND,dx,dy,yaw);
-            snprintf(text[6],sizeof(text[6]),"\x1b" "[7;1H" "Gyro: temp:%3d x:%8frad/s y:%8frad/s z:%8frad/s" VT100ERASETOEND,36-gyrotemp,GYRORATE*gyrox,GYRORATE*gyroy,GYRORATE*gyroz);
+            snprintf(text[6],sizeof(text[6]),"\x1b" "[7;1H" "Gyro: temp:%3d x:%8frad/s y:%8frad/s z:%8frad/s" VT100ERASETOEND,36-gyrotemp,GYRORATE*mygyrox,GYRORATE*mygyroy,GYRORATE*mygyroz);
             snprintf(text[7],sizeof(text[7]),"\x1b" "[8;1H" VT100BOLD VT100REVERSE ">Normal<" VT100NORMAL "Competition Demo Debug drivetrain Debug sensors " VT100NORMAL VT100ERASETOEND);
             break;
         case MODE_COMPETITION:
@@ -243,7 +253,7 @@ redraw_infoscreen_buffers(void) {
             snprintf(text[3],sizeof(text[3]),"\x1b" "[4;1H" VT100ERASETOEND);
             snprintf(text[4],sizeof(text[4]),"\x1b" "[5;1H" "Coilgun: %3.0fV, %s, %s" VT100ERASETOEND,capacitor,CHARGE ? "charging":"waiting ",BALL_DETECT? "Ball! ":"no ball");
             snprintf(text[5],sizeof(text[5]),"\x1b" "[6;1H" "Odometry: x:%10.7fm y:%10.7fm yaw:%10.7frad" VT100ERASETOEND,dx,dy,yaw);
-            snprintf(text[6],sizeof(text[6]),"\x1b" "[7;1H" "Gyro: temp:%3d x:%8frad/s y:%8frad/s z:%8frad/s" VT100ERASETOEND,36-gyrotemp,GYRORATE*gyrox,GYRORATE*gyroy,GYRORATE*gyroz);
+            snprintf(text[6],sizeof(text[6]),"\x1b" "[7;1H" "Gyro: temp:%3d x:%8frad/s y:%8frad/s z:%8frad/s" VT100ERASETOEND,36-gyrotemp,GYRORATE*mygyrox,GYRORATE*mygyroy,GYRORATE*mygyroz);
             snprintf(text[7],sizeof(text[7]),"\x1b" "[8;1H" " Normal" VT100BOLD VT100REVERSE ">Competition<" VT100NORMAL "Demo Debug drivetrain Debug sensors" VT100ERASETOEND);
             break;
         case MODE_DEMO:
@@ -272,8 +282,8 @@ redraw_infoscreen_buffers(void) {
             snprintf(text[0],sizeof(text[0]),"\x1b" "[1;1H" "Gyro raw: whoami:%3d temp:%3d x:%6d y:%6d z:%6d" VT100ERASETOEND,gyrowhoami,gyrotemp,gyrorawx,gyrorawy,gyrorawz);
             snprintf(text[1],sizeof(text[1]),"\x1b" "[2;1H" "Gyro calibrationmin min:      x:%6d y:%6d z:%6d" VT100ERASETOEND,gyrominx,gyrominy,gyrominz);
             snprintf(text[2],sizeof(text[2]),"\x1b" "[3;1H" "Gyro calibrationmin max:      x:%6d y:%6d z:%6d" VT100ERASETOEND,gyromaxx,gyromaxy,gyromaxz);
-            snprintf(text[3],sizeof(text[3]),"\x1b" "[4;1H" "Gyro filtered:                x:%6d y:%6d z:%6d" VT100ERASETOEND,gyrox,gyroy,gyroz);
-            snprintf(text[4],sizeof(text[4]),"\x1b" "[5;1H" "Gyro computed: temp:%3d x:%8frad/s y:%8frad/s z:%8frad/s" VT100ERASETOEND,36-gyrotemp,GYRORATE*gyrox,GYRORATE*gyroy,GYRORATE*gyroz);
+            snprintf(text[3],sizeof(text[3]),"\x1b" "[4;1H" "Gyro filtered:                x:%6d y:%6d z:%6d" VT100ERASETOEND,mygyrox,mygyroy,mygyroz);
+            snprintf(text[4],sizeof(text[4]),"\x1b" "[5;1H" "Gyro computed: temp:%3d x:%8frad/s y:%8frad/s z:%8frad/s" VT100ERASETOEND,36-gyrotemp,GYRORATE*mygyrox,GYRORATE*mygyroy,GYRORATE*mygyroz);
             snprintf(text[5],sizeof(text[5]),"\x1b" "[6;1H" "" VT100ERASETOEND);
             snprintf(text[6],sizeof(text[6]),"\x1b" "[7;1H" "" VT100ERASETOEND);
             snprintf(text[7],sizeof(text[7]),"\x1b" "[8;1H" " Normal Competition Demo Debug drivetrain" VT100BOLD VT100REVERSE ">Debug sensors<" VT100NORMAL VT100ERASETOEND);
