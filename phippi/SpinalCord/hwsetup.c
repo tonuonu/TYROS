@@ -288,6 +288,7 @@ Panda_Init(void) {
 static void 
 Coilgun_Init(void) {
     KICKd = PD_OUTPUT; 
+    KICK = 1; // Drive it up for normal mode
     pu22 = 1; // ball detect p7_3 pullup on
 }
 
