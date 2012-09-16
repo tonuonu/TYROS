@@ -51,6 +51,7 @@ extern int pwm[2];
 extern int pwmtarget[2];
 extern int accok, accwhoami; 
 extern int accwhoamistatus;
+extern signed char accx,accy,accz,acctout;
 
 extern unsigned char gyrowhoami;
 extern signed int gyrox,gyroy,gyroz;
@@ -87,8 +88,8 @@ enum {
   MODE_MANUAL,
   MODE_COMPETITION,
   MODE_DEMO,
-  MODE_DEBUG_DRIVETRAIN,
-  MODE_DEBUG_SENSORS,
+  MODE_DEBUG_POSSENSOR,
+  MODE_DEBUG_GYRO,
 };
 /*
  * IAR-HEW compatibility 

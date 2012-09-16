@@ -141,7 +141,7 @@ s_int(void) {
          * If current is over 10A on motors, then something is badly wrong
          * and better to make emergency stop. We may get fire otherwise.
          */
-        if(leftmotorcurrent>10.0f || rightmotorcurrent>10.0f) {
+        if(leftmotorcurrent>15.0f || rightmotorcurrent>15.0f) {
             ERRORLED=1;
             RIGHT_ENA=0; // right diag a (disable, no brakes)
             RIGHT_ENB=0; // right diag b (disable, no brakes)

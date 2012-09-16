@@ -119,15 +119,6 @@ main(void) {
     u6tb=L3G4200D_WHOAMI | 0x80;
     while (1) {
         char buf[256];
-    
-          
-
- 
-#if 1
-        //if(ticks % 100 == 0) {
-     //       updateOLED();    
-        //}
-#endif
         if(command[0]!=0) {
             char *tok;
             if(strncmp(command,"twist ",6)==0) {
