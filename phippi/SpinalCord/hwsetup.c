@@ -241,15 +241,15 @@ PWM_Init(void) {
     RIGHT_INA   = 0;
     RIGHT_INB   = 0;
 
-    LEFT_DIAGAd  = PD_OUTPUT;
-    LEFT_DIAGBd  = PD_OUTPUT;
-    RIGHT_DIAGAd = PD_OUTPUT;
-    RIGHT_DIAGBd = PD_OUTPUT;
+    LEFT_ENAd  = PD_OUTPUT;
+    LEFT_ENBd  = PD_OUTPUT;
+    RIGHT_ENAd = PD_OUTPUT;
+    RIGHT_ENBd = PD_OUTPUT;
 
-    LEFT_DIAGA   = 0;
-    LEFT_DIAGB   = 0;
-    RIGHT_DIAGA  = 0;
-    RIGHT_DIAGB  = 0;
+    LEFT_ENA   = 0;
+    LEFT_ENB   = 0;
+    RIGHT_ENA  = 0;
+    RIGHT_ENB  = 0;
 
     LEFT_PWMd    = PD_OUTPUT;
     LEFT_PWMs    = PF_TIMER;

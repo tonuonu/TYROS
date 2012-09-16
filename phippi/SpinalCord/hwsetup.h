@@ -51,14 +51,14 @@ void HardwareSetup(void);
 #define LEFT_INAd        pd2_2
 #define LEFT_INBd        pd2_3
 
-#define RIGHT_DIAGA      p2_4
-#define RIGHT_DIAGB      p2_5
-#define LEFT_DIAGA       p2_6
-#define LEFT_DIAGB       p2_7
-#define RIGHT_DIAGAd     pd2_4
-#define RIGHT_DIAGBd     pd2_5
-#define LEFT_DIAGAd      pd2_6
-#define LEFT_DIAGBd      pd2_7
+#define RIGHT_ENA      p2_4
+#define RIGHT_ENB      p2_5
+#define LEFT_ENA       p2_6
+#define LEFT_ENB       p2_7
+#define RIGHT_ENAd     pd2_4
+#define RIGHT_ENBd     pd2_5
+#define LEFT_ENAd      pd2_6
+#define LEFT_ENBd      pd2_7
 
 // Serial 0, USB interface to panda
 #define CS0d         pd6_0

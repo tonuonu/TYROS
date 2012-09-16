@@ -107,17 +107,16 @@ s_int(void) {
         }
     } 
     /*
-     * This is poor mans "debounce" function for joystick. We make sure\
+     * This is poor mans "debounce" function for joystick. We make sure
      * it gets just maximum 1 click during 1/5 sec
      */
     if(ticks%20==0){
-        if(JOY_RIGHT == 0 && mode<4) {
+        if(JOY_RIGHT==0 && mode<4) {
             mode++;
         }
-        if(JOY_LEFT == 0 && mode>0) {
+        if(JOY_LEFT==0 && mode>0) {
             mode--;
         } 
-        
     }
     /*
      * When capacitor is full, LT3750 chip drives CHARGE_DONE low.
@@ -144,6 +143,8 @@ s_int(void) {
          */
         if(leftmotorcurrent>10.0f || rightmotorcurrent>10.0f) {
             ERRORLED=1;
+            RIGHT_ENA=0; // right diag a (disable, no brakes)
+            RIGHT_ENB=0; // right diag b (disable, no brakes)
             pwmtarget[0]=0;
             pwmtarget[1]=0;
             pwm[0]=0;
@@ -235,35 +236,35 @@ s_int(void) {
     if(pwm[0] == 0) {
         RIGHT_INA=0; // right in a
         RIGHT_INB=0; // right in b      
-        RIGHT_DIAGA=0; // right diag a (disable, no brakes)
-        RIGHT_DIAGB=0; // right diag b (disable, no brakes)
+        RIGHT_ENA=0; // right diag a (disable, no brakes)
+        RIGHT_ENB=0; // right diag b (disable, no brakes)
     } else if(pwm[0] > 0) {
         RIGHT_INA=1; // right in a
         RIGHT_INB=0; // right in b
-        RIGHT_DIAGA=1; // right diag a (enable)
-        RIGHT_DIAGB=1; // right diag b (enable)
+        RIGHT_ENA=1; // right diag a (enable)
+        RIGHT_ENB=1; // right diag b (enable)
     } else {
         RIGHT_INA=0; // right in a
         RIGHT_INB=1; // right in b
-        RIGHT_DIAGA=1; // right diag a (enable)
-        RIGHT_DIAGB=1; // right diag b (enable)
+        RIGHT_ENA=1; // right diag a (enable)
+        RIGHT_ENB=1; // right diag b (enable)
     }
     
     if(pwm[1] == 0) {
         LEFT_INA=0; // right in a
         LEFT_INB=0; // right in b      
-        LEFT_DIAGA=0; // left diag a (disable, no brakes)
-        LEFT_DIAGB=0; // left diag b (disable, no brakes)
+        LEFT_ENA=0; // left diag a (disable, no brakes)
+        LEFT_ENB=0; // left diag b (disable, no brakes)
     } else if(pwm[1] > 0) {
         LEFT_INA=1; // left in a
         LEFT_INB=0; // left in b
-        LEFT_DIAGA=1; // left diag a (enable)
-        LEFT_DIAGB=1; // left diag b (enable)
+        LEFT_ENA=1; // left diag a (enable)
+        LEFT_ENB=1; // left diag b (enable)
     } else {
         LEFT_INA=0; // left in a
         LEFT_INB=1; // left in b
-        LEFT_DIAGA=1; // left diag a (enable)
-        LEFT_DIAGB=1; // left diag b (enable)
+        LEFT_ENA=1; // left diag a (enable)
+        LEFT_ENB=1; // left diag b (enable)
     }
         
     // Reduce PWM targets for next turn. This makes motors slow down in 
