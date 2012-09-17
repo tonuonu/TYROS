@@ -115,7 +115,11 @@ SPI4_Init(void) { // Right Melexis 90316
     
     pu27=1;
     DISABLE_IRQ
-    ilvl_s4ric =0x01;   
+    /* 
+     * Lowest interrupt priority
+     * we do not care about speed
+     */
+    ilvl_s4ric =1; 
     ir_s4ric   =0;            
     ENABLE_IRQ
 
@@ -123,6 +127,7 @@ SPI4_Init(void) { // Right Melexis 90316
 
 #pragma vector = UART4_RX
 __interrupt void _uart4_receive(void) {
+    ERRORLED=1;
 
   /* Used to reference a specific location in the array while string the
   received data.   */
@@ -196,6 +201,7 @@ __interrupt void _uart4_receive(void) {
   } 
   mlx1whoamistatus++;
   ir_s4ric = 0;
+    ERRORLED=0;
   
 }
 
@@ -237,7 +243,11 @@ SPI7_Init(void) { // Left Melexis 90316
     u7brg = 0x60;                                             // (unsigned char)(((f1_CLK_SPEED)/(2*BIT_RATE))-1);
 
     DISABLE_IRQ
-    ilvl_s7ric =0x01;   
+    /* 
+     * Lowest interrupt priority
+     * we do not care about speed
+     */
+    ilvl_s7ric =1;   
     ir_s7ric   =0;            
     ENABLE_IRQ 
 
@@ -248,6 +258,7 @@ signed int  MLXaccumulatorR=0LL;
 
 #pragma vector = UART7_RX
 __interrupt void _uart7_receive(void) {
+    ERRORLED=1;
 
 
   /* Used to reference a specific location in the array while string the
@@ -323,5 +334,6 @@ __interrupt void _uart7_receive(void) {
 
   /* Clear the 'reception complete' flag. */
   ir_s7ric = 0;
+    ERRORLED=0;
   
 }

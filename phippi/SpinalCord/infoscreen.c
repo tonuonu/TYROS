@@ -171,7 +171,7 @@ redraw_infoscreen_buffers(void) {
          * change is 0
          */
         yaw=0.0f;
-        smallradius= INFINITY;
+        smallradius =INFINITY;
         centerradius=ROBOTWIDTH/2.0;
         dx=0.0f;
         dy=distanceL;

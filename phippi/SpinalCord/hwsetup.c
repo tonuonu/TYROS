@@ -365,7 +365,11 @@ Oneshot_Init(void) {
     ta0         = 1;
     ta0s        = 5; // start counter
     DISABLE_IRQ
-    ilvl_ta0ic  = 0x04;       
+    /* 
+     * Lowest interrupt priority
+     * we do not care about speed
+     */
+    ilvl_ta0ic  = 1; 
     ir_ta0ic    = 0;            
     ENABLE_IRQ
       
@@ -378,7 +382,11 @@ Oneshot_Init(void) {
     ta3         = 1;
     ta3s        = 5; // start counter
     DISABLE_IRQ
-    ilvl_ta3ic  = 0x04;       
+    /* 
+     * Lowest interrupt priority
+     * we do not care about speed
+     */
+    ilvl_ta3ic  = 1;
     ir_ta3ic    = 0;            
     ENABLE_IRQ
 }

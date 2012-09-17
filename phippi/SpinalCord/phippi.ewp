@@ -101,7 +101,7 @@
         </option>
         <option>
           <name>IStackSize</name>
-          <state>0xE0</state>
+          <state>0x1000</state>
         </option>
         <option>
           <name>HeapSize</name>

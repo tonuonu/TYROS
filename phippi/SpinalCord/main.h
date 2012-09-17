@@ -19,7 +19,7 @@
  *
  */
 
-void main(void);
+//int main(void);
 
 extern volatile unsigned short ticks;
 extern volatile unsigned short ticks2;

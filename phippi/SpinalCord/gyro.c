@@ -100,7 +100,11 @@ SPI6_Init(void) {
     u6smr4 = 0x00;       
     
     DISABLE_IRQ
-    ilvl_s6ric =0x02;       
+    /* 
+     * Lowest interrupt priority
+     * we do not care about speed
+     */
+    ilvl_s6ric =1; 
     ir_s6ric   =0;            
     ENABLE_IRQ
     pu11 = 1; // gyro RX interface needs pullup on RX6 or p4_6
@@ -128,6 +132,8 @@ gyro_write_data(unsigned char b) {
 
 #pragma vector = UART6_RX
 __interrupt void _uart6_receive(void) {
+    ERRORLED=1;  
+
     signed char b=(signed char)u6rb & 0xFF;
     switch(gyrowhoamistatus) {
     case 1: // WHOAMI answer received. Sending request to write ctrl_REG2
@@ -259,4 +265,6 @@ __interrupt void _uart6_receive(void) {
 
     /* Clear the 'reception complete' flag */
     ir_s6ric = 0;
+    ERRORLED=0;  
+
 }

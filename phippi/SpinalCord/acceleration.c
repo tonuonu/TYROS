@@ -99,7 +99,11 @@ SPI2_Init(void) { // Accel sensor
     u2smr4 = 0x00;
 
     DISABLE_IRQ
-    ilvl_s2ric =0x02;       
+    /* 
+     * Lowest interrupt priority
+     * we do not care about speed
+     */
+    ilvl_s2ric =1;       
     ir_s2ric   =0;            
     ENABLE_IRQ
 }
@@ -139,6 +143,7 @@ __interrupt void _uart2_receive(void) {
    * This is done in main() to start whole process:
    * accelerometer_write_reg( MMA7455L_REG_I2CAD ); 
    */
+  ERRORLED=1;
   signed char b=u2rb & 0xFF;
   switch(accwhoamistatus) {
   case 0: // Writing bit to disable I2C
@@ -204,16 +209,16 @@ __interrupt void _uart2_receive(void) {
       u2tb=0xFF;
       break;
   } 
-  accwhoamistatus++;
+    accwhoamistatus++;
 
-  if(acccalcnt==CALIBRATIONSAMPLES) {
-      avgx/=CALIBRATIONSAMPLES;
-      avgy/=CALIBRATIONSAMPLES;
-      avgz/=CALIBRATIONSAMPLES;      
-      acccalcnt++; // Now becomes CALIBRATIONSAMPLES+1 and indicates "Calibration done"
-  }
-  /* Clear the 'reception complete' flag.	*/
-  ir_s2ric = 0;
-  
+    if(acccalcnt==CALIBRATIONSAMPLES) {
+        avgx/=CALIBRATIONSAMPLES;
+        avgy/=CALIBRATIONSAMPLES;
+        avgz/=CALIBRATIONSAMPLES;      
+        acccalcnt++; // Now becomes CALIBRATIONSAMPLES+1 and indicates "Calibration done"
+    } 
+    /* Clear the 'reception complete' flag.	*/
+    ir_s2ric = 0;
+    ERRORLED=0;  
 }
 
