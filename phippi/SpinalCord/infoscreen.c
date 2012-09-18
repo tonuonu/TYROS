@@ -281,8 +281,8 @@ signed char accx=0,accy=0,accz=0,acctout=0;
 int accstatus=0;
 */
             snprintf(text[0],sizeof(text[0]),"\x1b" "[1;1H" "accok %d accwhoami %d accx %d accy %d accz %d acctout %d accstatus %d" VT100ERASETOEND,accok , accwhoami , accx , accy , accz , acctout , accstatus );
-            snprintf(text[1],sizeof(text[1]),"\x1b" "[2;1H" "" VT100ERASETOEND);
-            snprintf(text[2],sizeof(text[2]),"\x1b" "[3;1H" "" VT100ERASETOEND);
+            snprintf(text[1],sizeof(text[1]),"\x1b" "[2;1H" " accx %10.7fG    accy %10.7fG    accz %10.7fG " VT100ERASETOEND, (float)accx/64.0 , (float)accy/64.0 , (float)accz/64.0 );
+            snprintf(text[2],sizeof(text[2]),"\x1b" "[3;1H" " accx %10.7fm/s2 accy %10.7fm/s2 accz %10.7fm/s2 " VT100ERASETOEND, (float)accx/64.0*9.807 , (float)accy/64.0*9.807 , (float)accz/64.0*9.807 );
             snprintf(text[3],sizeof(text[3]),"\x1b" "[4;1H" "" VT100ERASETOEND);
             snprintf(text[4],sizeof(text[4]),"\x1b" "[5;1H" "" VT100ERASETOEND);
             snprintf(text[5],sizeof(text[5]),"\x1b" "[6;1H" "" VT100ERASETOEND);
