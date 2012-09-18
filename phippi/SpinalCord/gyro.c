@@ -80,7 +80,7 @@ SPI6_Init(void) {
     te_u6c1 = 1;                                           // 1=Transmission Enable
     ti_u6c1 = 0;                                           // Must be 0 to send or receive
     re_u6c1 = 1;                                           // Reception Enable when 1
-    ri_u6c1 = 0;                                           // Receive complete flag - U4RB is empty.
+    ri_u6c1 = 0;                                           // Receive complete flag - U6RB is empty.
     u6irs_u6c1 = 1;                                        // Interrupt  when transmission  is completed, U4TB is empty. 
     u6rrm_u6c1 = 0;                                        // Continuous receive mode off
     u6lch_u6c1 = 0;                                        // Logical inversion off 

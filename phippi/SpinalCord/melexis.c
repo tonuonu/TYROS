@@ -237,7 +237,7 @@ SPI7_Init(void) { // Left Melexis 90316
     te_u7c1 = 1;                                           // 1=Transmission Enable
     ti_u7c1 = 0;                                           // Must be 0 to send or receive
     re_u7c1 = 1;                                           // Reception Enable when 1
-    ri_u7c1 = 0;                                           // Receive complete flag - U4RB is empty.
+    ri_u7c1 = 0;                                           // Receive complete flag - U7RB is empty.
     u7irs = 1;                                        // Interrupt  when transmission  is completed, U4TB is empty. 
     u7rrm = 0;                                        // Continuous receive mode off
     u7brg = 0x60;                                             // (unsigned char)(((f1_CLK_SPEED)/(2*BIT_RATE))-1);

@@ -19,7 +19,7 @@
  *
  */
 extern int acccalcnt;
-extern  signed char accx,accy,accz,acctout;
+extern  int accx,accy,accz,acctout;
 #define CALIBRATIONSAMPLES 50
 #define MMA7455L_WHOAMI_MAGIC 0x55
 
@@ -56,7 +56,7 @@ extern  signed char accx,accy,accz,acctout;
 #define MMA7455L_REG_TW  0x1e
 #define MMA7455L_REG_RESERVED2  0x1f
 
-#define MMA7455_REG_I2CDIS (1<<7)
+#define MMA7455_REG_I2CDIS (0x80)
 
 #define MMA7455L_STATUS_XDA  0x08
 #define MMA7455L_STATUS_YDA  0x10

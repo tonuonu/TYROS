@@ -119,7 +119,7 @@ main(void) {
     /* 
      * Acceleration sensor interrupt-driven state machine start  
      */
-    accelerometer_write_reg( MMA7455L_REG_I2CAD); 
+    accelerometer_write_reg( MMA7455L_REG_MCTL); 
     /* 
      * Gyroscopic sensor interrupt-driven state machine start  
      */

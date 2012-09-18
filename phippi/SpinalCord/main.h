@@ -50,8 +50,7 @@ extern double twist[6];
 extern int pwm[2];
 extern int pwmtarget[2];
 extern int accok, accwhoami; 
-extern int accwhoamistatus;
-extern signed char accx,accy,accz,acctout;
+extern int accstatus;
 
 extern unsigned char gyrowhoami;
 extern signed int gyrox,gyroy,gyroz;

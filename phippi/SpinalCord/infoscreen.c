@@ -26,6 +26,7 @@
 #include <stdlib.h>
 #include "hwsetup.h"
 #include "main.h"
+#include "mma7455l.h"
 #include <math.h>
 
 char text[8][150]; // 64 is not enough as we insert VT100 escape sequences
@@ -277,9 +278,9 @@ redraw_infoscreen_buffers(void) {
 int accok=0;
 int accwhoami=0;
 signed char accx=0,accy=0,accz=0,acctout=0;
-int accwhoamistatus=0;
+int accstatus=0;
 */
-            snprintf(text[0],sizeof(text[0]),"\x1b" "[1;1H" "accok %d accwhoami %d accx %d accy %d accz %d acctout %d accwhoamistatus %d" VT100ERASETOEND,accok , accwhoami , accx , accy , accz , acctout , accwhoamistatus );
+            snprintf(text[0],sizeof(text[0]),"\x1b" "[1;1H" "accok %d accwhoami %d accx %d accy %d accz %d acctout %d accstatus %d" VT100ERASETOEND,accok , accwhoami , accx , accy , accz , acctout , accstatus );
             snprintf(text[1],sizeof(text[1]),"\x1b" "[2;1H" "" VT100ERASETOEND);
             snprintf(text[2],sizeof(text[2]),"\x1b" "[3;1H" "" VT100ERASETOEND);
             snprintf(text[3],sizeof(text[3]),"\x1b" "[4;1H" "" VT100ERASETOEND);

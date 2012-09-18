@@ -237,7 +237,7 @@ __interrupt void _uart0_receive(void) {
 /* Acceleration sensor */
         write(VT100CURSORACC);
         write("Acceleration: ");
- //       sprintf(buf,"(%2d) ",accwhoamistatus);
+ //       sprintf(buf,"(%2d) ",accstatus);
  //       write(buf);
 
 //        if(accok && accwhoami==85) {

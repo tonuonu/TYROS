@@ -1,5 +1,5 @@
 /*
- *  Copyright (c) 2011, Tonu Samuel
+ *  Copyright (c) 2011,2012 Tonu Samuel
  *  All rights reserved.
  *
  *  This file is part of TYROS.
@@ -32,23 +32,24 @@
 
 int accok=0;
 int accwhoami=0;
-signed char accx=0,accy=0,accz=0,acctout=0;
-int accwhoamistatus=0;
+int accx=0,accy=0,accz=0,acctout=0;
+int accstatus=0;
 /* 
  * During startup we read CALIBRATIONSAMPLES values from sensor for all X,Y,Z acces to 
  * calculate and negate error, gravitation etc. 
  */
 
-int acccalcnt=0;
-static int avgx=0,avgy=0,avgz=0;
+//int acccalcnt=0;
+//static int avgx=0,avgy=0,avgz=0;
 
 void
 SPI2_Init(void) { // Accel sensor
- //   pu22=1; // pull up for CLK2 or p7_2
 #define f1_CLK_SPEED 24000000
+    /* 
+     * MMA7455L datasheet allows up to 8MHz clock
+     */
+    // u2brg =  (unsigned char)(((f1_CLK_SPEED)/(2*4000000))-1);
     u2brg =  (unsigned char)(((f1_CLK_SPEED)/(2*500000))-1);
-    // 8MHz max
-//    u2brg =  (unsigned char)(((f1_CLK_SPEED)/(2*400000))-1);
 
     CS2d = PD_OUTPUT;
     CS2=1;
@@ -79,7 +80,7 @@ SPI2_Init(void) { // Accel sensor
     te_u2c1 = 1;                                           // 1=Transmission Enable
     ti_u2c1 = 0;                                           // Must be 0 to send or receive
     re_u2c1 = 1;                                           // Reception Enable when 1
-    ri_u2c1 = 0;                                           // Receive complete flag - U4RB is empty.
+    ri_u2c1 = 0;                                           // Receive complete flag - U2RB is empty.
     u2irs_u2c1 = 1;                                        // Interrupt  when transmission is completed. 
     u2rrm_u2c1 = 0;                                        // Continuous receive mode off
     u2lch_u2c1 = 0;                                        // Logical inversion off 
@@ -110,115 +111,95 @@ SPI2_Init(void) { // Accel sensor
 
 void
 accelerometer_read_reg(unsigned char c) {
-    uDelay(6);
-    CS2=1;
-    // Datasheet does not specify CS timing but tells SPI is 8Mhz
-    // This is 125ns period
-    // On 48Mhz each cycle is ~21nS, so
-    // 125nS/21=~6
-    uDelay(6);
-    CS2=0;
-    uDelay(6);
     u2tb = c << 1;
 }
 
 void
 accelerometer_write_reg(unsigned char c) {
-    uDelay(6);
-    CS2=1;
-    uDelay(6);
-    CS2=0;
-    uDelay(6);
     u2tb = (c << 1) |  MMA7455L_WRITE_BIT;
 }
 
 void
 accelerometer_write_data(unsigned char c) {
+    uDelay(16);
     u2tb = c ; 
 }
 
 #pragma vector = UART2_RX
 __interrupt void _uart2_receive(void) {
-  /* 
-   * This is done in main() to start whole process:
-   * accelerometer_write_reg( MMA7455L_REG_I2CAD ); 
-   */
-  ERRORLED=1;
-  signed char b=u2rb & 0xFF;
-  switch(accwhoamistatus) {
-  case 0: // Writing bit to disable I2C
-      accelerometer_write_data(MMA7455_REG_I2CDIS);
-      break;
-  case 1: // MMA7455_REG_I2CDIS written. Sending request to write REG_MCTL
-      accelerometer_write_reg(MMA7455L_REG_MCTL);
-      break;
-  case 2: // REG_MCTL written, writing MODE_MEASUREMENT into it
-      accelerometer_write_data(MMA7455L_GSELECT_2 | MMA7455L_MODE_MEASUREMENT); 
-      break;
-  case 3: // MODE_MEASUREMENT written. Trying to get REG_WHOAMI
-      /* 
-       * When switching device on using MMA7455L_MODE_MEASUREMENT
-       * delay of 20milliseconds
-       */
-      // 20 000uS needed. On 48Mhz each cycle is ~21nS, so
-      // 20 000 000nS/21=~100000
-      for(int i=0;i<1000;i++) {
-          uDelay(100);
-      }
-      CS2=1;
-      for(int i=0;i<1000;i++) {
-          uDelay(100);
-      }
-      accelerometer_read_reg(MMA7455L_REG_WHOAMI);
-      break;
-  case 5: // REG_WHOAMI answer received. Trying to get XOUTL
-      accwhoami=(int) b;
-      accelerometer_read_reg(MMA7455L_REG_XOUT8);
-      break;
-  case 7: // XOUTL sent, trying to read answer
-      if(acccalcnt<CALIBRATIONSAMPLES) {
-          avgx+=(int)b;
-      } else {
-          accx=(signed char) b/*-avgx*/;
-      }
-      accelerometer_read_reg(MMA7455L_REG_YOUT8);
-      break;
-  case 9: // YOUTL sent, trying to read answer
-      if(acccalcnt<CALIBRATIONSAMPLES) {
-          avgy+=(int)b;
-      } else {
-          accy=(signed char) b/*-avgy*/;
-      }
-      accelerometer_read_reg(MMA7455L_REG_ZOUT8);
-      break;
-  case 11: // ZOUTL sent, trying to read answer
-      if(acccalcnt<CALIBRATIONSAMPLES) {
-          avgz+=(int)b;
-          acccalcnt++;
-      } else {
-          accz=(signed char) b/*-avgz*/;
-      }
-      accelerometer_read_reg(MMA7455L_REG_TOUT);
-      break;
-  case 13: // MMA7455L_REG_TOUT sent, trying to read answer
-      acctout=(signed char) b;
-      accwhoamistatus=4-1; // 4 after accwhoamistatus++ later
-      accelerometer_read_reg(MMA7455L_REG_WHOAMI);
-      break;
-  default:
-      u2tb=0xFF;
-      break;
-  } 
-    accwhoamistatus++;
-
-    if(acccalcnt==CALIBRATIONSAMPLES) {
-        avgx/=CALIBRATIONSAMPLES;
-        avgy/=CALIBRATIONSAMPLES;
-        avgz/=CALIBRATIONSAMPLES;      
-        acccalcnt++; // Now becomes CALIBRATIONSAMPLES+1 and indicates "Calibration done"
+    /* 
+     * This is done in main() to start whole process:
+     * accelerometer_write_reg( MMA7455L_REG_I2CAD ); 
+     */
+    ERRORLED=1;
+    signed char b=u2rb & 0xFF;
+    switch(accstatus) {
+    case 0: // Writing bit to disable I2C
+        accelerometer_write_data(MMA7455L_GSELECT_2 | MMA7455L_MODE_MEASUREMENT); 
+        break;
+    case 1:
+        uDelay(16);
+        CS2=1;
+        uDelay(16);
+        CS2=0;
+        uDelay(16);
+        accelerometer_read_reg(MMA7455L_REG_WHOAMI); 
+        break;
+    case 3: // REG_WHOAMI answer received. Trying to get XOUTL
+        accwhoami=(int) b;
+        uDelay(16);
+        CS2=1;
+        uDelay(16);
+        CS2=0;
+        uDelay(16);
+        accelerometer_read_reg(MMA7455L_REG_XOUT8);
+        break;
+    case 5: // XOUTL sent, trying to read answer
+        accx= (int) b/*-avgx*/;
+        uDelay(16);
+        CS2=1;
+        uDelay(16);
+        CS2=0;
+        uDelay(16);
+        accelerometer_read_reg(MMA7455L_REG_YOUT8);
+        break;
+    case 7:
+        accy=(int) b/*-avgy*/;
+        uDelay(16);
+        CS2=1;
+        uDelay(16);
+        CS2=0;
+        uDelay(16);
+        accelerometer_read_reg(MMA7455L_REG_ZOUT8);
+        break;
+    case 9: // ZOUTL sent, trying to read answer
+        accz=(int) b/*-avgz*/;
+        uDelay(16);
+        CS2=1;
+        uDelay(16);
+        CS2=0;
+        uDelay(16);
+        accelerometer_read_reg(MMA7455L_REG_TOUT);
+        break;
+    case 11: // MMA7455L_REG_TOUT sent, trying to read answer
+        acctout=(signed char) b;
+        accstatus=2-1; // 2 after accstatus++ later
+        uDelay(16);
+        CS2=1;
+        uDelay(16);
+        CS2=0;
+        uDelay(16);
+        accelerometer_read_reg(MMA7455L_REG_WHOAMI);
+        break;
+    default:    
+        uDelay(6);
+        u2tb=0x00;
+        uDelay(6);
+        break;
     } 
+    accstatus++;
+
     /* Clear the 'reception complete' flag.	*/
     ir_s2ric = 0;
     ERRORLED=0;  
 }
-

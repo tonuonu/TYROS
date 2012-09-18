@@ -59,7 +59,7 @@ SPI3_Init(void) // OLED
     ti_u3c1 = 0;                                           // Must be 0 to 
     re_u3c1 = 0;                                           // Reception is 
     ri_u3c1 = 0;                                           // Receive
-    u3irs_u3c1 = 0;                                        // 1 when
+    u3irs_u3c1 = 1;                                        // 1 when
     u3rrm_u3c1 = 1;                                        // Continuous
     u3lch_u3c1 = 0;                                        // Logical
     u3smr = 0x00;                                          // Set 0
