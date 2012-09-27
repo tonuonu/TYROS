@@ -18,11 +18,10 @@
  *  along with TYROS.  If not, see <http://www.gnu.org/licenses/>.
  *
  */
-
-//int main(void);
+#include "uart.h"
 
 extern volatile unsigned short ticks;
-extern volatile unsigned short ticks2;
+
 void uart0_init(void);
 void SPI3_send_cmd(unsigned char c);
 void SPI3_send_data(unsigned char c);
@@ -82,6 +81,8 @@ extern char text[8][150];
 extern int lineno;
 extern int textpos;
 extern int mode;
+
+extern char rx0_buff[RX_BUFF_SIZE];
 void redraw_infoscreen_buffers(void);
 enum {
   MODE_MANUAL,

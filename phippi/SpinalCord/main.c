@@ -22,8 +22,8 @@
 #include "ior32c111.h"
 #include <stdio.h>
 #include <stdlib.h>
-#include "main.h"
 #include "uart.h"
+#include "main.h"
 #include "hwsetup.h"
 #include "gyro.h"
 #include "SPI.h"

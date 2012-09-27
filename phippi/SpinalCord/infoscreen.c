@@ -137,8 +137,8 @@ redraw_infoscreen_buffers(void) {
     DISABLE_IRQ 
     revolutionsL= (float)MLXaccumulatorL/UNITSPERTURN;
     revolutionsR= (float)MLXaccumulatorR/UNITSPERTURN;
-    MLXaccumulatorL=0;
-    MLXaccumulatorR=0;
+//    MLXaccumulatorL=0;
+//    MLXaccumulatorR=0;
     /* Make also consistent local copy of gyro readings */
     mygyrox=gyrox;
     mygyroy=gyroy;
@@ -259,15 +259,22 @@ redraw_infoscreen_buffers(void) {
             snprintf(text[5],sizeof(text[5]),"\x1b" "[6;1H" "Odometry: x:%9.6fm y:%9.6fm yaw:%9.6frad" VT100ERASETOEND,dx,dy,yaw);
             snprintf(text[6],sizeof(text[6]),"\x1b" "[7;1H" "Gyro: temp:%3d x:%9.6frad/s y:%9.6frad/s z:%9.6frad/s" VT100ERASETOEND,36-gyrotemp,GYRORATE*mygyrox,GYRORATE*mygyroy,GYRORATE*mygyroz);
             snprintf(text[7],sizeof(text[7]),"\x1b" "[8;1H" VT100BOLD VT100REVERSE ">Normal<" VT100NORMAL "Competition Debug acc sensor Debug pos sensors Debug gyro " VT100NORMAL VT100ERASETOEND);
+
             break;
         case MODE_COMPETITION:
             if(capacitor<395.0f) {
                 CHARGE=1;
             }
-            snprintf(text[0],sizeof(text[0]),"\x1b" "[1;1H" VT100ERASETOEND);
+            snprintf(text[0],sizeof(text[0]),"\x1b" "[1;1H" "'%s'" VT100ERASETOEND,rx0_buff);
             snprintf(text[1],sizeof(text[1]),"\x1b" "[2;1H" "Battery: %s %4.1fV %3.0f%% Panda %s" VT100ERASETOEND,bat>6.9 ?"normal      ":bat>6.3 ?"LOW         ":bat>5.0 ?"CRITICAL    ":"disconnected",bat,batpercent,PANDA ? "on ":"off");
-            snprintf(text[2],sizeof(text[2]),"\x1b" "[3;1H" VT100ERASETOEND);
-            snprintf(text[3],sizeof(text[3]),"\x1b" "[4;1H" VT100ERASETOEND);
+            snprintf(text[2],sizeof(text[2]),"\x1b" "[3;1H %lf %lf %lf %lf %lf %lf" VT100ERASETOEND,
+                     twist[0],
+                     twist[1],
+                     twist[2],
+                     twist[3],
+                     twist[4],
+                     twist[5]
+                     );            snprintf(text[3],sizeof(text[3]),"\x1b" "[4;1H" VT100ERASETOEND);
             snprintf(text[4],sizeof(text[4]),"\x1b" "[5;1H" "Coilgun: %3.0fV, %s, %s" VT100ERASETOEND,capacitor,CHARGE ? "charging":"waiting ",BALL_DETECT? "Ball! ":"no ball");
             snprintf(text[5],sizeof(text[5]),"\x1b" "[6;1H" "Odometry: x:%10.7fm y:%10.7fm yaw:%10.7frad" VT100ERASETOEND,dx,dy,yaw);
             snprintf(text[6],sizeof(text[6]),"\x1b" "[7;1H" "Gyro: temp:%3d x:%10.7frad/s y:%10.7frad/s z:%10.7frad/s" VT100ERASETOEND,36-gyrotemp,GYRORATE*mygyrox,GYRORATE*mygyroy,GYRORATE*mygyroz);

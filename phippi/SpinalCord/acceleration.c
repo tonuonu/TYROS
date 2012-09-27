@@ -131,7 +131,7 @@ __interrupt void _uart2_receive(void) {
      * This is done in main() to start whole process:
      * accelerometer_write_reg( MMA7455L_REG_I2CAD ); 
      */
-    ERRORLED=1;
+    //ERRORLED=1;
     signed char b=u2rb & 0xFF;
     switch(accstatus) {
     case 0: // Writing bit to disable I2C
@@ -141,65 +141,32 @@ __interrupt void _uart2_receive(void) {
         uDelay(16);
         CS2=1;
         uDelay(16);
+   /*     for(int i=0;i<1000;i++){
+            uDelay(200);
+        }*/
         CS2=0;
         uDelay(16);
-        accelerometer_read_reg(MMA7455L_REG_WHOAMI); 
+        accelerometer_read_reg(MMA7455L_REG_MCTL); 
         break;
     case 3: // REG_WHOAMI answer received. Trying to get XOUTL
         accwhoami=(int) b;
+        accstatus=0-1; // 2 after accstatus++ later
         uDelay(16);
         CS2=1;
         uDelay(16);
         CS2=0;
         uDelay(16);
-        accelerometer_read_reg(MMA7455L_REG_XOUT8);
-        break;
-    case 5: // XOUTL sent, trying to read answer
-        accx= (int) b/*-avgx*/;
-        uDelay(16);
-        CS2=1;
-        uDelay(16);
-        CS2=0;
-        uDelay(16);
-        accelerometer_read_reg(MMA7455L_REG_YOUT8);
-        break;
-    case 7:
-        accy=(int) b/*-avgy*/;
-        uDelay(16);
-        CS2=1;
-        uDelay(16);
-        CS2=0;
-        uDelay(16);
-        accelerometer_read_reg(MMA7455L_REG_ZOUT8);
-        break;
-    case 9: // ZOUTL sent, trying to read answer
-        accz=(int) b/*-avgz*/;
-        uDelay(16);
-        CS2=1;
-        uDelay(16);
-        CS2=0;
-        uDelay(16);
-        accelerometer_read_reg(MMA7455L_REG_TOUT);
-        break;
-    case 11: // MMA7455L_REG_TOUT sent, trying to read answer
-        acctout=(signed char) b;
-        accstatus=2-1; // 2 after accstatus++ later
-        uDelay(16);
-        CS2=1;
-        uDelay(16);
-        CS2=0;
-        uDelay(16);
-        accelerometer_read_reg(MMA7455L_REG_WHOAMI);
+        accelerometer_write_reg(MMA7455L_REG_MCTL);
         break;
     default:    
-        uDelay(6);
-        u2tb=0x00;
-        uDelay(6);
+        uDelay(16);
+        u2tb=0xff;
+        uDelay(16);
         break;
     } 
     accstatus++;
 
     /* Clear the 'reception complete' flag.	*/
     ir_s2ric = 0;
-    ERRORLED=0;  
+    //ERRORLED=0;  
 }

@@ -40,7 +40,7 @@ int todocase=0;
 #pragma vector=TIMER_A0
 __interrupt void
 oneshot1(void) {
-    ERRORLED=1;
+    //ERRORLED=1;
     switch(mlx2whoamistatus) {
     case 6+1:
         CS7=0;
@@ -53,7 +53,7 @@ oneshot1(void) {
         break;
     }   
     ir_ta0ic = 0;
-    ERRORLED=0;
+    //ERRORLED=0;
 }
 
 /*
@@ -64,7 +64,7 @@ oneshot1(void) {
 #pragma vector=TIMER_A3
 __interrupt void
 oneshot2(void) {
-    ERRORLED=1;
+    //ERRORLED=1;
   
     switch(mlx1whoamistatus) {
         case 6+1:
@@ -78,13 +78,13 @@ oneshot2(void) {
             break;
     }   
     ir_ta3ic = 0;
-    ERRORLED=0;
+    //ERRORLED=0;
 }
 
 #pragma vector=TIMER_B5
 __interrupt void
 s_int(void) {
-    ERRORLED=1;
+   // ERRORLED=1;
     /* 
      * This interrupt gets called 100 times per second
      */
@@ -286,6 +286,6 @@ s_int(void) {
     } else if(pwmtarget[1] < 0) { 
         pwmtarget[1]++;
     }
-    ERRORLED=0;
+    //ERRORLED=0;
 }
 
