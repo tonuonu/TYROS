@@ -87,7 +87,7 @@ void redraw_infoscreen_buffers(void);
 enum {
   MODE_MANUAL,
   MODE_COMPETITION,
-  MODE_DEMO,
+  MODE_DEBUG_ACCSENSOR,
   MODE_DEBUG_POSSENSOR,
   MODE_DEBUG_GYRO,
 };

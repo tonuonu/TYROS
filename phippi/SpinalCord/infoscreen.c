@@ -84,7 +84,7 @@ redraw_infoscreen_buffers(void) {
 #define UPDATESPERSEC (5.0)     // We get called exactly 5 times per second
 #define ROBOTWIDTH    (0.175)   // 17.5 cm is distance from left to right legs
 #define TURNSPERSTEP  (4.306)   // Motor shaft makes 4.306 turns for one step 
-#define METERSPERSTEP (0.00545) // One step is 54.5mm but we use meters...
+#define METERSPERSTEP (0.0545) // One step is 54.5mm but we use meters...
 #define UNITSPERTURN  (16384.0) // Motor shaft position sensor has 14 bits resolution
 #define sign(x) ((x>0.0) - (x<0.0))
     /*
@@ -227,7 +227,7 @@ redraw_infoscreen_buffers(void) {
     dy=sin(yaw)*centerradius;
     dx=cos(yaw)*centerradius-centerradius;
     /* If we turn left, X coordinate should get negative */
-    if(turnL) {
+    if(!turnL) {
         dx=dx*-1.0f;
     }
     /* 
@@ -280,7 +280,7 @@ redraw_infoscreen_buffers(void) {
             snprintf(text[6],sizeof(text[6]),"\x1b" "[7;1H" "Gyro: temp:%3d x:%10.7frad/s y:%10.7frad/s z:%10.7frad/s" VT100ERASETOEND,36-gyrotemp,GYRORATE*mygyrox,GYRORATE*mygyroy,GYRORATE*mygyroz);
             snprintf(text[7],sizeof(text[7]),"\x1b" "[8;1H" " Normal" VT100BOLD VT100REVERSE ">Competition<" VT100NORMAL "Debug acc sensor Debug pos sensors Debug gyro" VT100ERASETOEND);
             break;
-        case MODE_DEMO:
+        case MODE_DEBUG_ACCSENSOR:
   /*        
 int accok=0;
 int accwhoami=0;
@@ -297,10 +297,13 @@ int accstatus=0;
             snprintf(text[7],sizeof(text[7]),"\x1b" "[8;1H" " Normal Competition"VT100BOLD VT100REVERSE ">Debug acc sensor<" VT100NORMAL "Debug pos sensors Debug gyro" VT100ERASETOEND);
             break;
         case MODE_DEBUG_POSSENSOR:
+//    distanceL=revolutionsL/TURNSPERSTEP*METERSPERSTEP;
+//    distanceR=revolutionsR/TURNSPERSTEP*METERSPERSTEP;
+    
             snprintf(text[0],sizeof(text[0]),"\x1b" "[1;1H" "" VT100ERASETOEND);
             snprintf(text[1],sizeof(text[1]),"\x1b" "[2;1H" "" VT100ERASETOEND);
             snprintf(text[2],sizeof(text[2]),"\x1b" "[3;1H" "" VT100ERASETOEND);
-            snprintf(text[3],sizeof(text[3]),"\x1b" "[4;1H" "" VT100ERASETOEND);
+            snprintf(text[3],sizeof(text[3]),"\x1b" "[4;1H" "revs %10.7f %10.7f distance %10.7f %10.7f" VT100ERASETOEND,revolutionsL,revolutionsR,distanceL,distanceR);
             snprintf(text[4],sizeof(text[4]),"\x1b" "[5;1H" "dx:%9.6f dy:%9.6f dl:%9.6fm dr:%9.6fm angle:%9.6f" VT100ERASETOEND,dx,dy,distanceL,distanceR,yaw);
             snprintf(text[5],sizeof(text[5]),"\x1b" "[6;1H" "left  %5.1frps, %6.1frpm %5.1f steps/s %6.1f steps/min %7.4fm/s" VT100ERASETOEND
                 ,revolutionsL*UPDATESPERSEC,revolutionsL*UPDATESPERSEC*60.0,revolutionsL/TURNSPERSTEP*UPDATESPERSEC,revolutionsL/TURNSPERSTEP*UPDATESPERSEC*60.0,distanceL*UPDATESPERSEC);

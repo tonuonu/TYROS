@@ -176,7 +176,7 @@ __interrupt void _uart4_receive(void) {
                 change+=16384;
               if(change > (16384/2))
                 change-=16384;
-              MLXaccumulatorL+=change;              
+              MLXaccumulatorL-=change;              
               mlxRstatus=2;
               MLXLold = MLXLdata;
           }
