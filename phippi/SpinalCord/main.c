@@ -128,8 +128,6 @@ main(void) {
     CS6=0;
     u6tb=L3G4200D_WHOAMI | 0x80;
     while(1) {
-     //   ERRORLED=1;
-        _asm("stop");
-     //   ERRORLED=0;
+        __wait_for_interrupt();
     }
 }

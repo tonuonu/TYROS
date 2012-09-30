@@ -23,6 +23,7 @@
 #include <intrinsics.h>
 #include "hwsetup.h"
 #include "main.h"
+#include "locking.h"
 #include "SPI.h"
 
 int mlx1whoamistatus=0;
@@ -127,84 +128,81 @@ SPI4_Init(void) { // Right Melexis 90316
 
 #pragma vector = UART4_RX
 __interrupt void _uart4_receive(void) {
-    //ERRORLED=1;
+    /* Used to reference a specific location in the array while string the
+    received data.   */
+    unsigned char b=u4rb; 
+    /*
+    This chip protocol:
+    2 bytes sent to chip - AA, FF
+    2 bytes responded with data
+    2 bytes of same data inverted responded
+    4 bytes of 0xFF (we ignore them)
+    10 in total.
+    From state machine perspective 0 and 1 are AA,FF
+    The 2 and 3 contain some data, rest can be jsut ignored
+    But we read also 4...5 and implement error checking on it
+    */
+    switch(mlx1whoamistatus) {
+    case 2:
+        MLXLbyte1=(int)b;
+        ta3  = 25; // Set timer 50us 
+        ta3os = 1; // start timer
+        break;
+    case 3:
+        MLXLbyte2=(int)b;
+        ta3  = 25; // Set timer 50us 
+        ta3os = 1; // start timer
+        break;
+    case 4:
+        MLXLbyte3=(int)b;
+        ta3  = 25; // Set timer 50us 
+        ta3os = 1; // start timer
+        break;
+    case 5:
+        MLXLbyte4=(int)b;
+        uDelay(200); 
+        if( MLXLbyte1 == (unsigned char)~ MLXLbyte3 &&  MLXLbyte2 == (unsigned char)~ MLXLbyte4) {
+            if((MLXLbyte2 & 3) == 2) { // error code, not angular data
+                mlxLstatus=1;
+                mlxLerrcode=MLXLbyte2 >> 2; 
+            } else {
+                MLXLdata = ((unsigned int) MLXLbyte1 << 6) | ((unsigned int) MLXLbyte2 >>  2) ;
 
-  /* Used to reference a specific location in the array while string the
-  received data.   */
-  unsigned char b=u4rb; 
-  /*
-  This chip protocol:
-  2 bytes sent to chip - AA, FF
-  2 bytes responded with data
-  2 bytes of same data inverted responded
-  4 bytes of 0xFF (we ignore them)
-  10 in total.
-  From state machine perspective 0 and 1 are AA,FF
-  The 2 and 3 contain some data, rest can be jsut ignored
-  But we read also 4...5 and implement error checking on it
-  */
-  switch(mlx1whoamistatus) {
-  case 2:
-      MLXLbyte1=(int)b;
-      ta3  = 25; // Set timer 50us 
-      ta3os = 1; // start timer
-      break;
-  case 3:
-      MLXLbyte2=(int)b;
-      ta3  = 25; // Set timer 50us 
-      ta3os = 1; // start timer
-      break;
-  case 4:
-      MLXLbyte3=(int)b;
-      ta3  = 25; // Set timer 50us 
-      ta3os = 1; // start timer
-      break;
-  case 5:
-      MLXLbyte4=(int)b;
-      uDelay(200); 
-      if( MLXLbyte1 == (unsigned char)~ MLXLbyte3 &&  MLXLbyte2 == (unsigned char)~ MLXLbyte4) {
-          if((MLXLbyte2 & 3) == 2) { // error code, not angular data
-              mlxLstatus=1;
-              mlxLerrcode=MLXLbyte2 >> 2; 
-          } else {
-              MLXLdata = ((unsigned int) MLXLbyte1 << 6) | ((unsigned int) MLXLbyte2 >>  2) ;
-
-              signed int change=0;
-              if(MLXLold != -1) // If old value is known at all
-                 change = (signed int)MLXLdata - MLXLold ;  
-              if(change < (-16384/2))
-                change+=16384;
-              if(change > (16384/2))
-                change-=16384;
-              MLXaccumulatorL-=change;              
-              mlxRstatus=2;
-              MLXLold = MLXLdata;
-          }
-      } else {
-          mlxLstatus=3;
-      }
-      u4tb=0xFF;
-      break;
-  case 6:
-      uDelay(25); // t4, 8+uS on scope, 6.9 required
-      CS4=1;
-      ta3  = 50*15; // Set timer 1500us or 1.5ms
-      ta3os = 1; // start timer
-      break;
-  default:   
-      if(mlx1whoamistatus==1) // no need for delay
-          u4tb=0xFF;
-      else {
-          ta3  = 25; // Set timer 50us 
-          ta3os = 1; // start timer
-      }
-  } 
-  mlx1whoamistatus++;
-  ir_s4ric = 0;
-    //ERRORLED=0;
-  
+                signed int change=0;
+                if(MLXLold != -1) // If old value is known at all
+                    change = (signed int)MLXLdata - MLXLold ;  
+                if(change < (-16384/2))
+                    change+=16384;
+                if(change > (16384/2))
+                   change-=16384;
+                while(!get_lock1()); 
+                MLXaccumulatorL-=change;              
+                release_lock1(); 
+                mlxRstatus=2;
+                MLXLold = MLXLdata;
+            }
+        } else {
+            mlxLstatus=3;
+        }
+        u4tb=0xFF;
+        break;
+    case 6:
+        uDelay(25); // t4, 8+uS on scope, 6.9 required
+        CS4=1;
+        ta3  = 50*15; // Set timer 1500us or 1.5ms
+        ta3os = 1; // start timer
+        break;
+    default:   
+        if(mlx1whoamistatus==1) // no need for delay
+            u4tb=0xFF;
+        else {
+            ta3  = 25; // Set timer 50us 
+            ta3os = 1; // start timer
+        }
+    } 
+    mlx1whoamistatus++;
+    ir_s4ric = 0;
 }
-
 
 void
 SPI7_Init(void) { // Left Melexis 90316
@@ -258,82 +256,80 @@ signed int  MLXaccumulatorR=0LL;
 
 #pragma vector = UART7_RX
 __interrupt void _uart7_receive(void) {
-    //ERRORLED=1;
 
+    /* Used to reference a specific location in the array while string the
+    received data.   */
+    unsigned char b=u7rb; 
+    /*
+    This chip protocol:
+    2 bytes sent to chip - AA, FF
+    2 bytes responded with data
+    2 bytes of same data inverted responded
+    4 bytes of 0xFF
+    10 in total.
+    From state machine perspective 0 and 1 are AA,FF
+    The 2 and 3 contain some data, rest can be jsut ignored
+    But we read also 4...5 and implement error checking on it
+    */
+    switch(mlx2whoamistatus) {
+    case 2:
+        MLXRbyte1=(int)b;
+        ta0  = 25; // Set timer 50us 
+        ta0os = 1; // start timer
+        break;
+    case 3:
+        MLXRbyte2=(int)b;
+        ta0  = 25; // Set timer 50us 
+        ta0os = 1; // start timer
+        break;
+    case 4:
+        MLXRbyte3=(int)b;
+        ta0  = 25; // Set timer 50us 
+        ta0os = 1; // start timer
+        break;
+    case 5:
+        MLXRbyte4=(int)b;
+        uDelay(200); 
+        if( MLXRbyte1 == (unsigned char)~ MLXRbyte3 &&  MLXRbyte2 == (unsigned char)~ MLXRbyte4) {
+            if((MLXRbyte2 & 3) == 2) { // error code, not angular data
+                mlxRstatus=1;
+                mlxRerrcode=MLXRbyte2 >> 2; 
+            } else {
+                MLXRdata = ((unsigned int) MLXRbyte1 << 6) | ((unsigned int) MLXRbyte2 >>  2) ;
+                signed int change=0;
+                if(MLXRold != -1) // If old value is known at all
+                    change = (signed int)MLXRdata - MLXRold ;  
+                if(change < (-16384/2))
+                    change+=16384;
+                if(change > (16384/2))
+                    change-=16384;
+                while(!get_lock1()); 
+                MLXaccumulatorR+=change;    
+                release_lock1(); 
+                mlxRstatus=2;
+                MLXRold = MLXRdata;
+            }
+        } else {
+            mlxRstatus=3;
+        }
+        u7tb=0xFF;
+        break;
+    case 6:
+        uDelay(25); // t4, 8+uS on scope, 6.9 required
+        CS7=1;
+        ta0  = 50*15; // Set timer 1500us or 1.5ms
+        ta0os = 1; // start timer
+        break;
+    default:   
+        if(mlx2whoamistatus==1) // no need for delay
+            u7tb=0xFF;
+        else {
+            ta0  = 25; // Set timer 50us 
+            ta0os = 1; // start timer
+        }
+    }
+    mlx2whoamistatus++;
 
-  /* Used to reference a specific location in the array while string the
-  received data.   */
-  unsigned char b=u7rb; 
-  /*
-  This chip protocol:
-  2 bytes sent to chip - AA, FF
-  2 bytes responded with data
-  2 bytes of same data inverted responded
-  4 bytes of 0xFF
-  10 in total.
-  From state machine perspective 0 and 1 are AA,FF
-  The 2 and 3 contain some data, rest can be jsut ignored
-  But we read also 4...5 and implement error checking on it
-  */
-  switch(mlx2whoamistatus) {
-  case 2:
-      MLXRbyte1=(int)b;
-      ta0  = 25; // Set timer 50us 
-      ta0os = 1; // start timer
-      break;
-  case 3:
-      MLXRbyte2=(int)b;
-      ta0  = 25; // Set timer 50us 
-      ta0os = 1; // start timer
-      break;
-  case 4:
-      MLXRbyte3=(int)b;
-      ta0  = 25; // Set timer 50us 
-      ta0os = 1; // start timer
-      break;
-  case 5:
-      MLXRbyte4=(int)b;
-      uDelay(200); 
-      if( MLXRbyte1 == (unsigned char)~ MLXRbyte3 &&  MLXRbyte2 == (unsigned char)~ MLXRbyte4) {
-          if((MLXRbyte2 & 3) == 2) { // error code, not angular data
-              mlxRstatus=1;
-              mlxRerrcode=MLXRbyte2 >> 2; 
-          } else {
-              MLXRdata = ((unsigned int) MLXRbyte1 << 6) | ((unsigned int) MLXRbyte2 >>  2) ;
-              signed int change=0;
-              if(MLXRold != -1) // If old value is known at all
-                 change = (signed int)MLXRdata - MLXRold ;  
-              if(change < (-16384/2))
-                change+=16384;
-              if(change > (16384/2))
-                change-=16384;
-              MLXaccumulatorR+=change;    
-              mlxRstatus=2;
-              MLXRold = MLXRdata;
-          }
-      } else {
-          mlxRstatus=3;
-      }
-      u7tb=0xFF;
-      break;
-  case 6:
-      uDelay(25); // t4, 8+uS on scope, 6.9 required
-      CS7=1;
-      ta0  = 50*15; // Set timer 1500us or 1.5ms
-      ta0os = 1; // start timer
-      break;
-  default:   
-      if(mlx2whoamistatus==1) // no need for delay
-          u7tb=0xFF;
-      else {
-          ta0  = 25; // Set timer 50us 
-          ta0os = 1; // start timer
-      }
-  }
-  mlx2whoamistatus++;
-
-  /* Clear the 'reception complete' flag. */
-  ir_s7ric = 0;
-    //ERRORLED=0;
-  
+    /* Clear the 'reception complete' flag. */
+    ir_s7ric = 0;
 }

@@ -131,7 +131,6 @@ __interrupt void _uart2_receive(void) {
      * This is done in main() to start whole process:
      * accelerometer_write_reg( MMA7455L_REG_I2CAD ); 
      */
-    //ERRORLED=1;
     signed char b=u2rb & 0xFF;
     switch(accstatus) {
     case 0: // Writing bit to disable I2C
@@ -168,5 +167,4 @@ __interrupt void _uart2_receive(void) {
 
     /* Clear the 'reception complete' flag.	*/
     ir_s2ric = 0;
-    //ERRORLED=0;  
 }

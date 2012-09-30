@@ -1630,6 +1630,9 @@
     <name>$PROJ_DIR$\interrupt.c</name>
   </file>
   <file>
+    <name>$PROJ_DIR$\locking.c</name>
+  </file>
+  <file>
     <name>$PROJ_DIR$\main.c</name>
   </file>
   <file>

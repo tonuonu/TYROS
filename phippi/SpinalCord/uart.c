@@ -28,6 +28,7 @@
 #include <stdlib.h>
 #include <iso646.h>
 #include "main.h"
+#include "locking.h"
 #include "mma7455l.h"
 
 #define base_freq (24000000)
@@ -51,13 +52,12 @@ void parsecmd( char *command) {
         char *tok;
         if(strncmp(command,"twist ",6)==0) {
             int tmp;
-            ERRORLED=1;
             for(tmp=0,tok = strtok(command," "); tok && tmp<=6 ; tok=strtok(0," "),tmp++) {
                 if(tmp>0) {
                     twist[tmp-1]=strtod(tok,NULL);
                 }
             }                
-
+#if 0
             // Yaw
             if(twist[5]>0.01) {
                 pwmtarget[0]= 100;
@@ -85,13 +85,14 @@ void parsecmd( char *command) {
                     pwmtarget[1]= -100;
                 }
             }                  
+#endif
 //            sprintf(buf,"new twist x=%f(m/s), y=%f(m/s), yaw=%f(deg)",twist[0],twist[1],twist[5]);
 //            write(buf);
         } else if(strncmp(command,"pwm ",4)==0) {
             int tmp;            
             for(tmp=0,tok = strtok(command," "); tok && tmp<=2 ; tok=strtok(0," "),tmp++) {
                 if(tmp >= 1) {
-                    pwmtarget[tmp-1]=(int)strtod(tok,NULL); 
+                    pwmtarget[tmp-1]=(int)__ROUND(strtod(tok,NULL)); 
                 }
             }
             if(pwmtarget[0]> 100) pwmtarget[0]= 100;
@@ -108,7 +109,7 @@ void parsecmd( char *command) {
             int tmp;
             for(tmp=0,tok = strtok(command," "); tok && tmp<=2 ; tok=strtok(0," "),tmp++) {
                 if(tmp == 1) {
-                    PANDA=(int)strtod(tok,NULL); 
+                    PANDA=(int)__ROUND(strtod(tok,NULL)); 
                 }
             }
             sprintf(buf,"panda %s",PANDA ? "on":"off");
@@ -117,7 +118,7 @@ void parsecmd( char *command) {
             int tmp;
             for(tmp=0,tok = strtok(command," "); tok && tmp<=2 ; tok=strtok(0," "),tmp++) {
                 if(tmp == 1) {
-                    buzzer=(int)strtod(tok,NULL); 
+                    buzzer=(int)__ROUND(strtod(tok,NULL)); 
                 }
             }
             sprintf(buf,"buzzer %s",buzzer ? "on":"off");
@@ -126,7 +127,7 @@ void parsecmd( char *command) {
             int tmp;
             for(tmp=0,tok = strtok(command," "); tok && tmp<=2 ; tok=strtok(0," "),tmp++) {
                 if(tmp == 1) {
-                    CHARGE=(int)strtod(tok,NULL); 
+                    CHARGE=(int)__ROUND(strtod(tok,NULL)); 
                 }
             }
             sprintf(buf,"charge %s",CHARGE ? "on":"off");
@@ -135,7 +136,7 @@ void parsecmd( char *command) {
             int tmp;
             for(tmp=0,tok = strtok(command," "); tok && tmp<=2 ; tok=strtok(0," "),tmp++) {
                 if(tmp == 1) {
-                    KICK=(int)strtod(tok,NULL);                    
+                    KICK=(int)__ROUND(strtod(tok,NULL));                    
                 }
             }
             sprintf(buf,"kick %s",KICK ? "on":"off");
@@ -152,44 +153,36 @@ void parsecmd( char *command) {
 //            sprintf(buf,"Unknown command:'%s'",command);
 //            writeln(buf);                            
         }
-/*        putchar('>');    
-        putchar(' ');
-        write(VT100CURSORSAVE);*/
         command[0]=0;
     }        
-    ERRORLED=0;
-
 }
 
 
 #pragma vector = UART0_TX
 __interrupt void _uart0_transmit(void) {
-    //ERRORLED=1;
-  if(!text[lineno][textpos]){
-      textpos=0;
-      lineno++;
-      if(lineno>7) {
-        lineno=0;
-      }
-  }
-  u0tb=text[lineno][textpos];
-  textpos++;
-  if(textpos>(100-1)) {
-      lineno++;
-      if(lineno>7) {
-        lineno=0;
-      }
-      textpos=0;
-  }
-  ir_s0tic = 0;
-    //ERRORLED=0;
-
+    while(!get_lock2()); 
+    if(!text[lineno][textpos]){
+        textpos=0;
+        lineno++;
+        if(lineno>7) {
+            lineno=0;
+        }
+    }
+    u0tb=text[lineno][textpos];
+    release_lock2();
+    textpos++;
+    if(textpos>(100-1)) {
+        lineno++;
+        if(lineno>7) {
+            lineno=0;
+        }
+        textpos=0;
+    }
+    ir_s0tic = 0;
 }
 
 #pragma vector = UART0_RX
 __interrupt void _uart0_receive(void) {
-    //ERRORLED=1;
-    
     /* Read the received data */
     U0_in = (unsigned char)u0rb;
     switch(U0_in) {
@@ -200,8 +193,6 @@ __interrupt void _uart0_receive(void) {
         rx0_ptr=0;
         rx0_buff[rx0_ptr]=0;
         parsecmd(command);
-    //    putchar(0x0a);
-     //   putchar(0x0d);
         break;
     case 127:
         rx0_ptr--;
@@ -211,7 +202,6 @@ __interrupt void _uart0_receive(void) {
        rx0_buff[rx0_ptr]= U0_in;
        rx0_ptr++;
        rx0_buff[rx0_ptr]= 0;
-     //  putchar(U0_in);
        break;
     }
     if (rx0_ptr >= RX_BUFF_SIZE) {
@@ -219,7 +209,6 @@ __interrupt void _uart0_receive(void) {
     }
 
     ir_s0ric = 0;
-    //ERRORLED=0;
 }
 
 void 
@@ -273,36 +262,16 @@ uart0_init(void) {
 
 void 
 uart8_init(void) {
-        u8brg = (f1_CLK_SPEED / 16 / 9600) - 1;
-	u8mr = 0x05;
-  	u8c0 = 0x10;
-	u8tb = u8rb;
-  	u8tb = 0;
-	s8ric = 0x03;
-	p7_3s = 0x07;
-	pd7_3 = 1;
-	pd7_5 = 0;
-        pu23 = 1;  // RX8 pullup
-	u8c1 = 0x05;
-}
-
-void write(char *c) {
-   char *ptr=c;
-   while(*ptr)
-       putchar((int)*ptr++);
-}
-
-void writeln(char *c) {
-   write(c);
-   putchar(0x0a);
-   putchar(0x0d);
-}    
-
-void 
-uart7_send(unsigned char d) {
-    while(ti_u7c1 == 0) {
-        NOP();
-    }
-    u7tb = (short)d;
+    u8brg = (f1_CLK_SPEED / 16 / 9600) - 1;
+    u8mr = 0x05;
+    u8c0 = 0x10;
+    u8tb = u8rb;
+    u8tb = 0;
+    s8ric = 0x03;
+    p7_3s = 0x07;
+    pd7_3 = 1;
+    pd7_5 = 0;
+    pu23 = 1;  // RX8 pullup
+    u8c1 = 0x05;
 }
 

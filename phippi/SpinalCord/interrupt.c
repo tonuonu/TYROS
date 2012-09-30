@@ -29,6 +29,8 @@
 #include "hwsetup.h"
 #include "SPI.h"
 #include "mma7455l.h"
+#include "intrinsics.h"
+
 
 int todocase=0;
 
@@ -221,7 +223,35 @@ s_int(void) {
         default:
            break;
     }
-   
+#if 0
+            // Yaw
+            if(twist[5]>0.01) {
+                pwmtarget[0]= 100;
+                pwmtarget[1]= -100;
+            } else if(twist[5]<-0.01) {
+                pwmtarget[0]= -100;
+                pwmtarget[1]= +100;
+            } else {
+                // FIXME: clearly bit wrong algorithm here                  
+                // X axle speed
+                if(twist[0]>0.01) {
+                    pwmtarget[0]= +100;
+                    pwmtarget[1]= +100;
+                } else if(twist[0]<-0.01) {
+                    pwmtarget[0]= -100;
+                    pwmtarget[1]= -100;
+                }
+                                      
+                // Y axle speed
+                if(twist[1]>0.01) {
+                    pwmtarget[0]= +100;
+                    pwmtarget[1]= +100;
+                } else if(twist[1]<-0.01) {
+                    pwmtarget[0]= -100;
+                    pwmtarget[1]= -100;
+                }
+            }                  
+#endif   
     // Make sure pwm-s get closer to targets but not too fast. 
     if(pwmtarget[0] < pwm[0]) {
         pwm[0]--;
@@ -236,8 +266,8 @@ s_int(void) {
     }
  
     // Update MCU PWM timers for new values
-    ta1=(int)abs(pwm[0]*TIMERB2COUNT/100);
-    ta2=(int)abs(pwm[1]*TIMERB2COUNT/100);
+    ta1=(int)__ROUND(abs(pwm[0]*TIMERB2COUNT/100));
+    ta2=(int)__ROUND(abs(pwm[1]*TIMERB2COUNT/100));
     // Make sure proper bits set on motor drivers to go forward or backward
     if(pwm[0] == 0) {
         RIGHT_INA=0; // right in a

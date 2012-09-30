@@ -1,5 +1,5 @@
 /*
- *  Copyright (c) 2011, Tonu Samuel
+ *  Copyright (c) 2011,2012 Tonu Samuel
  *  All rights reserved.
  *
  *  This file is part of TYROS.
@@ -27,10 +27,8 @@
 #include "mma7455l.h"
 
 
-
 void
-SPI3_Init(void) // OLED
-{
+SPI3_Init(void) { // OLED 
     OLED_DATACOMMANDd = PD_OUTPUT;
     OLED_RESETd = PD_OUTPUT;
   
@@ -90,8 +88,6 @@ SPI0_send_data(unsigned char c) {
 unsigned short 
 SPI0_receive(void) {
     unsigned short r;
-  //  SPI0_send_data(0xFF);
-  //  uDelay(200);
     uDelay(200);
     while (ri_u0c1 == 0) {
         NOP();
@@ -103,78 +99,51 @@ SPI0_receive(void) {
     return r;
 }
 
-/*
-unsigned short 
-accelerometer_receive(void) {
-    unsigned short r=0;
-    SPI2_send_data(0xFF);
-    while (ri_u2c1 == 0) {
-        NOP();
-    }
-    r=u2rb;    
-    ri_u2c1=0;
-    return r;
-}
-*/
 void
 SPI3_send_data(unsigned char c) {
-//    while (ti_u3c1 == 0)
-//        NOP();
-//    uDelay(SPI_DELAY);
     OLED_DATACOMMAND = 1;
     uDelay(SPI_DELAY);
     u3tb = c;
     uDelay(12);
-//    uDelay(255);
-//    uDelay(255);
- 
 }
 
 void
 SPI3_send_cmd(unsigned char c) {
-//    while (ti_u3c1 == 0)
-//        NOP();
-//    uDelay(SPI_DELAY);
     OLED_DATACOMMAND = 0;
     uDelay(SPI_DELAY);
     u3tb = c;
     uDelay(12);
-//    uDelay(255);
-//    uDelay(255);
 }
-
 
 void
 SPI6_send(unsigned short c) {
-  while (ti_u6c1 == 0) {
+    while (ti_u6c1 == 0) {
         NOP();
-  }
-  uDelay(SPI_DELAY);
-  ti_u6c1=0;
-  u6tb = c;
-
+    }
+    uDelay(SPI_DELAY);
+    ti_u6c1=0;
+    u6tb = c;
 }
 
 short unsigned
 SPI6_receive(void) {
-  short unsigned r;
-  SPI6_send(0xFF);
-  uDelay(SPI_DELAY);  
-  uDelay(SPI_DELAY);  
-  while (ri_u6c1 == 0) {
+    short unsigned r;
+    SPI6_send(0xFF);
+    uDelay(SPI_DELAY);  
+    uDelay(SPI_DELAY);  
+    while (ri_u6c1 == 0) {
         NOP();
-  }  
-  r=u6rb;
-  ri_u6c1=0;
-  return r;
+    }  
+    r=u6rb;
+    ri_u6c1=0;
+    return r;
 }
 
 void
 SPI7_send(unsigned short c) {
-  while (ti_u7c1 == 0)
+    while (ti_u7c1 == 0)
         NOP();
-  uDelay(SPI_DELAY);
-  ti_u7c1=0;
-  u7tb = c;
-
+    uDelay(SPI_DELAY);
+    ti_u7c1=0;
+    u7tb = c;
 }

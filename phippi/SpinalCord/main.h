@@ -19,6 +19,7 @@
  *
  */
 #include "uart.h"
+#include "intrinsics.h"
 
 extern volatile unsigned short ticks;
 
@@ -102,10 +103,16 @@ enum {
 #define	NOP()			{_asm("nop");}
 
 static inline void
-uDelay(unsigned char l)
-{
+uDelay(unsigned char l) {
     while (l--)
         NOP();
+
+}
+
+static inline void udelay(unsigned int usec) {
+    // On 48 Mhz we do 48 000 000 cycles per second
+    // or 48 cycles per microsecond
+    __delay_cycles(48UL*(unsinged long)usec);
 }
 
 #define ENABLE_IRQ   	{_asm("FSET I");}
