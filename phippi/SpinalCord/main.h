@@ -112,7 +112,7 @@ uDelay(unsigned char l) {
 static inline void udelay(unsigned int usec) {
     // On 48 Mhz we do 48 000 000 cycles per second
     // or 48 cycles per microsecond
-    __delay_cycles(48UL*(unsinged long)usec);
+    __delay_cycles(48UL*(unsigned long)usec);
 }
 
 #define ENABLE_IRQ   	{_asm("FSET I");}
