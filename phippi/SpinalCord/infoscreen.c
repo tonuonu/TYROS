@@ -260,11 +260,11 @@ redraw_infoscreen_buffers(void) {
             }
             snprintf(text[0],sizeof(text[0]),"\x1b" "[1;1H" "Status: %s%s%s" VT100NORMAL VT100ERASETOEND,gyrowhoami!=211? "Gyroscope error":mlxRstatus==2 && mlxLstatus==2?"OK":"",tmpRerror,tmpLerror);
             snprintf(text[1],sizeof(text[1]),"\x1b" "[2;1H" "Battery: %s %4.1fV %3.0f%% Panda %s" VT100ERASETOEND,bat>6.9 ?"normal      ":bat>6.3 ?"LOW         ":bat>5.0 ?"CRITICAL    ":"disconnected",bat,batpercent,PANDA ? "on ":"off");
-            snprintf(text[2],sizeof(text[2]),"\x1b" "[3;1H" "Left drive: %s %5.2fm/s %4.0frpm pwm:%3u%% %4.1fA diff:%8.2f stall:%3d" VT100ERASETOEND,pwm[0]<0 ?"backward":pwm[0]>0 ?"forward ":"brake   ",distanceL*10.0f,revolutionsL*UPDATESPERSEC*60.0,(int)__ROUND(abs(pwm[0])),leftmotorcurrent,revolutionsL,stallL);
-            snprintf(text[3],sizeof(text[3]),"\x1b" "[4;1H" "Right drive:%s %5.2fm/s %4.0frpm pwm:%3u%% %4.1fA diff:%8.2f stall:%3d" VT100ERASETOEND,pwm[1]<0 ?"backward":pwm[0]>0 ?"forward ":"brake   ",distanceR*10.0f,revolutionsR*UPDATESPERSEC*60.0,(int)__ROUND(abs(pwm[1])),rightmotorcurrent,revolutionsR,stallR);
+            snprintf(text[2],sizeof(text[2]),"\x1b" "[3;1H" "Left drive: %s %5.2fm/s %5.0frpm pwm:%3u%% %4.1fA diff:%8.2f stall:%3d" VT100ERASETOEND,pwm[0]<0 ?"backward":pwm[0]>0 ?"forward ":"brake   ",distanceL*10.0f,revolutionsL*UPDATESPERSEC*60.0,(int)__ROUND(abs(pwm[0])),leftmotorcurrent,revolutionsL,stallL);
+            snprintf(text[3],sizeof(text[3]),"\x1b" "[4;1H" "Right drive:%s %5.2fm/s %5.0frpm pwm:%3u%% %4.1fA diff:%8.2f stall:%3d" VT100ERASETOEND,pwm[1]<0 ?"backward":pwm[0]>0 ?"forward ":"brake   ",distanceR*10.0f,revolutionsR*UPDATESPERSEC*60.0,(int)__ROUND(abs(pwm[1])),rightmotorcurrent,revolutionsR,stallR);
             snprintf(text[4],sizeof(text[4]),"\x1b" "[5;1H" "Coilgun: %3.0fV, %s, %s" VT100ERASETOEND,capacitor,CHARGE ? "charging":"waiting ",BALL_DETECT ? "no ball":"Ball! ");
-            snprintf(text[5],sizeof(text[5]),"\x1b" "[6;1H" "Odometry: x:%9.6fm y:%9.6fm yaw:%9.6frad" VT100ERASETOEND,dx,dy,yaw);
-            snprintf(text[6],sizeof(text[6]),"\x1b" "[7;1H" "Gyro: temp:%3d x:%9.6frad/s y:%9.6frad/s z:%9.6frad/s" VT100ERASETOEND,36-gyrotemp,GYRORATE*mygyrox,GYRORATE*mygyroy,GYRORATE*mygyroz);
+            snprintf(text[5],sizeof(text[5]),"\x1b" "[6;1H" "Odometry: x:%8.5fm y:%8.5fm yaw:%7.4frad" VT100ERASETOEND,dx,dy,yaw);
+            snprintf(text[6],sizeof(text[6]),"\x1b" "[7;1H" "Gyro: temp:%3d x:%8.5frad/s y:%8.5frad/s z:%8.5frad/s" VT100ERASETOEND,36-gyrotemp,GYRORATE*mygyrox,GYRORATE*mygyroy,GYRORATE*mygyroz);
             snprintf(text[7],sizeof(text[7]),"\x1b" "[8;1H" VT100BOLD VT100REVERSE ">Normal<" VT100NORMAL "Competition Debug acc sensor Debug pos sensors Debug gyro " VT100NORMAL VT100ERASETOEND);
 
             break;
@@ -281,7 +281,8 @@ redraw_infoscreen_buffers(void) {
                      twist[3],
                      twist[4],
                      twist[5]
-                     );            snprintf(text[3],sizeof(text[3]),"\x1b" "[4;1H" VT100ERASETOEND);
+                     );
+            snprintf(text[3],sizeof(text[3]),"\x1b" "[4;1H" VT100ERASETOEND);
             snprintf(text[4],sizeof(text[4]),"\x1b" "[5;1H" "Coilgun: %3.0fV, %s, %s" VT100ERASETOEND,capacitor,CHARGE ? "charging":"waiting ",BALL_DETECT? "Ball! ":"no ball");
 //   while(!get_lock2()); 
             snprintf(text[5],sizeof(text[5]),"\x1b" "[6;1H" "Odometry: x:%10.7fm y:%10.7fm yaw:%10.7frad" VT100ERASETOEND,dx,dy,yaw);
@@ -305,12 +306,12 @@ redraw_infoscreen_buffers(void) {
     
             snprintf(text[0],sizeof(text[0]),"\x1b" "[1;1H" "" VT100ERASETOEND);
             snprintf(text[1],sizeof(text[1]),"\x1b" "[2;1H" "" VT100ERASETOEND);
-            snprintf(text[2],sizeof(text[2]),"\x1b" "[3;1H" "" VT100ERASETOEND);
-            snprintf(text[3],sizeof(text[3]),"\x1b" "[4;1H" "revs %10.7f %10.7f distance %10.7f %10.7f" VT100ERASETOEND,revolutionsL,revolutionsR,distanceL,distanceR);
-            snprintf(text[4],sizeof(text[4]),"\x1b" "[5;1H" "dx:%9.6f dy:%9.6f dl:%9.6fm dr:%9.6fm angle:%9.6f" VT100ERASETOEND,dx,dy,distanceL,distanceR,yaw);
-            snprintf(text[5],sizeof(text[5]),"\x1b" "[6;1H" "left  %5.1frps, %6.1frpm %5.1f steps/s %6.1f steps/min %7.4fm/s" VT100ERASETOEND
+            snprintf(text[2],sizeof(text[2]),"\x1b" "[3;1H" "twist: %7.3f %7.3f %7.3f %7.3f %7.3f %7.3f age: %d " VT100ERASETOEND,twist[0],twist[1],twist[2],twist[3],twist[4],twist[5],twistcmdage);
+            snprintf(text[3],sizeof(text[3]),"\x1b" "[4;1H" "revs %7.3f %7.3f distance %7.4fm %7.4fm" VT100ERASETOEND,revolutionsL,revolutionsR,distanceL,distanceR);
+            snprintf(text[4],sizeof(text[4]),"\x1b" "[5;1H" "dx:%9.6f dy:%9.6f angle:%7.4frad" VT100ERASETOEND,dx,dy,yaw);
+            snprintf(text[5],sizeof(text[5]),"\x1b" "[6;1H" "left  %5.1frps, %4.0frpm %5.1f steps/s %6.1f steps/min %7.4fm/s" VT100ERASETOEND
                 ,revolutionsL*UPDATESPERSEC,revolutionsL*UPDATESPERSEC*60.0,revolutionsL/TURNSPERSTEP*UPDATESPERSEC,revolutionsL/TURNSPERSTEP*UPDATESPERSEC*60.0,distanceL*UPDATESPERSEC);
-            snprintf(text[6],sizeof(text[6]),"\x1b" "[7;1H" "right %5.1frps, %6.1frpm %5.1f steps/s %6.1f steps/min %7.4fm/s" VT100ERASETOEND
+            snprintf(text[6],sizeof(text[6]),"\x1b" "[7;1H" "right %5.1frps, %4.0frpm %5.1f steps/s %6.1f steps/min %7.4fm/s" VT100ERASETOEND
                 ,revolutionsR*UPDATESPERSEC,revolutionsR*UPDATESPERSEC*60.0,revolutionsR/TURNSPERSTEP*UPDATESPERSEC,revolutionsR/TURNSPERSTEP*UPDATESPERSEC*60.0,distanceR*UPDATESPERSEC);
             snprintf(text[7],sizeof(text[7]),"\x1b" "[8;1H" " Normal Competition Debug acc sensor"VT100BOLD VT100REVERSE ">Debug pos sensors<" VT100NORMAL "Debug gyro " VT100ERASETOEND); 
             break;

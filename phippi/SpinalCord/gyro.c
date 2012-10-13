@@ -132,7 +132,6 @@ gyro_write_data(unsigned char b) {
 
 #pragma vector = UART6_RX
 __interrupt void _uart6_receive(void) {
-    //ERRORLED=1;  
 
     signed char b=(signed char)u6rb & 0xFF;
     switch(gyrowhoamistatus) {

@@ -216,12 +216,15 @@ s_int(void) {
      */
     if(twistcmdage < 1000) {
         twistcmdage++;
-        twist[5]-=yaw;
-//        twist[5]-=gyroz*GYRORATE;
+//        twist[5]+=yaw * 0.1f ;
+        twist[5]+=(float)gyroz*GYRORATE*0.1; 
+        /* 
+         * 0.1 is because we do this 10 times per 
+         * second but gyro tells as yaw in rad/s 
+         */
         if(twist[5] < 0) {
            twist[5]=twist[5]+(2.0*PI);
-        } else
-        if(twist[5] > 2*PI) {
+        } else if(twist[5] > 2*PI) {
            twist[5]=twist[5]-(2.0*PI);
         }
         /*
