@@ -175,10 +175,10 @@ __interrupt void _uart4_receive(void) {
                     change+=16384;
                 if(change > (16384/2))
                    change-=16384;
-                while(!get_lock1()); 
+//                while(!get_lock1()); 
                 MLXaccumulatorL-=change;              
-                release_lock1(); 
-                mlxRstatus=2;
+//                release_lock1(); 
+                mlxLstatus=2;
                 MLXLold = MLXLdata;
             }
         } else {
@@ -303,9 +303,9 @@ __interrupt void _uart7_receive(void) {
                     change+=16384;
                 if(change > (16384/2))
                     change-=16384;
-                while(!get_lock1()); 
+//                while(!get_lock1()); 
                 MLXaccumulatorR+=change;    
-                release_lock1(); 
+//                release_lock1(); 
                 mlxRstatus=2;
                 MLXRold = MLXRdata;
             }

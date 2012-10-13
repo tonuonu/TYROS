@@ -30,16 +30,19 @@
 #include "SPI.h"
 #include "mma7455l.h"
 #include "uart.h"
+#include "locking.h"
 
 
 extern int alarm;
+int redraw_infoscreen=1;
+int redraw_infoscreen_ticks_passed=0;
 volatile unsigned short ticks;
 volatile unsigned short ticks2;
 
 extern char command[TX_BUFF_SIZE];
 
-double twist[6]={0,1,0,0,0,0};
-int twistflag=0;
+double twist[6]={0,0,0,0,0,0};
+int twistcmdage=99999; /* Maximum integer */
 int pwm[2]={0,0};
 int pwmtarget[2]={0,0};
 int buzzer=1; // If audible heartbeat is on
@@ -132,10 +135,27 @@ main(void) {
     CS6=0;
     u6tb=L3G4200D_WHOAMI | 0x80;
     while(1) {
-        unsigned long r;
-        char buf[256];
-        char command[256];
+//        unsigned long r;
+//        char buf[256];
+//        char command[256];
         __wait_for_interrupt();
+        
+        if(redraw_infoscreen) {
+            /*
+             * Here we update screen data. There is a code at uart.c
+             * which flags us when screen output is complete and we need to update
+             * everything for next display turn.
+             * At 57.6kb/s we output 7.2kbytes per second.
+             * This means we can output 150 bytes long lines of data
+             * (this is our hardcoded maximum) 48 times per second. 
+             * 48/8 lines = 6 times per second.  
+             */
+            redraw_infoscreen=0;
+            redraw_infoscreen_buffers();
+
+      //       while(!get_lock2()); 
+        //    release_lock2();
+        }
 #if 0
         if((r=__read(0,command,sizeof(command)))>0) {
             unsigned char in = (unsigned char)command[0];

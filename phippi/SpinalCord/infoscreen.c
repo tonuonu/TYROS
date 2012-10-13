@@ -86,7 +86,6 @@ float yaw=0.0f;
 void 
 redraw_infoscreen_buffers(void) {
 
-#define UPDATESPERSEC (5.0)     // We get called exactly 5 times per second
 #define ROBOTWIDTH    (0.175)   // 17.5 cm is distance from left to right legs
 #define TURNSPERSTEP  (4.306)   // Motor shaft makes 4.306 turns for one step 
 #define METERSPERSTEP (0.0545) // One step is 54.5mm but we use meters...
@@ -128,6 +127,8 @@ redraw_infoscreen_buffers(void) {
      * to vary between 6..8.4V, so we scale this range from 0..100%.
      */
     float batpercent=(bat-6.0f)/2.4f*100.0f;
+    float UPDATESPERSEC=100.0f/redraw_infoscreen_ticks_passed;
+    redraw_infoscreen_ticks_passed=0;
 
     if(batpercent<0.0f) {
       batpercent=0.0f;
@@ -141,8 +142,10 @@ redraw_infoscreen_buffers(void) {
     while(!get_lock1()); 
     revolutionsL= (float)MLXaccumulatorL/UNITSPERTURN;
     revolutionsR= (float)MLXaccumulatorR/UNITSPERTURN;
-//    MLXaccumulatorL=0;
-//    MLXaccumulatorR=0;
+#if 1
+    MLXaccumulatorL=0;
+    MLXaccumulatorR=0;
+#endif
     /* Make also consistent local copy of gyro readings */
     mygyrox=gyrox;
     mygyroy=gyroy;
@@ -210,7 +213,7 @@ redraw_infoscreen_buffers(void) {
              * We are turning left. Imaginary center is left of us
              */
             smallradius=ROBOTWIDTH/(distanceR/distanceL-1.0f);
-            yaw=distanceL/smallradius;
+            yaw=-distanceL/smallradius;
         } else {
             /* 
              * We are turning right. Imaginary center is right of us
@@ -280,10 +283,10 @@ redraw_infoscreen_buffers(void) {
                      twist[5]
                      );            snprintf(text[3],sizeof(text[3]),"\x1b" "[4;1H" VT100ERASETOEND);
             snprintf(text[4],sizeof(text[4]),"\x1b" "[5;1H" "Coilgun: %3.0fV, %s, %s" VT100ERASETOEND,capacitor,CHARGE ? "charging":"waiting ",BALL_DETECT? "Ball! ":"no ball");
-   while(!get_lock2()); 
+//   while(!get_lock2()); 
             snprintf(text[5],sizeof(text[5]),"\x1b" "[6;1H" "Odometry: x:%10.7fm y:%10.7fm yaw:%10.7frad" VT100ERASETOEND,dx,dy,yaw);
             snprintf(text[6],sizeof(text[6]),"\x1b" "[7;1H" "Gyro: temp:%3d x:%10.7frad/s y:%10.7frad/s z:%10.7frad/s" VT100ERASETOEND,36-gyrotemp,GYRORATE*mygyrox,GYRORATE*mygyroy,GYRORATE*mygyroz);
-  release_lock2();
+//  release_lock2();
             snprintf(text[7],sizeof(text[7]),"\x1b" "[8;1H" " Normal" VT100BOLD VT100REVERSE ">Competition<" VT100NORMAL "Debug acc sensor Debug pos sensors Debug gyro" VT100ERASETOEND);
             break;
         case MODE_DEBUG_ACCSENSOR:

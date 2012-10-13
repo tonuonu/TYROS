@@ -57,7 +57,7 @@ void parsecmd( char *command) {
                     twist[tmp-1]=strtod(tok,NULL);
                 }
             }                
-            twistflag=0;
+            twistcmdage=0;
 //            sprintf(buf,"new twist x=%f(m/s), y=%f(m/s), yaw=%f(deg)",twist[0],twist[1],twist[5]);
 //            write(buf);
         } else if(strncmp(command,"pwm ",4)==0) {
@@ -132,16 +132,17 @@ void parsecmd( char *command) {
 
 #pragma vector = UART0_TX
 __interrupt void _uart0_transmit(void) {
-    while(!get_lock2()); 
+//    while(!get_lock2()); 
     if(!text[lineno][textpos]){
         textpos=0;
         lineno++;
         if(lineno>7) {
-            lineno=0;
+            lineno=0;    
+            redraw_infoscreen=1;
         }
     }
     u0tb=text[lineno][textpos];
-    release_lock2();
+//    release_lock2();
     textpos++;
     if(textpos>(100-1)) {
         lineno++;

@@ -21,6 +21,7 @@
 #include <stdlib.h>
 #include "uart.h"
 #include "intrinsics.h"
+#define PI 3.1415926535897932384626433832795028841971693993751058
 
 extern volatile unsigned short ticks;
 
@@ -83,7 +84,8 @@ extern char text[8][150];
 extern int lineno;
 extern int textpos;
 extern int mode;
-
+extern int redraw_infoscreen;
+extern int redraw_infoscreen_ticks_passed;
 extern char rx0_buff[RX_BUFF_SIZE];
 void redraw_infoscreen_buffers(void);
 enum {
@@ -125,7 +127,7 @@ Delay(unsigned char n);
 size_t __write(int, unsigned const char*, size_t);
 size_t __read(int Handle, unsigned char *Buf, size_t BufSize);
 
-extern int twistflag;
+extern int twistcmdage;
 
     /* 
      * Next constant is from 

@@ -89,6 +89,8 @@ s_int(void) {
      * This interrupt gets called 100 times per second
      */
     ticks++;
+    redraw_infoscreen_ticks_passed++;
+
     /*
      * Depending on Joystick we may want to accelerate or decelerate
      */
@@ -196,22 +198,6 @@ s_int(void) {
                 ta4=0; 
             }
             break;
-        case 7: 
-        case 27: 
-        case 47: 
-        case 67: 
-        case 87:
-           /*
-            * Just at some random time but 5 times per second
-            * with equal interval we update screen data. 
-            * at 57.6kb/s we output 7.2kbytes per second.
-            * This means we can output lines of 150 bytes data
-            * (this is our hardcoded maximum) 48 times per second. 
-            * 48/8 lines = 6 times per second. We update those numbers 
-            * 5 times per second to stay on safe side. 
-            */
-           redraw_infoscreen_buffers();
-           break;
         case 99:
            /*
             * Reset the counter to prevent overroll later
@@ -222,15 +208,14 @@ s_int(void) {
            break;
     }
 
-#define PI 3.1415926535897932384626433832795028841971693993751058
 #define x45deg (PI/4.0)
     /*
      * Locomotion algorithm
      * Fist we check, if TWIST data is fresh enough. If not, we do not
      * set new targets and speed will fade to zero soon.
      */
-    if(twistflag < 1000) {
-        twistflag++;
+    if(twistcmdage < 1000) {
+        twistcmdage++;
         twist[5]-=yaw;
 //        twist[5]-=gyroz*GYRORATE;
         if(twist[5] < 0) {
