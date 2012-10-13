@@ -18,6 +18,7 @@
  *  along with TYROS.  If not, see <http://www.gnu.org/licenses/>.
  *
  */
+#include <stdlib.h>
 #include "uart.h"
 #include "intrinsics.h"
 
@@ -120,3 +121,16 @@ static inline void udelay(unsigned int usec) {
 
 void
 Delay(unsigned char n);
+
+size_t __write(int, unsigned const char*, size_t);
+size_t __read(int Handle, unsigned char *Buf, size_t BufSize);
+
+extern int twistflag;
+
+    /* 
+     * Next constant is from 
+     * http://www.wolframalpha.com/input/?i=1%2F%280xFFFF%2F250%29+degrees+in+radians
+     */
+#define GYRORATE (0.00006658)
+extern float yaw;
+

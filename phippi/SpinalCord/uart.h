@@ -80,5 +80,8 @@ extern unsigned char get_uart5(void);
 #define VT100CURSORSAVE       "\x1b" "7"       // Save cursor and attributes
 #define VT100CURSORRESTORE    "\x1b" "8"       // Restore cursor and attributes
 
-void write(char *c) ;
-void writeln(char *c);
+extern char rx0_buff[RX_BUFF_SIZE];
+extern unsigned short rx0_ptr;
+
+
+void parsecmd( char *command);

@@ -22,8 +22,8 @@
 
 #include "ior32c111.h"
 #include <stdio.h>
-#include <string.h>
 #include <stdlib.h>
+#include <string.h>
 #include "main.h"
 #include "uart.h"
 #include "hwsetup.h"
@@ -31,7 +31,11 @@
 #include "mma7455l.h"
 #include "intrinsics.h"
 
-
+/* 
+ * While maximum PWM value is 100% we can tune it lower here to limit 
+ * maximum speed of robot while debugging 
+ */
+#define MAX_PWM 50 
 int todocase=0;
 
 /*
@@ -42,7 +46,6 @@ int todocase=0;
 #pragma vector=TIMER_A0
 __interrupt void
 oneshot1(void) {
-    //ERRORLED=1;
     switch(mlx2whoamistatus) {
     case 6+1:
         CS7=0;
@@ -55,7 +58,6 @@ oneshot1(void) {
         break;
     }   
     ir_ta0ic = 0;
-    //ERRORLED=0;
 }
 
 /*
@@ -66,8 +68,6 @@ oneshot1(void) {
 #pragma vector=TIMER_A3
 __interrupt void
 oneshot2(void) {
-    //ERRORLED=1;
-  
     switch(mlx1whoamistatus) {
         case 6+1:
             CS4=0;
@@ -80,13 +80,11 @@ oneshot2(void) {
             break;
     }   
     ir_ta3ic = 0;
-    //ERRORLED=0;
 }
 
 #pragma vector=TIMER_B5
 __interrupt void
 s_int(void) {
-   // ERRORLED=1;
     /* 
      * This interrupt gets called 100 times per second
      */
@@ -97,21 +95,21 @@ s_int(void) {
     if(JOY_UP == 0) {
         pwmtarget[0]+=2;
         pwmtarget[1]+=2;
-        if(pwmtarget[0]> 100) {
-            pwmtarget[0]= 100;
+        if(pwmtarget[0]> MAX_PWM) {
+            pwmtarget[0]= MAX_PWM;
         }
-        if(pwmtarget[1]> 100) {
-            pwmtarget[1]= 100;
+        if(pwmtarget[1]> MAX_PWM) {
+            pwmtarget[1]= MAX_PWM;
         }
     } else    
     if(JOY_DOWN == 0) {
         pwmtarget[0]-=2;
         pwmtarget[1]-=2;
-        if(pwmtarget[0]<-100) {
-            pwmtarget[0]=-100;
+        if(pwmtarget[0]<-MAX_PWM) {
+            pwmtarget[0]=-MAX_PWM;
         }
-        if(pwmtarget[1]<-100) {
-            pwmtarget[1]=-100;    
+        if(pwmtarget[1]<-MAX_PWM) {
+            pwmtarget[1]=-MAX_PWM;    
         }
     } 
     /*
@@ -223,35 +221,60 @@ s_int(void) {
         default:
            break;
     }
-#if 0
-            // Yaw
-            if(twist[5]>0.01) {
-                pwmtarget[0]= 100;
-                pwmtarget[1]= -100;
-            } else if(twist[5]<-0.01) {
-                pwmtarget[0]= -100;
-                pwmtarget[1]= +100;
-            } else {
-                // FIXME: clearly bit wrong algorithm here                  
-                // X axle speed
-                if(twist[0]>0.01) {
-                    pwmtarget[0]= +100;
-                    pwmtarget[1]= +100;
-                } else if(twist[0]<-0.01) {
-                    pwmtarget[0]= -100;
-                    pwmtarget[1]= -100;
-                }
-                                      
-                // Y axle speed
-                if(twist[1]>0.01) {
-                    pwmtarget[0]= +100;
-                    pwmtarget[1]= +100;
-                } else if(twist[1]<-0.01) {
-                    pwmtarget[0]= -100;
-                    pwmtarget[1]= -100;
-                }
-            }                  
-#endif   
+
+#define PI 3.1415926535897932384626433832795028841971693993751058
+#define x45deg (PI/4.0)
+    /*
+     * Locomotion algorithm
+     * Fist we check, if TWIST data is fresh enough. If not, we do not
+     * set new targets and speed will fade to zero soon.
+     */
+    if(twistflag < 1000) {
+        twistflag++;
+        twist[5]-=yaw;
+//        twist[5]-=gyroz*GYRORATE;
+        if(twist[5] < 0) {
+           twist[5]=twist[5]+(2.0*PI);
+        } else
+        if(twist[5] > 2*PI) {
+           twist[5]=twist[5]-(2.0*PI);
+        }
+        /*
+         * Every 45 degrees is PI/4.
+         * If twist (angle is -45 degrees to 45 degrees ahead, we turn on just on 
+         * one motor _ahead_.      
+         */
+        if(twist[5] >= x45deg*7.0) { /* over 315 degrees, need to turn left */
+            pwmtarget[0]=30;
+            pwmtarget[1]=MAX_PWM;
+        } else if(twist[1] > 0.0 && twist[5] <= x45deg/4.0 ) { /* under 45 degrees, need to turn right */    
+            pwmtarget[0]=MAX_PWM;
+            pwmtarget[1]=30;
+        } else 
+        /*
+         * If twist (angle is 45 degrees to 90 degrees ahead, we turn left 
+         * motor _ahead_ and right motor _back_      
+         */
+        if(twist[5] >= x45deg && twist[5] <= x45deg*3.0 ) { 
+            pwmtarget[0]=MAX_PWM;
+            pwmtarget[1]=-MAX_PWM;
+        } else
+        /*
+         * Same for opposide side      
+         */
+        if(twist[5] >= x45deg*5.0 && twist[5] <= x45deg*7.0 ) { 
+            pwmtarget[0]=-MAX_PWM;
+            pwmtarget[1]=MAX_PWM;
+        } else
+        /* remains moving backward */
+        if(twist[5] >= x45deg*3.0 && twist[5] <= x45deg*4.0) { 
+            pwmtarget[0]=-MAX_PWM;
+            pwmtarget[1]=0;
+        } else if(twist[1] > 0.0 && twist[5] >= x45deg*4.0 && twist[5] <= x45deg*5.0) { 
+            pwmtarget[0]=0;
+            pwmtarget[1]=-MAX_PWM;
+        }  
+    }
     // Make sure pwm-s get closer to targets but not too fast. 
     if(pwmtarget[0] < pwm[0]) {
         pwm[0]--;
@@ -268,13 +291,16 @@ s_int(void) {
     // Update MCU PWM timers for new values
     ta1=(int)__ROUND(abs(pwm[0]*TIMERB2COUNT/100));
     ta2=(int)__ROUND(abs(pwm[1]*TIMERB2COUNT/100));
-    // Make sure proper bits set on motor drivers to go forward or backward
-    if(pwm[0] == 0) {
+    /* 
+     * Make sure proper bits set on motor drivers to go forward or backward
+     * Right side first
+     */
+    if(pwm[1] == 0) { // 
         RIGHT_INA=0; // right in a
         RIGHT_INB=0; // right in b      
         RIGHT_ENA=0; // right diag a (disable, no brakes)
         RIGHT_ENB=0; // right diag b (disable, no brakes)
-    } else if(pwm[0] > 0) {
+    } else if(pwm[1] > 0) {
         RIGHT_INA=1; // right in a
         RIGHT_INB=0; // right in b
         RIGHT_ENA=1; // right diag a (enable)
@@ -285,13 +311,14 @@ s_int(void) {
         RIGHT_ENA=1; // right diag a (enable)
         RIGHT_ENB=1; // right diag b (enable)
     }
-    
-    if(pwm[1] == 0) {
+
+    /* Left side too */
+    if(pwm[0] == 0) {
         LEFT_INA=0; // right in a
         LEFT_INB=0; // right in b      
         LEFT_ENA=0; // left diag a (disable, no brakes)
         LEFT_ENB=0; // left diag b (disable, no brakes)
-    } else if(pwm[1] > 0) {
+    } else if(pwm[0] > 0) {
         LEFT_INA=1; // left in a
         LEFT_INB=0; // left in b
         LEFT_ENA=1; // left diag a (enable)
@@ -304,7 +331,7 @@ s_int(void) {
     }
         
     // Reduce PWM targets for next turn. This makes motors slow down in 
-    // ~2 seconds if no new commands are received.
+    // maximum of ~2 seconds if no new commands are received.
     if(pwmtarget[0] > 0) {
         pwmtarget[0]--;
     } else if(pwmtarget[0] < 0) {
@@ -316,6 +343,4 @@ s_int(void) {
     } else if(pwmtarget[1] < 0) { 
         pwmtarget[1]++;
     }
-    //ERRORLED=0;
 }
-

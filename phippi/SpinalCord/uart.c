@@ -57,35 +57,7 @@ void parsecmd( char *command) {
                     twist[tmp-1]=strtod(tok,NULL);
                 }
             }                
-#if 0
-            // Yaw
-            if(twist[5]>0.01) {
-                pwmtarget[0]= 100;
-                pwmtarget[1]= -100;
-            } else if(twist[5]<-0.01) {
-                pwmtarget[0]= -100;
-                pwmtarget[1]= +100;
-            } else {
-                // FIXME: clearly bit wrong algorithm here                  
-                // X axle speed
-                if(twist[0]>0.01) {
-                    pwmtarget[0]= +100;
-                    pwmtarget[1]= +100;
-                } else if(twist[0]<-0.01) {
-                    pwmtarget[0]= -100;
-                    pwmtarget[1]= -100;
-                }
-                                      
-                // Y axle speed
-                if(twist[1]>0.01) {
-                    pwmtarget[0]= +100;
-                    pwmtarget[1]= +100;
-                } else if(twist[1]<-0.01) {
-                    pwmtarget[0]= -100;
-                    pwmtarget[1]= -100;
-                }
-            }                  
-#endif
+            twistflag=0;
 //            sprintf(buf,"new twist x=%f(m/s), y=%f(m/s), yaw=%f(deg)",twist[0],twist[1],twist[5]);
 //            write(buf);
         } else if(strncmp(command,"pwm ",4)==0) {

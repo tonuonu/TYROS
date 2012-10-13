@@ -80,6 +80,9 @@ melexiscode(int errcode) {
     return err;
 }
 
+float yaw=0.0f;
+
+
 void 
 redraw_infoscreen_buffers(void) {
 
@@ -113,7 +116,6 @@ redraw_infoscreen_buffers(void) {
      * dy is position change on Y axis in meters 
      * yaw is angle change of robot in radians
      */
-    float yaw;
     float dx, dy;
     char turnL;
     /*

@@ -22,12 +22,15 @@
 #include "ior32c111.h"
 #include <stdio.h>
 #include <stdlib.h>
+#include <string.h>
 #include "uart.h"
 #include "main.h"
 #include "hwsetup.h"
 #include "gyro.h"
 #include "SPI.h"
 #include "mma7455l.h"
+#include "uart.h"
+
 
 extern int alarm;
 volatile unsigned short ticks;
@@ -35,7 +38,8 @@ volatile unsigned short ticks2;
 
 extern char command[TX_BUFF_SIZE];
 
-double twist[6]={0,0,0,0,0,0};
+double twist[6]={0,1,0,0,0,0};
+int twistflag=0;
 int pwm[2]={0,0};
 int pwmtarget[2]={0,0};
 int buzzer=1; // If audible heartbeat is on
@@ -128,6 +132,41 @@ main(void) {
     CS6=0;
     u6tb=L3G4200D_WHOAMI | 0x80;
     while(1) {
+        unsigned long r;
+        char buf[256];
+        char command[256];
         __wait_for_interrupt();
+#if 0
+        if((r=__read(0,command,sizeof(command)))>0) {
+            unsigned char in = (unsigned char)command[0];
+            switch(in) {
+            case 13:
+                rx0_buff[rx0_ptr]=0;
+                /* No null-character is implicitly appended to the end of destination, so destination will only be null-terminated if the length of the C string in source is less than num. */
+                strncpy(command,rx0_buff,RX_BUFF_SIZE-1);
+                rx0_ptr=0;
+                rx0_buff[rx0_ptr]=0;
+                parsecmd(command);
+                snprintf(buf,sizeof(buf),"parse '%s' %lu\n",command,r);
+                __write(1,buf,strlen(buf));
+                break;
+            case 127:
+                rx0_ptr--;
+                rx0_buff[rx0_ptr]= 0;
+                break;
+            default:
+               rx0_buff[rx0_ptr]= in;
+               rx0_ptr++;
+               rx0_buff[rx0_ptr]= 0;
+               break;
+            }
+            if (rx0_ptr >= RX_BUFF_SIZE) {
+                rx0_ptr = RX_BUFF_SIZE-1;
+            }
+            udelay(100000);
+        } else {
+            udelay(100000);
+        }
+#endif
     }
 }
