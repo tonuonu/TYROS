@@ -79,7 +79,7 @@ extern unsigned char tmpMLXRdata4;
 
 extern signed int MLXaccumulatorL;
 extern signed int MLXaccumulatorR;
-
+extern float turnsincetwist[3];
 extern char text[8][150];
 extern int lineno;
 extern int textpos;
@@ -128,11 +128,11 @@ size_t __write(int, unsigned const char*, size_t);
 size_t __read(int Handle, unsigned char *Buf, size_t BufSize);
 
 extern int twistcmdage;
-
-    /* 
-     * Next constant is from 
-     * http://www.wolframalpha.com/input/?i=1%2F%280xFFFF%2F250%29+degrees+in+radians
-     */
-#define GYRORATE (0.00006658)
+extern int xxx;
+/* 
+ * Next constant is from 
+ * http://www.wolframalpha.com/input/?i=8.75millidegrees+per+second
+ */
+#define GYRORATE (0.0001527)
 extern float yaw;
 

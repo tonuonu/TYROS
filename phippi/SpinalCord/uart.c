@@ -58,6 +58,9 @@ void parsecmd( char *command) {
                 }
             }                
             twistcmdage=0;
+            turnsincetwist[0]=0.0f;
+            turnsincetwist[1]=0.0f;
+            turnsincetwist[2]=0.0f;
 //            sprintf(buf,"new twist x=%f(m/s), y=%f(m/s), yaw=%f(deg)",twist[0],twist[1],twist[5]);
 //            write(buf);
         } else if(strncmp(command,"pwm ",4)==0) {

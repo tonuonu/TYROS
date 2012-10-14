@@ -31,6 +31,7 @@
 #include "mma7455l.h"
 #include "intrinsics.h"
 
+float turnsincetwist[3]={0.0f,0.0f,0.0f};
 /* 
  * While maximum PWM value is 100% we can tune it lower here to limit 
  * maximum speed of robot while debugging 
@@ -208,60 +209,79 @@ s_int(void) {
            break;
     }
 
-#define x45deg (PI/4.0)
+//#define x45deg (PI/4.0)
     /*
      * Locomotion algorithm
      * Fist we check, if TWIST data is fresh enough. If not, we do not
      * set new targets and speed will fade to zero soon.
      */
-    if(twistcmdage < 1000) {
+    if(twistcmdage < 200) {
         twistcmdage++;
 //        twist[5]+=yaw * 0.1f ;
-        twist[5]+=(float)gyroz*GYRORATE*0.1; 
         /* 
          * 0.1 is because we do this 10 times per 
          * second but gyro tells as yaw in rad/s 
+         * We add, not substract because our gyro is mounted upside down and 
+         * opposite therefore.
          */
-        if(twist[5] < 0) {
+        turnsincetwist[0]+=(float)gyrox*GYRORATE*0.01; 
+        turnsincetwist[1]+=(float)gyroy*GYRORATE*0.01; 
+        turnsincetwist[2]+=(float)gyroz*GYRORATE*0.01; 
+        
+        /*
+         * Normalize twist to range -PI to +PI
+         * This is not only because previous computation we made but also
+         * ROS may command us a la "270 degrees" or "-90 degrees" which is 
+         * essentially the same.
+         */
+        if(twist[5] < -PI) {
            twist[5]=twist[5]+(2.0*PI);
-        } else if(twist[5] > 2*PI) {
+        } else if(twist[5] > PI) {
            twist[5]=twist[5]-(2.0*PI);
         }
         /*
-         * Every 45 degrees is PI/4.
-         * If twist (angle is -45 degrees to 45 degrees ahead, we turn on just on 
-         * one motor _ahead_.      
+         * Zero point is on right! 
+         * Reference http://upload.wikimedia.org/wikipedia/commons/9/9a/Degree-Radian_Conversion.svg  
+         * First cases are for driving straight or mostly stright
          */
-        if(twist[5] >= x45deg*7.0) { /* over 315 degrees, need to turn left */
-            pwmtarget[0]=30;
+        if(twist[5] <= -PI/2.0 && twist[5] >= -PI*3.0/4.0) { // Slightly eft
+xxx=__LINE__;
+            pwmtarget[0]=MAX_PWM/2;
             pwmtarget[1]=MAX_PWM;
-        } else if(twist[1] > 0.0 && twist[5] <= x45deg/4.0 ) { /* under 45 degrees, need to turn right */    
+        } else if(twist[5] >= -PI/2.0 && twist[5] <= -PI/4.0) { // Slightly right
+xxx=__LINE__;
             pwmtarget[0]=MAX_PWM;
-            pwmtarget[1]=30;
+            pwmtarget[1]=MAX_PWM/2;
         } else 
         /*
-         * If twist (angle is 45 degrees to 90 degrees ahead, we turn left 
+         * If twist is asking to turn sharp right, we turn left 
          * motor _ahead_ and right motor _back_      
          */
-        if(twist[5] >= x45deg && twist[5] <= x45deg*3.0 ) { 
+        if(twist[5] >= -PI/4.0 && twist[5] <= PI/4.0) { 
+xxx=__LINE__; 
             pwmtarget[0]=MAX_PWM;
             pwmtarget[1]=-MAX_PWM;
         } else
         /*
-         * Same for opposide side      
+         * Same but opposide side      
          */
-        if(twist[5] >= x45deg*5.0 && twist[5] <= x45deg*7.0 ) { 
+        if(twist[5] >= PI*3.0/4.0 || twist[5] <= -PI*3.0/4.0) { 
+xxx=__LINE__;
             pwmtarget[0]=-MAX_PWM;
             pwmtarget[1]=MAX_PWM;
         } else
         /* remains moving backward */
-        if(twist[5] >= x45deg*3.0 && twist[5] <= x45deg*4.0) { 
+        if(twist[5] >= PI/4.0 && twist[5] <= PI/2.0) { 
+xxx=__LINE__;
             pwmtarget[0]=-MAX_PWM;
-            pwmtarget[1]=0;
-        } else if(twist[1] > 0.0 && twist[5] >= x45deg*4.0 && twist[5] <= x45deg*5.0) { 
-            pwmtarget[0]=0;
+            pwmtarget[1]=-MAX_PWM/2;
+        } else if(twist[5] >= PI/2.0 && twist[5] <= PI*3.0/4.0) { 
+xxx=__LINE__;
+            pwmtarget[0]=-MAX_PWM/2;
             pwmtarget[1]=-MAX_PWM;
-        }  
+        } else {
+xxx=__LINE__;
+        }
     }
     // Make sure pwm-s get closer to targets but not too fast. 
     if(pwmtarget[0] < pwm[0]) {
