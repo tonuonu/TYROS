@@ -42,6 +42,8 @@ int mode=MODE_MANUAL;
 #define VT100REVERSE    "\x1b" "[7m"
 #define VT100ERASETOEND "\x1b" "[0K"
 
+int xxx=0;
+
 const char *
 melexiscode(int errcode) {
     const  char *err;
@@ -241,7 +243,7 @@ redraw_infoscreen_buffers(void) {
      * Next constant is from 
      * http://www.wolframalpha.com/input/?i=1%2F%280xFFFF%2F250%29+degrees+in+radians
      */
-#define GYRORATE (0.00006658)
+//#define GYRORATE (0.00006658/4.0)
     switch(mode) {
         case MODE_MANUAL:
             if(bat<6.0) {  
@@ -305,8 +307,8 @@ redraw_infoscreen_buffers(void) {
 //    distanceR=revolutionsR/TURNSPERSTEP*METERSPERSTEP;
     
             snprintf(text[0],sizeof(text[0]),"\x1b" "[1;1H" "" VT100ERASETOEND);
-            snprintf(text[1],sizeof(text[1]),"\x1b" "[2;1H" "" VT100ERASETOEND);
-            snprintf(text[2],sizeof(text[2]),"\x1b" "[3;1H" "twist: %7.3f %7.3f %7.3f %7.3f %7.3f %7.3f age: %d " VT100ERASETOEND,twist[0],twist[1],twist[2],twist[3],twist[4],twist[5],twistcmdage);
+            snprintf(text[1],sizeof(text[1]),"\x1b" "[2;1H" "%f %f %f" VT100ERASETOEND,turnsincetwist[0],turnsincetwist[1],turnsincetwist[2]);
+            snprintf(text[2],sizeof(text[2]),"\x1b" "[3;1H" "twist: %7.3f %7.3f %7.3f %7.3f %7.3f %7.3f age: %d xxx: %3d" VT100ERASETOEND,twist[0],twist[1],twist[2],twist[3],twist[4],twist[5],twistcmdage,xxx);
             snprintf(text[3],sizeof(text[3]),"\x1b" "[4;1H" "revs %7.3f %7.3f distance %7.4fm %7.4fm" VT100ERASETOEND,revolutionsL,revolutionsR,distanceL,distanceR);
             snprintf(text[4],sizeof(text[4]),"\x1b" "[5;1H" "dx:%9.6f dy:%9.6f angle:%7.4frad" VT100ERASETOEND,dx,dy,yaw);
             snprintf(text[5],sizeof(text[5]),"\x1b" "[6;1H" "left  %5.1frps, %4.0frpm %5.1f steps/s %6.1f steps/min %7.4fm/s" VT100ERASETOEND
