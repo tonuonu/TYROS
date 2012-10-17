@@ -29,7 +29,8 @@
 #include <camera_info_manager/camera_info_manager.h>
 #include <image_transport/image_transport.h>
 
-#include "opencv2/opencv.hpp"
+#include "opencv/cv.h"
+#include "opencv/highgui.h"
 #include <cvblob.h>
 #include "libcam.h"
 #include "image.h"
@@ -64,7 +65,7 @@ void my_mouse_callback(int event, int x, int y, int flags, void* param) {
             box = cvRect(x, y, 0, 0);
 	    if(x<=IMAGE_WIDTH && y<=IMAGE_HEIGHT) {
 	        CvScalar pixel=cvGet2D(image,y,x);
-	        printf("%3d %3d %3.0f %3.0f %3.0f\n",x,y,pixel.val[0],pixel.val[1],pixel.val[2]);
+	        printf("coord x:%3d y:%3d color Y:%3.0f :U%3.0f V:%3.0f\n",x,y,pixel.val[0],pixel.val[1],pixel.val[2]);
             }
         }
         break;
@@ -107,7 +108,7 @@ int main(int argc, char **argv) {
 	nh.param<int>("height", height, IMAGE_HEIGHT);
 	nh.param<int>("input", input, 0);
 	if(argc<2) {
-		nh.param<std::string>("device", dev, "/dev/video0");
+		nh.param<std::string>("device", dev, "/dev/video3");
 	} else {
 		nh.param<std::string>("device", dev, argv[1]);
 		printf("opening %s\n",argv[1]);
@@ -200,10 +201,10 @@ int main(int argc, char **argv) {
 
 		cvMerge(iply,iplu ,iplv , NULL, imgYUV);
                 cvInRangeS(imgYUV, cvScalar( 55,  65, 152), cvScalar(203, 109, 199), imgOrange);
-                cvInRangeS(imgYUV, cvScalar( 16, 133,  95), cvScalar(100, 181, 126), imgBlue  );
+                cvInRangeS(imgYUV, cvScalar( 0, 100,  115), cvScalar(40, 133, 128), imgBlue  );
                 cvInRangeS(imgYUV, cvScalar(101,  83, 123), cvScalar(155, 114, 142), imgYellow);
                 IplImage *labelImg=cvCreateImage(cvGetSize(imgYUV), IPL_DEPTH_LABEL, 1);
-
+#if 0
                 unsigned int result;
 
 
@@ -225,7 +226,9 @@ int main(int argc, char **argv) {
                 cvRenderTracks(tracks_o, imgYUV, imgYUV, CV_TRACK_RENDER_ID|CV_TRACK_RENDER_BOUNDING_BOX);
 
 // Blue
-		result=cvLabel(imgBlue, labelImg, blobs);
+//		result=cvLabel(imgBlue, labelImg, blobs);
+
+//assert(0);
                 cvFilterByArea(blobs, 15, 1000000);
                 label=cvLargestBlob(blobs);
                 if(label!=0) {
@@ -249,7 +252,7 @@ int main(int argc, char **argv) {
 
 		/*cvMinMaxLoc( const CvArr* A, double* minVal, double* maxVal,
                   CvPoint* minLoc, CvPoint* maxLoc, const CvArr* mask=0 ); */
-		find_circles(iply);
+		//find_circles(iply);
 
 #ifdef DEBUG
                 double hScale=0.7;
@@ -285,6 +288,7 @@ int main(int argc, char **argv) {
 #endif
                 }
 
+#endif
                 pub.publish(msg);
            //     msg.object.clear();
 #ifdef DEBUG

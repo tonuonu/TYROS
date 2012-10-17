@@ -20,16 +20,12 @@
  */
 
 
-#include "opencv2/imgproc/imgproc_c.h"
-#include "opencv2/highgui/highgui_c.h"
-#include "opencv2/legacy/compat.hpp"
-#include "opencv2/objdetect/objdetect.hpp"
-
+#include "opencv/cv.h"
+#include "opencv/highgui.h"
 
 #include "libcam.h"
 #include "image.h"
 #include <stdio.h>
-
 
 struct circles circles_st[11];
 

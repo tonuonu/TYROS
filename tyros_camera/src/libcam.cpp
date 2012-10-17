@@ -310,6 +310,32 @@ void Camera::Init() {
 	}
 
 #endif
+#if 1
+
+   // struct v4l2_control control;
+    control.id = V4L2_CID_AUTOGAIN;
+    control.value = 0;
+
+    if (ioctl(fd, VIDIOC_S_CTRL, &control) < 0) {
+	printf("ioctl set_autogain error\n");
+	return ;
+	}
+
+#endif
+#if 1
+
+   // struct v4l2_control control;
+    control.id = V4L2_CID_GAIN;
+    control.value = 10;
+
+    if (ioctl(fd, VIDIOC_S_CTRL, &control) < 0) {
+	printf("ioctl set_gain error\n");
+	return ;
+	}
+
+#endif
+
+
 
 	//END TO ADD SETTINGS
 

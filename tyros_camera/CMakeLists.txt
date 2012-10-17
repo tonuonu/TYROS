@@ -20,13 +20,13 @@ set(LIBRARY_OUTPUT_PATH ${PROJECT_SOURCE_DIR}/lib)
 rosbuild_genmsg()
 #uncomment if you have defined services
 #rosbuild_gensrv()
+find_package( OpenCV REQUIRED )
 
-#common commands for building c++ executables and libraries
-#rosbuild_add_library(${PROJECT_NAME} src/example.cpp)
-#rosbuild_add_boost_directories()
-#rosbuild_link_boost(${PROJECT_NAME} thread)
-rosbuild_add_executable(tyros_camera src/tyros_cam.cpp src/libcam.cpp src/find_circles.cpp src/draw_circles.cpp)
+
+rosbuild_add_executable(tyros_camera src/tyros_cam.cpp src/libcam.cpp src/find_circles.cpp)
 target_link_libraries(${PROJECT_NAME} cvblob)
-#target_link_libraries(example ${PROJECT_NAME})
 rosbuild_add_executable(red_object_tracking src/red_object_tracking.cpp)
 target_link_libraries(red_object_tracking cvblob)
+target_link_libraries(red_object_tracking ${OpenCV_LIBS} )
+target_link_libraries(tyros_camera ${OpenCV_LIBS} )
+

@@ -12,9 +12,8 @@
   <depend package="geometry_msgs"/>
   <depend package="roscpp"/>
   <depend package="sensor_msgs"/>
-  <depend package="camera_info_manager"/>
   <depend package="image_transport"/>
-  <depend package="opencv2"/>
+  <depend package="camera_info_manager"/>
 
 </package>
 
