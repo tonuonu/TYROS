@@ -99,6 +99,7 @@ int main(int argc, char** argv)
 	    exit(-1);
 	}
 	res = read(fd, buf, 7);	
+	msg.header.stamp=ros::Time::now();
         if(res==-1) {
             printf("read() failed\n");
             exit(-1);
