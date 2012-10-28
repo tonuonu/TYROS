@@ -28,6 +28,7 @@
 #include <stdarg.h>
 #include "main.h"
 #include "uart.h"
+#include "gyro.h"
 
 volatile struct statuses status;
 unsigned int base_freq;
@@ -243,7 +244,6 @@ PWM_Init(void) {
     RIGHT_DIAGA  = 0;
     RIGHT_DIAGB  = 0;
 
-    
     LEFT_PWMd    = PD_OUTPUT;
     LEFT_PWMs    = PF_TIMER;
     RIGHT_PWMd   = PD_OUTPUT;
@@ -286,7 +286,9 @@ Coilgun_Init(void) {
 
 static void 
 CapacitorCharger_Init(void) {
+    CHARGE = 0;
     CHARGEd = PD_OUTPUT; 
+    
 }
 
 static void 
@@ -393,6 +395,7 @@ HardwareSetup(void) {
     SPI4_Init();  // Melexis sensor left
     uart5_init(); // Panda
     SPI6_Init();  // gyro
+    gyro_Init();
     SPI7_Init();  // Melexis sensor right
 //    OLED_On();    // ?
     OLED_Init();

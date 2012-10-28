@@ -72,8 +72,8 @@ __interrupt void _uart5_transmit(void)
 
 void 
 uart5_init(void) {
-//    u5brg = (f1_CLK_SPEED / 16 / 115200) - 1;	
-    u5brg = (f1_CLK_SPEED / 16 / 9600) - 1;	
+    u5brg = (f1_CLK_SPEED / 16 / 115200) - 1;	
+//   u5brg = (f1_CLK_SPEED / 16 / 9600) - 1;	
 
     smd0_u5mr  = 1;  // 8 bit character lenght
     smd1_u5mr  = 0;  // 8 bit character lenght

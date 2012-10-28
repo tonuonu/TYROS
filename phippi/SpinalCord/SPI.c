@@ -22,6 +22,7 @@
 #include "ior32c111.h"
 #include <intrinsics.h>
 #include "hwsetup.h"
+#include "main.h"
 
 
 void
@@ -372,3 +373,121 @@ SPI3_Init(void) // OLED
     s3tic = 0x0;
 }
 
+void
+SPI0_send_data(unsigned char c) {
+    while (ti_u0c1 == 0) {
+        NOP();
+    }
+    u0tb = c;
+    uDelay(60);
+}
+
+unsigned short 
+SPI0_receive(void) {
+    unsigned short r;
+    SPI0_send_data(0xFF);
+//    while (ri_u0c1 == 0) {
+        //NOP();
+//    }
+    r=u0rb;    
+    ri_u0c1=0;
+    return r;
+}
+
+void
+SPI2_send_data(unsigned char c) {
+    while (ti_u2c1 == 0) {
+        NOP();
+    }
+    u2tb = c;
+    uDelay(60);
+}
+
+unsigned short 
+SPI2_receive(void) {
+    unsigned short r;
+    SPI2_send_data(0xFF);
+//    while (ri_u2c1 == 0) {
+        //NOP();
+//    }
+    r=u2rb;    
+    ri_u2c1=0;
+    return r;
+}
+
+void
+SPI3_send_data(unsigned char c) {
+    while (ti_u3c1 == 0)
+        NOP();
+    uDelay(SPI_DELAY);
+    OLED_DATACOMMAND = 1;
+    uDelay(SPI_DELAY);
+    u3tb = c;
+}
+
+void
+SPI3_send_cmd(unsigned char c) {
+    while (ti_u3c1 == 0)
+        NOP();
+    uDelay(SPI_DELAY);
+    OLED_DATACOMMAND = 0;
+    uDelay(SPI_DELAY);
+    u3tb = c;
+}
+
+void
+SPI4_send(unsigned short c) {
+  while (ti_u4c1 == 0)
+        NOP();
+  uDelay(SPI_DELAY);
+  ti_u4c1=0;
+  u4tb = c;
+
+}
+
+short unsigned
+SPI4_receive(void) {
+  short unsigned r;
+  SPI4_send(0xFF);
+  while (ri_u4c1 == 0) {
+        NOP();
+  }
+  r=u4rb;
+  ri_u4c1=0;
+  return r;
+}
+
+void
+SPI6_send(unsigned short c) {
+  while (ti_u6c1 == 0) {
+        NOP();
+  }
+  uDelay(SPI_DELAY);
+  ti_u6c1=0;
+  u6tb = c;
+
+}
+
+short unsigned
+SPI6_receive(void) {
+  short unsigned r;
+  SPI6_send(0xFF);
+  uDelay(SPI_DELAY);  
+  uDelay(SPI_DELAY);  
+  while (ri_u6c1 == 0) {
+        NOP();
+  }  
+  r=u6rb;
+  ri_u6c1=0;
+  return r;
+}
+
+void
+SPI7_send(unsigned short c) {
+  while (ti_u7c1 == 0)
+        NOP();
+  uDelay(SPI_DELAY);
+  ti_u7c1=0;
+  u7tb = c;
+
+}
