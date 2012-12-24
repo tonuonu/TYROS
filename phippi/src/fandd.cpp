@@ -49,15 +49,16 @@ open_port(void){
         tio.c_lflag=0;
         tio.c_cc[VMIN]=1;
         tio.c_cc[VTIME]=5;
-	fd = open("/dev/ttyO2", O_RDWR | O_NOCTTY | O_NDELAY);
+	fd = open("/dev/ttyUSB0", O_RDWR | O_NOCTTY | O_NDELAY);
 	if (fd == -1) {
-	    ROS_ERROR("open_port: Unable to open /dev/ttyO2");
+	    ROS_ERROR("open_port: Unable to open /dev/ttyUSB0");
 	} else {
-	    ROS_INFO("open_port: opened /dev/ttyO2");
+	    ROS_INFO("open_port: opened /dev/ttyUSB0");
 	    fcntl(fd, F_SETFL, 0);
             cfsetospeed(&tio,B115200);            // 115200 baud
             cfsetispeed(&tio,B115200);            // 115200 baud
 	}
+        fcntl(fd,F_SETFL,FNDELAY); // Make read() call nonblocking
 	return (fd);
 }
 
@@ -68,12 +69,12 @@ void chatterCallback(const phippi::Velocity::ConstPtr& msg)
     int r;
     ROS_INFO("we got: [%.1f %.1f]", msg->angular,msg->linear);
     if(0 > fd) {
-        ROS_WARN("/dev/ttyO2 is not yet open. Trying to fix this...");
+        ROS_WARN("/dev/ttyUSB0 is not yet open. Trying to fix this...");
         open_port();
     } 
     len=0;
     if(0 > fd)  {
-        ROS_ERROR("/dev/ttyO2 is still not open?! Now I give up!");
+        ROS_ERROR("/dev/ttyUSB0 is still not open?! Now I give up!");
     } else if(msg->angular > 0) {
 	snprintf(buf,256,"pwm -50 500%c",0x0d);
         len=strlen(buf);
