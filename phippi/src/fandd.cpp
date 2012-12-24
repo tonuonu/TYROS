@@ -1,5 +1,5 @@
 /*
- *  Copyright (c) 2011, Tõnu Samuel
+ *  Copyright (c) 2011, Tonu Samuel
  *  All rights reserved.
  *
  *  This file is part of TYROS.
@@ -103,35 +103,34 @@ void chatterCallback(const phippi::Velocity::ConstPtr& msg)
 
 
 
-int main(int argc, char **argv)
-{
-  ros::init(argc, argv, "phippi_motors");
-  ros::NodeHandle n;
-  ros::Subscriber sub = n.subscribe("/turtle1/command_velocity", 1, chatterCallback);
-  double angular=0,linear=0;
+int main(int argc, char **argv) {
+    ros::init(argc, argv, "phippi_motors");
+    ros::NodeHandle n;
+    ros::Subscriber sub = n.subscribe("/turtle1/command_velocity", 1, chatterCallback);
+    double angular=0,linear=0;
 
-  ros::Time current_time, last_time;
-  current_time = ros::Time::now();
-  last_time = ros::Time::now();
-
-  ros::Rate r(10.0);
-  while(n.ok()){
-    if(angular>0) angular--;
-    if(angular<0) angular++;
-    if(linear>0) linear--;
-    if(linear<0) linear++;
-    if(!linear && !angular) {
-        snprintf(buf,256,"pwm 0 0%c",0x0d);
-        len=strlen(buf);
-    }
+    ros::Time current_time, last_time;
     current_time = ros::Time::now();
+    last_time = ros::Time::now();
 
-     ros::spinOnce();
- //   double dt = (current_time - last_time).toSec();
+    ros::Rate r(10.0);
+    while(n.ok()){
+        if(angular>0) angular--;
+        if(angular<0) angular++;
+        if(linear>0) linear--;
+        if(linear<0) linear++;
+        if(!linear && !angular) {
+            snprintf(buf,256,"pwm 0 0%c",0x0d);
+            len=strlen(buf);
+        }
+        current_time = ros::Time::now();
 
-    last_time = current_time;
-    r.sleep();
-  }
-  return 0;
+        ros::spinOnce();
+       // double dt = (current_time - last_time).toSec();
+
+        last_time = current_time;
+        r.sleep();
+    }
+    return 0;
 }
 
